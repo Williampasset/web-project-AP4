@@ -1,12 +1,15 @@
 import React from 'react';
-import './navbar.css';
 
 interface NavbarProps {
     logo?: string;
     links?: Array<{ label: string; href: string }>;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ logo = 'Logo', links = [] }) => {
+const Navbar: React.FC<NavbarProps> = ({ logo = 'Logo', links = [
+    { label: 'Stock Dashboard', href: '/stock' },
+    { label: 'Command Dashboard', href: '/commande' },
+    { label: 'Team Affectation', href: '/affectation' }
+] }) => {
     return (
         <nav className="navbar">
             <div className="navbar-brand">

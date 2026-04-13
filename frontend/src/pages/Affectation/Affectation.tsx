@@ -1,8 +1,12 @@
 import './Affectation.css';
+import Navbar from '@component/navbar';
 
 export default function Affectation(){
     
     return (
-        <h1>Affectation des commandes</h1>
+        <>
+            <Navbar />
+            <h1>Affectation des commandes</h1>
+        </>
     );
 }
