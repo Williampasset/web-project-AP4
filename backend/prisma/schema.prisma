@@ -12,8 +12,87 @@ datasource db {
   provider = "mysql"
 }
 
-model User { 
-  id    Int     @id @default(autoincrement()) 
-  email String  @unique
-  name  String?
+model User {
+  id        Int       @id @default(autoincrement())
+  matricule String    @unique @db.VarChar(9)
+  lastName  String?   @db.VarChar(50)
+  firstName String?   @db.VarChar(50)
+  managerId Int?
+  password  String
+  role      UserRole
+  manager   User?     @relation(name: "manager_to_magasinier", fields: [managerId], references: [id])
+  users     User[]    @relation(name: "manager_to_magasinier")
+  command   Command[]
+}
+
+enum UserRole {
+  MANAGER
+  MAGASINIER
+}
+
+model Command {
+  id           Int           @id @default(autoincrement())
+  weight       Float
+  status       CommandStatus @default(WAITING)
+  commandDate  DateTime?
+  deliveryDate DateTime?
+  article      Article[]
+  truck        Truck[]
+  client       Client[]
+  user         User?         @relation(fields: [userId], references: [id])
+  userId       Int?
+}
+
+model Article {
+  id          Int        @id @default(autoincrement())
+  weight      Float
+  label       String     @db.VarChar(255)
+  description String?    @db.VarChar(255)
+  stock       Int        @default(0)
+  command     Command[]
+  locationId  Int
+  location    Location   @relation(name: "article_to_location", fields: [locationId], references: [id])
+  supplier    Supplier[]
+}
+
+enum CommandStatus {
+  WAITING
+  PENDING
+  FINISH
+}
+
+model Client {
+  id      Int       @id @default(autoincrement())
+  address String    @db.VarChar(255)
+  name    String    @db.VarChar(50)
+  command Command[]
+}
+
+model Truck {
+  id      Int       @id @default(autoincrement())
+  imat    String    @unique
+  load    Float
+  ptac    Float
+  command Command[]
+}
+
+model Supplier {
+  id      Int       @id @default(autoincrement())
+  address String    @db.VarChar(255)
+  name    String    @db.VarChar(50)
+  article Article[]
+}
+
+model Location {
+  id       Int              @id @default(autoincrement())
+  building LocationBuilding
+  aisle    Int
+  cell     Int
+  article  Article[]        @relation(name: "article_to_location")
+}
+
+enum LocationBuilding {
+  A
+  B
+  C
 }
