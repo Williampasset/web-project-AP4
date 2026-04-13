@@ -4,6 +4,7 @@ import DefaultLayout from '@component/default';
 export default function Affectation(){
     return (
         <DefaultLayout>
+            <h1>Suivis des effectifs</h1>
             <div className="affectation-table-wrapper">
                 <h1>Affectation des commandes</h1>
                 <table className="affectation-table">
