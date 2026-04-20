@@ -19,10 +19,11 @@ export default function Login() {
           matricule: userName,
           password: password,
         }),
-      }).then((res) => res.json());
-      console.log('Result: ', result);
-      if (result.success) {
+      });
+      if (result.ok) {
         console.log('Success');
+        const resObj = result.json();
+        navigate('/commande');
       }
     } catch (error) {
       console.error(error);
