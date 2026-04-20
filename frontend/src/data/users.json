@@ -1,0 +1,49 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "matricule": "MGR000001",
+      "lastName": "Bernard",
+      "firstName": "Claire",
+      "managerId": null,
+      "password": "Pass@123",
+      "role": "MANAGER"
+    },
+    {
+      "id": 2,
+      "matricule": "MAG000002",
+      "lastName": "Dubreuil",
+      "firstName": "Antoine",
+      "managerId": 1,
+      "password": "Mag@234",
+      "role": "MAGASINIER"
+    },
+    {
+      "id": 3,
+      "matricule": "MAG000003",
+      "lastName": "Nguyen",
+      "firstName": "Laura",
+      "managerId": 1,
+      "password": "Mag@345",
+      "role": "MAGASINIER"
+    },
+    {
+      "id": 4,
+      "matricule": "MAG000004",
+      "lastName": "Lemaire",
+      "firstName": "Mathis",
+      "managerId": 1,
+      "password": "Mag@456",
+      "role": "MAGASINIER"
+    },
+    {
+      "id": 5,
+      "matricule": "MGR000005",
+      "lastName": "Rousseau",
+      "firstName": "Sophie",
+      "managerId": null,
+      "password": "Pass@456",
+      "role": "MANAGER"
+    }
+  ]
+}

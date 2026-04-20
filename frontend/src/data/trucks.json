@@ -1,0 +1,32 @@
+{
+  "trucks": [
+    {
+      "id": 1,
+      "imat": "FR-123-AB",
+      "load": 1200,
+      "ptac": 3500,
+      "commandIds": [101, 106]
+    },
+    {
+      "id": 2,
+      "imat": "FR-456-CD",
+      "load": 1800,
+      "ptac": 4500,
+      "commandIds": [102, 104]
+    },
+    {
+      "id": 3,
+      "imat": "FR-789-EF",
+      "load": 950,
+      "ptac": 3200,
+      "commandIds": [103]
+    },
+    {
+      "id": 4,
+      "imat": "FR-321-GH",
+      "load": 2100,
+      "ptac": 5000,
+      "commandIds": [104, 105]
+    }
+  ]
+}
