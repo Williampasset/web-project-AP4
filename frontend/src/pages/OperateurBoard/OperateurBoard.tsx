@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import './OperateurBoard.css';
 import data from '@data/commands.json';
 import Loading from '../../component/Loading/Loading';
-import CommandDetail from '../../component/CommandDetail/CommandDetail';
 import { getStatusClass, getStatusLabel } from '@service/mapper.service';
 import { formatDate } from '@service/date.service';
 
@@ -19,10 +19,10 @@ interface Command {
 }
 
 export default function OperateurBoard() {
+  const navigate = useNavigate();
   const [commands, setCommands] = useState<Command[]>(
     data?.commands as Command[],
   );
-  const [selectedCommand, setSelectedCommand] = useState<Command | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [loading, setLoading] = useState(true);
 
@@ -56,15 +56,6 @@ export default function OperateurBoard() {
     return <Loading message='Chargement des commandes...' />;
   }
 
-  if (selectedCommand) {
-    return (
-      <CommandDetail
-        command={selectedCommand}
-        onBack={() => setSelectedCommand(null)}
-      />
-    );
-  }
-
   return (
     <div className='operateur-board'>
       <div className='board-header'>
@@ -94,7 +85,7 @@ export default function OperateurBoard() {
             <div
               key={command.id}
               className='command-card'
-              onClick={() => setSelectedCommand(command)}
+              onClick={() => navigate(`/commande/${command.id}`)}
             >
               <div className='card-header'>
                 <span className='command-id'>#{command.id}</span>
