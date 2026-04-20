@@ -6,12 +6,13 @@ table {
 
 td, th {
   border: 1px solid #ddd;
-  padding: 8px;
+  padding: 12px;
+  text-align: left;
 }
 
 tr:nth-child(even){background-color: #f2f2f2;}
 
-tr:hover {background-color: #ddd;}
+tr:hover {background-color: #e8e8e8;}
 
 th {
   padding-top: 12px;
@@ -19,4 +20,270 @@ th {
   text-align: left;
   background-color: #007bff;
   color: white;
+  font-weight: bold;
+}
+
+.stock-search {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  padding: 10px 12px;
+  border: 2px solid #007bff;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 300px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0056b3;
+  box-shadow: 0 0 5px rgba(0, 86, 179, 0.3);
+}
+
+.stock-quantity {
+  font-weight: bold;
+  text-align: center;
+}
+
+.stock-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline-block;
+}
+
+.stock-status.in-stock {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.stock-status.low-stock {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.stock-status.out-of-stock {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.row-low-stock {
+  background-color: #fffbea !important;
+}
+
+.row-out-of-stock {
+  background-color: #ffe6e6 !important;
+}
+
+.supplier-btn {
+  padding: 6px 12px;
+  background-color: #17a2b8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.supplier-btn:hover {
+  background-color: #138496;
+}
+
+.qr-btn {
+  padding: 6px 12px;
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  margin-left: 4px;
+}
+
+.qr-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-close:hover {
+  color: #000;
+}
+
+.modal-body {
+  padding: 16px;
+}
+
+.suppliers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.supplier-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 12px;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.supplier-card:hover {
+  background-color: #f0f0f0;
+  border-color: #17a2b8;
+}
+
+.supplier-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.supplier-address {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.quote-btn {
+  padding: 8px 16px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  margin-left: 12px;
+}
+
+.quote-btn:hover {
+  background-color: #218838;
+}
+
+/* Overcommitted styles */
+.overcommitted {
+  background-color: #ffe6e6 !important;
+}
+
+.alert-overcommitted {
+  display: block;
+  font-size: 12px;
+  color: #d32f2f;
+  font-weight: bold;
+  margin-top: 4px;
+}
+
+.commands-info {
+  font-size: 11px;
+  color: #d32f2f;
+  font-weight: bold;
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+.stock-status.overcommitted {
+  background-color: #d32f2f !important;
+  color: white !important;
+}
+
+/* QR Code Modal */
+.qr-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+}
+
+.qr-code-img {
+  border: 2px solid #ddd;
+  padding: 8px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.qr-label {
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+.download-btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+  background-color: #0056b3;
 }

@@ -7,13 +7,11 @@ import type { Command } from '@type/Command';
 import type { StockItem } from '@type/StockItem';
 
 import usersData from '@data/users.json';
-import stockData from '@data/stock.json';
 import articlesData from '@data/articles.json';
 import commandsData from '@data/commands.json';
 
 const users: User[] = usersData.users as User[];
-const stocks: StockItem[] = stockData.stocks as StockItem[];
-const articles: Array<Pick<StockItem, 'id' | 'label'>> = articlesData.articles as Array<Pick<StockItem, 'id' | 'label'>>;
+const stocks: StockItem[] = articlesData.articles as StockItem[];
 const commands: Command[] = commandsData.commands as Command[];
 
 const getUser = (userId: number) => users.find(u => u.id === userId);
@@ -38,12 +36,11 @@ const getMissingArticles = (cmd: Command): MissingArticle[] => {
         .map(articleId => ({
             articleId,
             stock: stocks.find(s => s.id === articleId),
-            article: articles.find(a => a.id === articleId),
         }))
         .filter(({ stock }) => stock === undefined || stock.stock <= 0)
-        .map(({ articleId, stock, article }) => ({
+        .map(({ articleId, stock }) => ({
             articleId,
-            label: stock?.label ?? article?.label ?? `Article #${articleId}`,
+            label: stock?.label ?? `Article #${articleId}`,
         }));
 };
 
