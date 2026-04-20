@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './OperateurBoard.css';
 import data from '@data/commands.json';
-import Loading from '../../component/Loading';
+import Loading from '../../component/Loading/Loading';
+import CommandDetail from '../../component/CommandDetail/CommandDetail';
 import { getStatusClass, getStatusLabel } from '@service/mapper.service';
 import { formatDate } from '@service/date.service';
 
@@ -57,74 +58,10 @@ export default function OperateurBoard() {
 
   if (selectedCommand) {
     return (
-      <div className='operateur-board'>
-        <div className='command-detail'>
-          <button
-            className='back-button'
-            onClick={() => setSelectedCommand(null)}
-          >
-            ← Retour à la liste
-          </button>
-
-          <div className='detail-header'>
-            <h2>Commande #{selectedCommand.id}</h2>
-            <span
-              className={`status-badge ${getStatusClass(selectedCommand.status)}`}
-            >
-              {getStatusLabel(selectedCommand.status)}
-            </span>
-          </div>
-
-          <div className='detail-content'>
-            <div className='detail-row'>
-              <span className='label'>Poids:</span>
-              <span className='value'>{selectedCommand.weight} kg</span>
-            </div>
-
-            <div className='detail-row'>
-              <span className='label'>Date de commande:</span>
-              <span className='value'>
-                {formatDate(selectedCommand.commandDate)}
-              </span>
-            </div>
-
-            {selectedCommand.deliveryDate && (
-              <div className='detail-row'>
-                <span className='label'>Date de livraison:</span>
-                <span className='value'>
-                  {formatDate(selectedCommand.deliveryDate)}
-                </span>
-              </div>
-            )}
-
-            <div className='detail-row'>
-              <span className='label'>Articles:</span>
-              <span className='value'>
-                {selectedCommand.articleIds.join(', ')}
-              </span>
-            </div>
-
-            <div className='detail-row'>
-              <span className='label'>Camions:</span>
-              <span className='value'>
-                {selectedCommand.truckIds.join(', ')}
-              </span>
-            </div>
-
-            <div className='detail-row'>
-              <span className='label'>Clients:</span>
-              <span className='value'>
-                {selectedCommand.clientIds.join(', ')}
-              </span>
-            </div>
-
-            <div className='detail-row'>
-              <span className='label'>Utilisateur:</span>
-              <span className='value'>#{selectedCommand.userId}</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <CommandDetail
+        command={selectedCommand}
+        onBack={() => setSelectedCommand(null)}
+      />
     );
   }
 
