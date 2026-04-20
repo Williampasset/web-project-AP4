@@ -91,16 +91,15 @@ export default function Login() {
   /**
    * Redirige l'utilisateur vers la page appropriée selon son rôle
    *
-   * @param role - Le rôle de l'utilisateur (MANAGER, ADMIN, USER, etc.)
+   * @param role - Le rôle de l'utilisateur (MANAGER, MAGASINIER, etc.)
    */
   const navigateByRole = (role: string): void => {
     const roleRoutes: Record<string, string> = {
       MANAGER: '/commande',
-      ADMIN: '/affectation',
-      USER: '/stock',
+      MAGASINIER: '/operateur',
     };
 
-    const route = roleRoutes[role] || '/stock';
+    const route = roleRoutes[role] || '/';
     navigate(route);
   };
 

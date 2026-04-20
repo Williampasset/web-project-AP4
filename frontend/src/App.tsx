@@ -5,6 +5,7 @@ import Affectation from './pages/Affectation/Affectation';
 import Stock from './pages/Stock/Stock';
 import Command from './pages/Command/Command';
 import { ProtectedRoute } from './guards/ProtectedRoute';
+import OperateurBoard from './pages/OperateurBoard/OperateurBoard';
 
 function App() {
   return (
@@ -31,6 +32,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Command />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/operateur'
+        element={
+          <ProtectedRoute>
+            <OperateurBoard />
           </ProtectedRoute>
         }
       ></Route>
