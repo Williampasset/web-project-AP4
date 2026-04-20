@@ -9,7 +9,8 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ logo = 'Logo', links = [
     { label: 'Stock Dashboard', href: '/stock' },
     { label: 'Command Dashboard', href: '/commande' },
-    { label: 'Team Affectation', href: '/affectation' }
+    { label: 'Team Affectation', href: '/affectation' },
+    { label: 'Employés', href: '/employes' }
 ] }) => {
     return (
         <nav className="navbar">

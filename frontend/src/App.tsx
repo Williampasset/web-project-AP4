@@ -4,6 +4,7 @@ import Login from './pages/login/Login'
 import Affectation from './pages/Affectation/Affectation'
 import Stock from './pages/Stock/Stock'
 import Command  from './pages/Command/Command'
+import Employees from './pages/Employees/Employees'
 
 function App() {
 
@@ -13,6 +14,7 @@ function App() {
       <Route path="/affectation" element={<Affectation/>}></Route>
       <Route path="/stock" element={<Stock/>}></Route>
       <Route path="/commande" element={<Command/>}></Route>
+      <Route path="/employes" element={<Employees/>}></Route>
     </Routes>
   )
 }
