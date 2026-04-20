@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import './login.css';
 import { useNavigate } from 'react-router';
 import { jwtDecode } from 'jwt-decode';
-import type { TokenPayload } from 'types/TokenPayload.type';
+import type { TokenPayload } from '@type/TokenPayload.type';
 
 export default function Login() {
   const [userName, setUserName] = useState('');
