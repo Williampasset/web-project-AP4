@@ -65,6 +65,17 @@
       "truckIds": [1],
       "clientIds": [1],
       "userId": 4
+    },
+    {
+      "id": 107,
+      "weight": 14.0,
+      "status": "WAITING",
+      "commandDate": "2026-04-11T10:50:00.000Z",
+      "deliveryDate": null,
+      "articleIds": [8],
+      "truckIds": [1],
+      "clientIds": [1],
+      "userId": null
     }
   ]
 }
