@@ -1,0 +1,28 @@
+{
+  "suppliers": [
+    {
+      "id": 1,
+      "name": "GlobalTech Supplies",
+      "address": "8 route du Commerce, 92200 Neuilly-sur-Seine",
+      "articleIds": [1, 6, 7]
+    },
+    {
+      "id": 2,
+      "name": "CableWorks",
+      "address": "14 rue des Entrepreneurs, 59120 Loos",
+      "articleIds": [2, 5, 10]
+    },
+    {
+      "id": 3,
+      "name": "OfficePro Distribution",
+      "address": "47 avenue du Parc, 69006 Lyon",
+      "articleIds": [3, 4, 8, 9]
+    },
+    {
+      "id": 4,
+      "name": "SmartWare Inc.",
+      "address": "62 chemin de l'Innovation, 34000 Montpellier",
+      "articleIds": [6, 7]
+    }
+  ]
+}

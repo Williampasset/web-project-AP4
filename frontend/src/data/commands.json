@@ -1,0 +1,70 @@
+{
+  "commands": [
+    {
+      "id": 101,
+      "weight": 3.7,
+      "status": "WAITING",
+      "commandDate": "2026-04-10T09:30:00.000Z",
+      "deliveryDate": null,
+      "articleIds": [1, 3],
+      "truckIds": [1],
+      "clientIds": [1],
+      "userId": 2
+    },
+    {
+      "id": 102,
+      "weight": 10.6,
+      "status": "PENDING",
+      "commandDate": "2026-04-08T14:45:00.000Z",
+      "deliveryDate": "2026-04-12T10:00:00.000Z",
+      "articleIds": [2, 5, 9],
+      "truckIds": [2],
+      "clientIds": [2],
+      "userId": 3
+    },
+    {
+      "id": 103,
+      "weight": 8.6,
+      "status": "FINISH",
+      "commandDate": "2026-03-30T11:20:00.000Z",
+      "deliveryDate": "2026-04-02T16:00:00.000Z",
+      "articleIds": [4, 6],
+      "truckIds": [3],
+      "clientIds": [3],
+      "userId": 2
+    },
+    {
+      "id": 104,
+      "weight": 1.8,
+      "status": "WAITING",
+      "commandDate": "2026-04-18T08:15:00.000Z",
+      "deliveryDate": null,
+      "articleIds": [10],
+      "truckIds": [2, 4],
+      "clientIds": [4],
+      "userId": 4
+    },
+    {
+      "id": 105,
+      "weight": 0.85,
+      "status": "PENDING",
+      "commandDate": "2026-04-15T13:00:00.000Z",
+      "deliveryDate": "2026-04-19T09:00:00.000Z",
+      "articleIds": [7, 9],
+      "truckIds": [4],
+      "clientIds": [5],
+      "userId": 3
+    },
+    {
+      "id": 106,
+      "weight": 14.0,
+      "status": "WAITING",
+      "commandDate": "2026-04-11T10:50:00.000Z",
+      "deliveryDate": null,
+      "articleIds": [8],
+      "truckIds": [1],
+      "clientIds": [1],
+      "userId": 4
+    }
+  ]
+}

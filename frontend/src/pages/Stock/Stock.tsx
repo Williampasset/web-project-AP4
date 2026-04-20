@@ -8,7 +8,6 @@ interface StockItem {
     label: string;
     description: string | null;
     stock: number;
-    command: [number]
 }
 
 export default function Stock() {
@@ -31,7 +30,6 @@ export default function Stock() {
                         <th>Description</th>
                         <th>Stock</th>
                         <th>Poids</th>
-                        <th>Commandes</th>
                     </tr>
                 </thead>
                 <tbody>

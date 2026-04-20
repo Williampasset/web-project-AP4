@@ -1,0 +1,40 @@
+{
+  "locations": [
+    {
+      "id": 1,
+      "building": "A",
+      "aisle": 1,
+      "cell": 2
+    },
+    {
+      "id": 2,
+      "building": "A",
+      "aisle": 1,
+      "cell": 4
+    },
+    {
+      "id": 3,
+      "building": "B",
+      "aisle": 2,
+      "cell": 1
+    },
+    {
+      "id": 4,
+      "building": "B",
+      "aisle": 2,
+      "cell": 3
+    },
+    {
+      "id": 5,
+      "building": "C",
+      "aisle": 1,
+      "cell": 1
+    },
+    {
+      "id": 6,
+      "building": "C",
+      "aisle": 3,
+      "cell": 2
+    }
+  ]
+}

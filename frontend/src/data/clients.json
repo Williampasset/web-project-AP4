@@ -1,0 +1,34 @@
+{
+  "clients": [
+    {
+      "id": 1,
+      "name": "Agence Horizon",
+      "address": "12 rue de la Liberté, 75008 Paris",
+      "commandIds": [101, 106]
+    },
+    {
+      "id": 2,
+      "name": "TechPartners SARL",
+      "address": "45 avenue des Champs, 69002 Lyon",
+      "commandIds": [102]
+    },
+    {
+      "id": 3,
+      "name": "Bureau Central",
+      "address": "3 boulevard du Commerce, 33000 Bordeaux",
+      "commandIds": [103]
+    },
+    {
+      "id": 4,
+      "name": "LogiCorp",
+      "address": "95 route industrielle, 59100 Roubaix",
+      "commandIds": [104]
+    },
+    {
+      "id": 5,
+      "name": "Studio Pixel",
+      "address": "21 impasse des Artisans, 31000 Toulouse",
+      "commandIds": [105]
+    }
+  ]
+}
