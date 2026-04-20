@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 
 interface NavbarProps {
     logo?: string;
@@ -18,7 +19,7 @@ const Navbar: React.FC<NavbarProps> = ({ logo = 'Logo', links = [
             <ul className="navbar-links">
                 {links.map((link) => (
                     <li key={link.href}>
-                        <a href={link.href}>{link.label}</a>
+                        <Link to={link.href}>{link.label}</Link>
                     </li>
                 ))}
             </ul>
