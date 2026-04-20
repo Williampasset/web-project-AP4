@@ -6,12 +6,12 @@
   ],
 
   "compilerOptions": {
-        "baseUrl": "src",
-        "paths": {
-            "@component/*": ["component/*"],
-            "@type/*": ["type/*"],
-            "@data/*": ["data/*"]
-        }
-      }
-
+    "baseUrl": "src",
+    "paths": {
+      "@component/*": ["component/*"],
+      "@type/*": ["type/*"],
+      "@data/*": ["data/*"],
+      "@service/": ["service/*"]
+    }
+  }
 }

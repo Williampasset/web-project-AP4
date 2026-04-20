@@ -6,6 +6,8 @@ import Stock from './pages/Stock/Stock';
 import Command from './pages/Command/Command';
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import OperateurBoard from './pages/OperateurBoard/OperateurBoard';
+import CommandDetailPage from './pages/CommandDetailPage/CommandDetailPage';
+import PreparationPage from './pages/PreparationPage/PreparationPage';
 
 function App() {
   return (
@@ -40,6 +42,22 @@ function App() {
         element={
           <ProtectedRoute>
             <OperateurBoard />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/commande/:id'
+        element={
+          <ProtectedRoute>
+            <CommandDetailPage />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/preparation/:id'
+        element={
+          <ProtectedRoute>
+            <PreparationPage />
           </ProtectedRoute>
         }
       ></Route>

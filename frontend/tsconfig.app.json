@@ -11,7 +11,8 @@
     "paths": {
       "@component/*": ["component/*"],
       "@type/*": ["type/*"],
-      "@data/*": ["data/*"]
+      "@data/*": ["data/*"],
+      "@service/*": ["service/*"]
     },
 
     /* Bundler mode */
