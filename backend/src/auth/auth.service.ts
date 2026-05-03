@@ -20,7 +20,6 @@ export class AuthService {
     const { matricule, password } = loginDto;
 
     const user = await this.usersService.findByMatricule(matricule);
-    if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid)
