@@ -14,15 +14,131 @@ datasource db {
 
 model User {
   id        Int       @id @default(autoincrement())
-  matricule String    @unique @db.VarChar(9)
-  lastName  String?   @db.VarChar(50)
-  firstName String?   @db.VarChar(50)
-  managerId Int?
+  matricule String    @unique
+  firstName String
+  lastName  String
   password  String
   role      UserRole
-  manager   User?     @relation(name: "manager_to_magasinier", fields: [managerId], references: [id])
-  users     User[]    @relation(name: "manager_to_magasinier")
-  command   Command[]
+  managerId Int?
+  manager   User?     @relation(name: "manager", fields: [managerId], references: [id])
+  employees User[]    @relation(name: "manager")
+  commands  Command[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([managerId])
+}
+
+model Command {
+  id           Int           @id @default(autoincrement())
+  reference    String        @unique
+  status       CommandStatus
+  commandDate  DateTime      @default(now())
+  deliveryDate DateTime?
+  clientId     Int
+  client       Client        @relation(fields: [clientId], references: [id])
+  truckId      Int?
+  truck        Truck?        @relation(fields: [truckId], references: [id])
+  userId       Int
+  user         User          @relation(fields: [userId], references: [id])
+  items        CommandItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([truckId])
+  @@index([userId])
+  @@index([status])
+}
+
+model CommandItem {
+  id        Int     @id @default(autoincrement())
+  commandId Int
+  command   Command @relation(fields: [commandId], references: [id])
+  articleId Int
+  article   Article @relation(fields: [articleId], references: [id])
+  quantity  Int
+  unitPrice Float
+
+  @@unique([commandId, articleId])
+  @@index([commandId])
+  @@index([articleId])
+}
+
+model Article {
+  id         Int      @id @default(autoincrement())
+  reference  String   @unique
+  label      String
+  weight     Float
+  price      Float
+  stock      Int      @default(0)
+  locationId Int
+  location   Location @relation(fields: [locationId], references: [id])
+
+  supplierId Int?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  items CommandItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([locationId])
+  @@index([supplierId])
+}
+
+model Location {
+  id       Int          @id @default(autoincrement())
+  building BuildingName
+  aisle    Int
+  shelf    Int
+  cell     Int
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([building, aisle, shelf, cell])
+}
+
+model Client {
+  id       Int       @id @default(autoincrement())
+  name     String
+  address  String
+  email    String?
+  phone    String?   @db.VarChar(20)
+  commands Command[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Truck {
+  id       Int       @id @default(autoincrement())
+  imat     String    @unique
+  maxLoad  Float
+  commands Command[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Supplier {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(100)
+  email    String?   @db.VarChar(100)
+  phone    String?   @db.VarChar(20)
+  address  String    @db.VarChar(255)
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
 }
 
 enum UserRole {
@@ -30,68 +146,14 @@ enum UserRole {
   MAGASINIER
 }
 
-model Command {
-  id           Int           @id @default(autoincrement())
-  weight       Float
-  status       CommandStatus @default(WAITING)
-  commandDate  DateTime?
-  deliveryDate DateTime?
-  article      Article[]
-  truck        Truck[]
-  client       Client[]
-  user         User?         @relation(fields: [userId], references: [id])
-  userId       Int?
-}
-
-model Article {
-  id          Int        @id @default(autoincrement())
-  weight      Float
-  label       String     @db.VarChar(255)
-  description String?    @db.VarChar(255)
-  stock       Int        @default(0)
-  command     Command[]
-  locationId  Int
-  location    Location   @relation(name: "article_to_location", fields: [locationId], references: [id])
-  supplier    Supplier[]
-}
-
 enum CommandStatus {
   WAITING
   PENDING
-  FINISH
+  DELIVERED
+  CANCELLED
 }
 
-model Client {
-  id      Int       @id @default(autoincrement())
-  address String    @db.VarChar(255)
-  name    String    @db.VarChar(50)
-  command Command[]
-}
-
-model Truck {
-  id      Int       @id @default(autoincrement())
-  imat    String    @unique
-  load    Float
-  ptac    Float
-  command Command[]
-}
-
-model Supplier {
-  id      Int       @id @default(autoincrement())
-  address String    @db.VarChar(255)
-  name    String    @db.VarChar(50)
-  article Article[]
-}
-
-model Location {
-  id       Int              @id @default(autoincrement())
-  building LocationBuilding
-  aisle    Int
-  cell     Int
-  article  Article[]        @relation(name: "article_to_location")
-}
-
-enum LocationBuilding {
+enum BuildingName {
   A
   B
   C
