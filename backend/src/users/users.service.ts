@@ -7,6 +7,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
+import { UserResponseDto } from './dto/user-response.dto';
+import { User } from './type/user.type';
 
 @Injectable()
 export class UsersService {
@@ -34,7 +36,7 @@ export class UsersService {
       },
     });
 
-    return result;
+    return this.toUserResponse(result as User);
   }
 
   /**
@@ -121,5 +123,10 @@ export class UsersService {
   async hashPassword(password: string): Promise<string> {
     const saltRounds = 10;
     return bcrypt.hash(password, saltRounds);
+  }
+
+  private toUserResponse(user: User): UserResponseDto {
+    const { password, ...safeUser } = user;
+    return safeUser;
   }
 }
