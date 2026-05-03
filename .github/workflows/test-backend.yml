@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Tests Backend
 
 on:
   pull_request:
@@ -33,9 +33,11 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm i
+        working-directory: ./backend
+        run: npm ci
 
       - name: Generate Prisma Client
+        working-directory: ./backend
         env:
           DATABASE_URL:
             postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD
@@ -43,6 +45,7 @@ jobs:
         run: npx prisma generate
 
       - name: Run database migrations
+        working-directory: ./backend
         env:
           DATABASE_URL:
             postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD
@@ -50,11 +53,12 @@ jobs:
         run: npx prisma migrate deploy
 
       - name: Run tests
+        working-directory: ./backend
         run: npm run test:cov
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         with:
-          file: ./coverage/coverage-final.json
+          file: ./backend/coverage/coverage-final.json
           flags: unittests
           name: codecov-umbrella
