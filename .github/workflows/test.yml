@@ -33,7 +33,7 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm i
 
       - name: Generate Prisma Client
         env:
