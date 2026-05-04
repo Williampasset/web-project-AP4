@@ -24,3 +24,10 @@ export const COMMAND_STATUSES: CommandStatus[] = [
   'DELIVERED',
   'CANCELLED',
 ];
+
+export const STATUS_TRANSITIONS: Record<CommandStatus, CommandStatus[]> = {
+  WAITING: ['PENDING', 'CANCELLED'],
+  PENDING: ['DELIVERED', 'CANCELLED'],
+  DELIVERED: [],
+  CANCELLED: [],
+};

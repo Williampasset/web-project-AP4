@@ -1,9 +1,13 @@
 import { useState } from 'react';
-import { ChevronDown, Eye, Calendar, Package, Truck } from 'lucide-react';
+import { Eye, Calendar, Package, Truck } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { formatDate } from '@service/date.service';
 import { getStatusClass, getStatusLabel } from '@service/mapper.service';
-import { type CommandStatus, COMMAND_STATUSES } from '@type/command';
+import {
+  type CommandStatus,
+  COMMAND_STATUSES,
+  STATUS_TRANSITIONS,
+} from '@type/command';
 import type { Command } from '@type/command';
 import Wizard, { type WizardStep } from '@component/Wizard/Wizard';
 import './CommandCard.css';
@@ -21,37 +25,32 @@ export default function CommandCard({
   onViewDetails,
   isUpdating,
 }: CommandCardProps) {
-  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false);
-  const [statusChangeWizard, setStatusChangeWizard] = useState<{
-    open: boolean;
-    newStatus: CommandStatus | null;
-  }>({
-    open: false,
-    newStatus: null,
-  });
+  const [statusChangeWizard, setStatusChangeWizard] =
+    useState<CommandStatus | null>(null);
 
-  const handleStatusClick = (newStatus: CommandStatus) => {
-    setIsStatusDropdownOpen(false);
-    setStatusChangeWizard({ open: true, newStatus });
+  const availableStatuses = STATUS_TRANSITIONS[command.status];
+
+  const handleStatusClick = (status: CommandStatus) => {
+    setStatusChangeWizard(status);
   };
 
   const handleStatusConfirm = async () => {
-    if (!statusChangeWizard.newStatus) return;
+    if (!statusChangeWizard) return;
 
     try {
-      await onStatusChange(command.id, statusChangeWizard.newStatus);
+      await onStatusChange(command.id, statusChangeWizard);
       toast.success(
-        `Statut changé en ${getStatusLabel(statusChangeWizard.newStatus)}`,
+        `Statut mis à jour : ${getStatusLabel(statusChangeWizard)}`,
       );
-      setStatusChangeWizard({ open: false, newStatus: null });
-    } catch (err) {
+    } catch {
       toast.error('Erreur lors de la mise à jour du statut');
-      console.error('Failed to update command status:', err);
+    } finally {
+      setStatusChangeWizard(null);
     }
   };
 
   const handleStatusCancel = () => {
-    setStatusChangeWizard({ open: false, newStatus: null });
+    setStatusChangeWizard(null);
   };
 
   /**
@@ -77,7 +76,7 @@ export default function CommandCard({
             Vous êtes sur le point de changer le statut de cette commande de{' '}
             <strong>{getStatusLabel(command.status)}</strong> à{' '}
             <strong>
-              {getStatusLabel(statusChangeWizard.newStatus as CommandStatus)}
+              {getStatusLabel(statusChangeWizard as CommandStatus)}
             </strong>
           </p>
           <div className='command-card__wizard-info'>
@@ -104,7 +103,7 @@ export default function CommandCard({
         <div className='command-card__wizard-content'>
           <div className='command-card__wizard-confirmation'>
             <div className='command-card__wizard-confirmation-badge'>
-              {getStatusLabel(statusChangeWizard.newStatus as CommandStatus)}
+              {getStatusLabel(statusChangeWizard as CommandStatus)}
             </div>
             <p className='command-card__wizard-confirmation-text'>
               Êtes-vous sûr de vouloir modifier ce statut ?
@@ -218,35 +217,20 @@ export default function CommandCard({
 
         <div className='command-card__footer'>
           <div className='command-card__actions'>
-            <div className='command-card__status-dropdown'>
-              <button
-                onClick={() => setIsStatusDropdownOpen(!isStatusDropdownOpen)}
-                disabled={isUpdating}
-                className='command-card__action-button command-card__action-button--status'
-                title='Changer le statut de la commande'
-                aria-label='Changer le statut de la commande'
-                aria-expanded={isStatusDropdownOpen}
-              >
-                <ChevronDown size={16} />
-                Changer statut
-              </button>
-
-              {isStatusDropdownOpen && !isUpdating && (
-                <div className='command-card__dropdown-menu'>
-                  {COMMAND_STATUSES.filter((s) => s !== command.status).map(
-                    (status) => (
-                      <button
-                        key={status}
-                        onClick={() => handleStatusClick(status)}
-                        className={`command-card__dropdown-item command-card__dropdown-item--${getStatusClass(status)}`}
-                      >
-                        {getStatusLabel(status)}
-                      </button>
-                    ),
-                  )}
-                </div>
-              )}
-            </div>
+            {availableStatuses.length > 0 && (
+              <div className='command-card__status-actions'>
+                {availableStatuses.map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => handleStatusClick(status)}
+                    disabled={isUpdating}
+                    className={`command-card__status-btn command-card__status-btn--${getStatusClass(status)}`}
+                  >
+                    {getStatusLabel(status)}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <button
               onClick={() => onViewDetails(command.id)}
@@ -261,7 +245,7 @@ export default function CommandCard({
         </div>
       </div>
 
-      {statusChangeWizard.open && statusChangeWizard.newStatus && (
+      {statusChangeWizard && (
         <div className='command-card__wizard-overlay'>
           <div className='command-card__wizard-container'>
             <Wizard
