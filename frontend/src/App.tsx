@@ -1,12 +1,11 @@
 import './App.css';
 import { Route, Routes } from 'react-router';
-import Login from './pages/login/Login';
+import Login from './pages/Login/Login';
 import Affectation from './pages/Affectation/Affectation';
 import Stock from './pages/Stock/Stock';
 import Command from './pages/Command/Command';
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import OperateurBoard from './pages/OperatorBoard/OperatorBoard';
-import CommandDetailPage from './pages/CommandDetailPage/CommandDetailPage';
 import { PublicRoute } from './guards/PublicRoute';
 import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 // import PreparationPage from './pages/PreparationPage/PreparationPage';
@@ -54,14 +53,6 @@ function App() {
         element={
           <ProtectedRoute>
             <OperateurBoard />
-          </ProtectedRoute>
-        }
-      ></Route>
-      <Route
-        path='/commande/:id'
-        element={
-          <ProtectedRoute>
-            <CommandDetailPage />
           </ProtectedRoute>
         }
       ></Route>
