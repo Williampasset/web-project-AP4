@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import './OperateurBoard.css';
+import './OperatorBoard.css';
 import data from '@data/commands.json';
 import Loading from '../../component/Loading/Loading';
 import { getStatusClass, getStatusLabel } from '@service/mapper.service';
