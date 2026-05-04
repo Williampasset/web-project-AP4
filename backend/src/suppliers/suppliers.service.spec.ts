@@ -151,8 +151,7 @@ describe('SuppliersService', () => {
       expect(prisma.supplier.findFirst).toHaveBeenCalledWith({
         where: {
           name: {
-            contains: 'Tech Supplies',
-            mode: 'insensitive',
+            contains: 'tech supplies',
           },
         },
       });
@@ -175,7 +174,6 @@ describe('SuppliersService', () => {
         where: {
           name: {
             contains: 'tech supplies',
-            mode: 'insensitive',
           },
         },
       });
