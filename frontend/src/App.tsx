@@ -7,7 +7,7 @@ import Command from './pages/Command/Command';
 import { ProtectedRoute } from './guards/ProtectedRoute';
 import OperateurBoard from './pages/OperateurBoard/OperateurBoard';
 import CommandDetailPage from './pages/CommandDetailPage/CommandDetailPage';
-import PreparationPage from './pages/PreparationPage/PreparationPage';
+// import PreparationPage from './pages/PreparationPage/PreparationPage';
 
 function App() {
   return (
@@ -53,14 +53,14 @@ function App() {
           </ProtectedRoute>
         }
       ></Route>
-      <Route
+      {/* <Route
         path='/preparation/:id'
         element={
           <ProtectedRoute>
             <PreparationPage />
           </ProtectedRoute>
         }
-      ></Route>
+      ></Route> */}
     </Routes>
   );
 }
