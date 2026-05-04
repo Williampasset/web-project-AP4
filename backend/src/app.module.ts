@@ -4,6 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import { ArticlesModule } from './articles/articles.module';
 import { CommandsModule } from './commands/commands.module';
 import { SuppliersModule } from './suppliers/suppliers.module';
+import { TrucksModule } from './trucks/trucks.module';
 import { ClientsModule } from './clients/clients.module';
 
 @Module({
@@ -13,6 +14,7 @@ import { ClientsModule } from './clients/clients.module';
     ArticlesModule,
     SuppliersModule,
     CommandsModule,
+    TrucksModule,
     ClientsModule,
   ],
 })
