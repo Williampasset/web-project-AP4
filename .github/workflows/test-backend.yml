@@ -1,0 +1,65 @@
+name: Run Tests Backend
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.DB_NAME }}_test
+          MYSQL_USER: ${{ secrets.DB_USER }}
+          MYSQL_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        options: >-
+          --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout
+          5s --health-retries 5
+        ports:
+          - 3306:3306
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Generate Prisma Client
+        working-directory: ./backend
+        env:
+          DATABASE_URL:
+            mysql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD
+            }}@localhost:3306/${{ secrets.DB_NAME }}_test
+        run: npx prisma generate
+
+      - name: Run database migrations
+        working-directory: ./backend
+        env:
+          DATABASE_URL:
+            mysql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD
+            }}@localhost:3306/${{ secrets.DB_NAME }}_test
+        run: npx prisma migrate deploy
+
+      - name: Run tests
+        working-directory: ./backend
+        run: npm run test:cov
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./backend/coverage/coverage-final.json
+          flags: unittests
+          name: codecov-umbrella
