@@ -5,14 +5,26 @@ import Affectation from './pages/Affectation/Affectation';
 import Stock from './pages/Stock/Stock';
 import Command from './pages/Command/Command';
 import { ProtectedRoute } from './guards/ProtectedRoute';
-import OperateurBoard from './pages/OperateurBoard/OperateurBoard';
+import OperateurBoard from './pages/OperatorBoard/OperatorBoard';
 import CommandDetailPage from './pages/CommandDetailPage/CommandDetailPage';
+import { PublicRoute } from './guards/PublicRoute';
+import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 // import PreparationPage from './pages/PreparationPage/PreparationPage';
 
 function App() {
   return (
     <Routes>
-      <Route path='/login' element={<Login />}></Route>
+      <Route path='/' element={<DashboardRedirect />}></Route>
+
+      <Route
+        path='/login'
+        element={
+          <PublicRoute>
+            <Login />
+          </PublicRoute>
+        }
+      ></Route>
+
       <Route
         path='/affectation'
         element={
