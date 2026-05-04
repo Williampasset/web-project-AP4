@@ -1,11 +1,26 @@
+export type CommandStatus = 'WAITING' | 'PENDING' | 'DELIVERED' | 'CANCELLED';
+
 export interface Command {
+  id: number;
+  reference: string;
+  status: CommandStatus;
+  commandDate: string;
+  deliveryDate: string | null;
+  clientId: number;
+  truckId: number | null;
+  userId: number;
+
+  items: {
     id: number;
-    weight: number;
-    status: "WAITING" | "PENDING" | "FINISH";
-    commandDate: string;
-    deliveryDate: string | null;
-    articleIds: number[];
-    truckIds: number[];
-    clientIds: number[];
-    userId: number;
+    quantity: number;
+    unitPrice: number;
+    articleId: number;
+  }[];
 }
+
+export const COMMAND_STATUSES: CommandStatus[] = [
+  'WAITING',
+  'PENDING',
+  'DELIVERED',
+  'CANCELLED',
+];
