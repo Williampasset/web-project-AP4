@@ -102,6 +102,7 @@ export default function Login() {
 
   return (
     <div className='login-container'>
+      <img src='/cargoflow-logo.png' alt='Logo' className='logo' />
       <form className='form' onSubmit={handleSubmit}>
         <h1>Connexion</h1>
 
