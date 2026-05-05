@@ -66,6 +66,15 @@ export default function Command() {
 
     // Sort by delivery date (nearest or late first)
     const sorted = [...filtered].sort((a, b) => {
+      if (statusFilter === 'ALL') {
+        const aDelivered = a.status === 'DELIVERED';
+        const bDelivered = b.status === 'DELIVERED';
+
+        if (aDelivered !== bDelivered) {
+          return aDelivered ? 1 : -1;
+        }
+      }
+
       const aDate = a.deliveryDate ? new Date(a.deliveryDate).getTime() : Infinity;
       const bDate = b.deliveryDate ? new Date(b.deliveryDate).getTime() : Infinity;
       return aDate - bDate;
@@ -168,7 +177,7 @@ export default function Command() {
                 key={command.id}
                 command={command}
                 onViewDetails={(commandId) => navigate(`/commands/${commandId}`)}
-                editableAssignments
+                editableAssignments={command.status !== 'DELIVERED'}
                 users={users}
                 trucks={trucks}
                 isUpdating={savingCommandId === command.id}

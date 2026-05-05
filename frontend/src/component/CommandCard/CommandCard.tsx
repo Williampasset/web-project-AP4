@@ -143,6 +143,10 @@ export default function CommandCard({
   };
 
   const hasTruckVolumeOverflow = (): boolean => {
+    if (command.status === 'DELIVERED' || command.status === 'CANCELLED') {
+      return false;
+    }
+
     if (!command.truck || command.truck.maxVolume == null) return false;
     return getTotalVolume() > command.truck.maxVolume;
   };
