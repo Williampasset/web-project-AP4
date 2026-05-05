@@ -20,6 +20,7 @@ export const fetchCommands = async (params?: {
 
   const res = await fetch(`${BASE_URL}?${query.toString()}`, {
     headers: getHeaders(),
+    cache: 'no-store',
   });
 
   if (!res.ok) throw new Error('Failed to fetch commands');
@@ -36,6 +37,7 @@ export const fetchCommands = async (params?: {
 export const fetchCommandById = async (id: number) => {
   const res = await fetch(`${BASE_URL}/${id}`, {
     headers: getHeaders(),
+    cache: 'no-store',
   });
 
   if (!res.ok) throw new Error('Command not found');

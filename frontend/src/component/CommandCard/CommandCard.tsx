@@ -61,6 +61,20 @@ export default function CommandCard({
     );
   };
 
+  const getTotalWeight = (): number => {
+    return command.items.reduce(
+      (total, item) => total + (item.article?.weight ?? 0) * item.quantity,
+      0,
+    );
+  };
+
+  const getTotalVolume = (): number => {
+    return command.items.reduce(
+      (total, item) => total + (item.article?.volume ?? 0) * item.quantity,
+      0,
+    );
+  };
+
   return (
     <>
       <div
@@ -134,6 +148,26 @@ export default function CommandCard({
               <span className='command-card__info-label'>Articles</span>
               <span className='command-card__info-value'>
                 {command.items.length}
+              </span>
+            </div>
+          </div>
+
+          <div className='command-card__info-item'>
+            <Package size={16} className='command-card__info-icon' />
+            <div className='command-card__info-content'>
+              <span className='command-card__info-label'>Poids total</span>
+              <span className='command-card__info-value'>
+                {getTotalWeight().toFixed(2)} kg
+              </span>
+            </div>
+          </div>
+
+          <div className='command-card__info-item'>
+            <Package size={16} className='command-card__info-icon' />
+            <div className='command-card__info-content'>
+              <span className='command-card__info-label'>Volume total</span>
+              <span className='command-card__info-value'>
+                {getTotalVolume().toFixed(2)} m³
               </span>
             </div>
           </div>
