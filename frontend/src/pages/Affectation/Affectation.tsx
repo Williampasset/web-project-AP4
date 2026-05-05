@@ -1,5 +1,5 @@
 import './Affectation.css';
-import DefaultLayout from '@component/default';
+import DefaultLayout from '@component/default/DefaultLayout';
 import { Link } from 'react-router';
 import { useState } from 'react';
 import type { User } from '@type/User';
