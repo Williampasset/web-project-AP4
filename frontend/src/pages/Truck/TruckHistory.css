@@ -65,6 +65,24 @@
   padding: 0.2rem 0.55rem;
 }
 
+.truck-history__summary {
+  margin-top: 0.7rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.55rem 0.65rem;
+}
+
+.truck-history__summary p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.84rem;
+}
+
+.truck-history__summary p + p {
+  margin-top: 0.2rem;
+}
+
 .truck-history__trip-list {
   margin: 0.85rem 0 0;
   padding: 0;
