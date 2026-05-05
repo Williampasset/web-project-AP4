@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router';
 import DefaultLayout from '@component/default/DefaultLayout';
 import CommandCard from '@component/CommandCard/CommandCard';
 import Loading from '@component/Loading/Loading';
-import { useCommands } from '../../hooks/commands.hooks';
+import { useCommands, useUpdateCommand } from '../../hooks/commands.hooks';
+import { useUsers } from '../../hooks/users.hooks';
+import { useTrucks } from '../../hooks/trucks.hooks';
 import type { CommandStatus } from '@type/command.type';
 import './Command.css';
 
@@ -20,10 +22,14 @@ export default function Command() {
   const [statusFilter, setStatusFilter] = useState<'ALL' | CommandStatus>('ALL');
   const [search, setSearch] = useState('');
   const [showLateOnly, setShowLateOnly] = useState(false);
+  const [savingCommandId, setSavingCommandId] = useState<number | null>(null);
 
   const { data: commands = [], isLoading, isError, error, refetch } = useCommands(
     statusFilter === 'ALL' ? undefined : { status: statusFilter },
   );
+  const { data: users = [] } = useUsers();
+  const { data: trucks = [] } = useTrucks();
+  const updateCommandMutation = useUpdateCommand();
 
   const filteredCommands = useMemo(() => {
     const now = new Date();
@@ -67,6 +73,21 @@ export default function Command() {
 
     return sorted;
   }, [commands, search, showLateOnly, statusFilter]);
+
+  const handleUpdateAssignments = async (
+    commandId: number,
+    data: { userId?: number; truckId?: number | null },
+  ) => {
+    setSavingCommandId(commandId);
+    try {
+      await updateCommandMutation.mutateAsync({
+        id: commandId,
+        data,
+      });
+    } finally {
+      setSavingCommandId(null);
+    }
+  };
 
   return (
     <DefaultLayout>
@@ -147,6 +168,11 @@ export default function Command() {
                 key={command.id}
                 command={command}
                 onViewDetails={(commandId) => navigate(`/commands/${commandId}`)}
+                editableAssignments
+                users={users}
+                trucks={trucks}
+                isUpdating={savingCommandId === command.id}
+                onUpdateAssignments={handleUpdateAssignments}
               />
             ))}
           </div>

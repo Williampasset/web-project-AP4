@@ -1,18 +1,85 @@
+import { useEffect, useState } from 'react';
 import { Eye, Calendar, Package, Truck, User } from 'lucide-react';
 import { formatDate } from '@service/date.service';
 import { getStatusClass, getStatusLabel } from '@service/mapper.service';
 import type { Command } from '@type/command.type';
+import type { User as AppUser } from '@type/user.type';
+import type { Truck as AppTruck } from '@type/truck.type';
 import './CommandCard.css';
 
 interface CommandCardProps {
   command: Command;
   onViewDetails: (commandId: number) => void;
+  editableAssignments?: boolean;
+  users?: AppUser[];
+  trucks?: AppTruck[];
+  isUpdating?: boolean;
+  onUpdateAssignments?: (
+    commandId: number,
+    data: { userId?: number; truckId?: number | null },
+  ) => Promise<void>;
 }
 
 export default function CommandCard({
   command,
   onViewDetails,
+  editableAssignments = false,
+  users = [],
+  trucks = [],
+  isUpdating = false,
+  onUpdateAssignments,
 }: CommandCardProps) {
+  const [isEditingUser, setIsEditingUser] = useState(false);
+  const [isEditingTruck, setIsEditingTruck] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<number>(command.userId);
+  const [selectedTruckId, setSelectedTruckId] = useState<string>(
+    command.truckId ? String(command.truckId) : '',
+  );
+
+  useEffect(() => {
+    setSelectedUserId(command.userId);
+    setSelectedTruckId(command.truckId ? String(command.truckId) : '');
+    setIsEditingUser(false);
+    setIsEditingTruck(false);
+  }, [command.id, command.userId, command.truckId]);
+
+  const handleUserUpdate = async (value: string) => {
+    const nextUserId = Number(value);
+    if (Number.isNaN(nextUserId)) return;
+
+    setSelectedUserId(nextUserId);
+
+    if (onUpdateAssignments && nextUserId !== command.userId) {
+      await onUpdateAssignments(command.id, { userId: nextUserId });
+    }
+
+    setIsEditingUser(false);
+  };
+
+  const handleTruckUpdate = async (value: string) => {
+    setSelectedTruckId(value);
+
+    if (value === '') {
+      if (onUpdateAssignments && command.truckId !== null) {
+        await onUpdateAssignments(command.id, { truckId: null });
+      }
+      setIsEditingTruck(false);
+      return;
+    }
+
+    const nextTruckId = Number(value);
+    if (Number.isNaN(nextTruckId)) {
+      setIsEditingTruck(false);
+      return;
+    }
+
+    if (onUpdateAssignments && nextTruckId !== command.truckId) {
+      await onUpdateAssignments(command.id, { truckId: nextTruckId });
+    }
+
+    setIsEditingTruck(false);
+  };
+
   /**
    * Check if command is late
    */
@@ -75,6 +142,11 @@ export default function CommandCard({
     );
   };
 
+  const hasTruckVolumeOverflow = (): boolean => {
+    if (!command.truck || command.truck.maxVolume == null) return false;
+    return getTotalVolume() > command.truck.maxVolume;
+  };
+
   return (
     <>
       <div
@@ -103,9 +175,16 @@ export default function CommandCard({
           </div>
         </div>
 
-        {hasInsufficientStock() && (
+        {(hasInsufficientStock() || hasTruckVolumeOverflow()) && (
           <div className='command-card__alert'>
-            <p className='command-card__alert-text'>⚠️ Stock insuffisant</p>
+            {hasInsufficientStock() && (
+              <p className='command-card__alert-text'>⚠️ Stock insuffisant</p>
+            )}
+            {hasTruckVolumeOverflow() && (
+              <p className='command-card__alert-text'>
+                ⚠️ Dépassement du volume max camion ({getTotalVolume().toFixed(2)} m³ / {command.truck?.maxVolume.toFixed(2)} m³)
+              </p>
+            )}
           </div>
         )}
 
@@ -120,13 +199,37 @@ export default function CommandCard({
             </div>
           </div>
 
-          <div className='command-card__info-item'>
+          <div
+            className={`command-card__info-item ${editableAssignments ? 'command-card__info-item--editable' : ''}`}
+            onClick={() => {
+              if (!editableAssignments || isUpdating) return;
+              setIsEditingUser(true);
+            }}
+          >
             <User size={16} className='command-card__info-icon' />
             <div className='command-card__info-content'>
               <span className='command-card__info-label'>Opérateur</span>
-              <span className='command-card__info-value'>
-                {command.user.firstName} {command.user.lastName}
-              </span>
+              {editableAssignments && isEditingUser ? (
+                <select
+                  className='command-card__inline-select'
+                  value={String(selectedUserId)}
+                  onClick={(event) => event.stopPropagation()}
+                  onChange={(event) => {
+                    void handleUserUpdate(event.target.value);
+                  }}
+                  disabled={isUpdating}
+                >
+                  {users.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.firstName} {user.lastName}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <span className='command-card__info-value'>
+                  {command.user.firstName} {command.user.lastName}
+                </span>
+              )}
             </div>
           </div>
 
@@ -172,14 +275,41 @@ export default function CommandCard({
             </div>
           </div>
 
-          {command.truckId && (
-            <div className='command-card__info-item'>
+          {(command.truckId || editableAssignments) && (
+            <div
+              className={`command-card__info-item ${editableAssignments ? 'command-card__info-item--editable' : ''}`}
+              onClick={() => {
+                if (!editableAssignments || isUpdating) return;
+                setIsEditingTruck(true);
+              }}
+            >
               <Truck size={16} className='command-card__info-icon' />
               <div className='command-card__info-content'>
                 <span className='command-card__info-label'>Camion</span>
-                <span className='command-card__info-value'>
-                  #{command.truck?.imat || 'Inconnu'}
-                </span>
+                {editableAssignments && isEditingTruck ? (
+                  <select
+                    className='command-card__inline-select'
+                    value={selectedTruckId}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={(event) => {
+                      void handleTruckUpdate(event.target.value);
+                    }}
+                    disabled={isUpdating}
+                  >
+                    <option value=''>
+                      Désaffecter le camion
+                    </option>
+                    {trucks.map((truck) => (
+                      <option key={truck.id} value={truck.id}>
+                        {truck.imat}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <span className='command-card__info-value'>
+                    #{command.truck?.imat || 'Non assigné'}
+                  </span>
+                )}
               </div>
             </div>
           )}

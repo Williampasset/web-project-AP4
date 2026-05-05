@@ -140,8 +140,18 @@
   transition: all 0.2s ease;
 }
 
+.command-card__info-item--editable {
+  cursor: pointer;
+  border: 1px dashed #c7d2fe;
+}
+
 .command-card__info-item:hover {
   background: #f3f4f6;
+}
+
+.command-card__info-item--editable:hover {
+  background: #eef2ff;
+  border-color: #818cf8;
 }
 
 .command-card__info-icon {
@@ -170,6 +180,16 @@
   font-weight: 600;
   color: #111827;
   word-break: break-word;
+}
+
+.command-card__inline-select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  width: 100%;
+  background: #fff;
 }
 
 /* Items Section */

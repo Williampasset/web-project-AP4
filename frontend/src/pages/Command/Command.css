@@ -109,6 +109,64 @@
   gap: 1rem;
 }
 
+.commands-page__card-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.commands-page__assignments {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.6rem;
+  align-items: end;
+}
+
+.commands-page__assignment-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.commands-page__assignment-field label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.commands-page__assignment-field select {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.9rem;
+  background: #fff;
+}
+
+.commands-page__save-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  background: #4f46e5;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.commands-page__save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .commands-page__assignments {
+    grid-template-columns: 1fr;
+  }
+}
+
 .commands-page__feedback {
   padding: 1rem;
   border-radius: 10px;
