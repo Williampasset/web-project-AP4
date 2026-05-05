@@ -31,18 +31,20 @@ model User {
 }
 
 model Command {
-  id           Int           @id @default(autoincrement())
-  reference    String        @unique
-  status       CommandStatus
-  commandDate  DateTime      @default(now())
-  deliveryDate DateTime?
-  clientId     Int
-  client       Client        @relation(fields: [clientId], references: [id])
-  truckId      Int?
-  truck        Truck?        @relation(fields: [truckId], references: [id])
-  userId       Int
-  user         User          @relation(fields: [userId], references: [id])
-  items        CommandItem[]
+  id            Int                      @id @default(autoincrement())
+  reference     String                   @unique
+  status        CommandStatus
+  commandDate   DateTime                 @default(now())
+  deliveryDate  DateTime?
+  clientId      Int
+  client        Client                   @relation(fields: [clientId], references: [id])
+  truckId       Int?
+  truck         Truck?                   @relation(fields: [truckId], references: [id])
+  userId        Int
+  user          User                     @relation(fields: [userId], references: [id])
+  items         CommandItem[]
+  preparedItems CommandItemPreparation[]
+  loadingStages CommandLoadingStage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,17 +56,69 @@ model Command {
 }
 
 model CommandItem {
-  id        Int     @id @default(autoincrement())
-  commandId Int
-  command   Command @relation(fields: [commandId], references: [id])
-  articleId Int
-  article   Article @relation(fields: [articleId], references: [id])
-  quantity  Int
-  unitPrice Float
+  id                     Int                     @id @default(autoincrement())
+  commandId              Int
+  command                Command                 @relation(fields: [commandId], references: [id])
+  articleId              Int
+  article                Article                 @relation(fields: [articleId], references: [id])
+  quantity               Int
+  unitPrice              Float
+  commandItemPreparation CommandItemPreparation?
 
   @@unique([commandId, articleId])
   @@index([commandId])
   @@index([articleId])
+}
+
+model CommandItemPreparation {
+  id            Int         @id @default(autoincrement())
+  commandItemId Int         @unique
+  commandItem   CommandItem @relation(fields: [commandItemId], references: [id], onDelete: Cascade)
+
+  isPicked Boolean   @default(false)
+  pickedAt DateTime?
+
+  isValidated      Boolean          @default(false)
+  validatedAt      DateTime?
+  validationMethod ValidationMethod @default(MANUAL)
+
+  isAtLoadingZone Boolean   @default(false)
+  atLoadingZoneAt DateTime?
+
+  isLoaded Boolean   @default(false)
+  loadedAt DateTime?
+
+  rfidChecksPassed Int       @default(0)
+  rfidChecksFailed Int       @default(0)
+  lastRfidCheck    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  command   Command? @relation(fields: [commandId], references: [id])
+  commandId Int?
+
+  @@index([commandItemId])
+}
+
+model CommandLoadingStage {
+  id        Int     @id @default(autoincrement())
+  commandId Int
+  command   Command @relation(fields: [commandId], references: [id], onDelete: Cascade)
+
+  stage  LoadingStage
+  status StageStatus  @default(PENDING)
+
+  rfidChecksPassed Int @default(0)
+  rfidChecksFailed Int @default(0)
+
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([commandId, stage])
+  @@index([commandId])
 }
 
 model Article {
@@ -157,4 +211,23 @@ enum BuildingName {
   A
   B
   C
+}
+
+enum ValidationMethod {
+  MANUAL
+  QR_CODE
+}
+
+enum LoadingStage {
+  PREPARATION
+  LOADING_ZONE
+  LOADING_TRUCK
+  LOADED
+}
+
+enum StageStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
 }
