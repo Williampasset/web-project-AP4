@@ -45,6 +45,7 @@ model Command {
   items         CommandItem[]
   preparedItems CommandItemPreparation[]
   loadingStages CommandLoadingStage[]
+  tripStops     TripStop[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -177,10 +178,72 @@ model Truck {
   imat     String    @unique
   maxLoad  Float
   maxVolume Float    @default(0)
+  maintenanceEndAt DateTime?
   commands Command[]
+  trips    Trip[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Trip {
+  id                 Int        @id @default(autoincrement())
+  reference          String     @unique
+  truckId            Int
+  truck              Truck      @relation(fields: [truckId], references: [id])
+  status             TripStatus @default(PLANNED)
+
+  plannedDepartureAt DateTime?
+  plannedArrivalAt   DateTime?
+  actualDepartureAt  DateTime?
+  actualArrivalAt    DateTime?
+
+  plannedWeight      Float      @default(0)
+  plannedVolume      Float      @default(0)
+  actualWeight       Float?
+  actualVolume       Float?
+
+  notes              String?    @db.VarChar(500)
+  deliveryStops      TripStop[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([truckId])
+  @@index([status])
+  @@index([plannedDepartureAt])
+}
+
+model TripStop {
+  id                   Int                @id @default(autoincrement())
+  tripId               Int
+  trip                 Trip               @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  commandId            Int?
+  command              Command?           @relation(fields: [commandId], references: [id])
+
+  stopOrder            Int
+  status               DeliveryStopStatus @default(PENDING)
+
+  plannedArrivalAt     DateTime?
+  actualArrivalAt      DateTime?
+  deliveredAt          DateTime?
+
+  plannedWeight        Float              @default(0)
+  plannedVolume        Float              @default(0)
+
+  clientNameSnapshot   String             @db.VarChar(150)
+  clientAddressSnapshot String            @db.VarChar(255)
+  commandRefSnapshot   String?            @db.VarChar(50)
+  deliveryNotes        String?            @db.VarChar(500)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tripId, stopOrder])
+  @@index([tripId])
+  @@index([commandId])
+  @@index([status])
 }
 
 model Supplier {
@@ -232,4 +295,19 @@ enum StageStatus {
   IN_PROGRESS
   COMPLETED
   FAILED
+}
+
+enum TripStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliveryStopStatus {
+  PENDING
+  ARRIVED
+  DELIVERED
+  FAILED
+  SKIPPED
 }

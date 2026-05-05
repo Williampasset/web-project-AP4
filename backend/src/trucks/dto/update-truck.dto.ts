@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsNumber, Min, Matches } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  Min,
+  Matches,
+  IsDateString,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateTruckDto {
@@ -35,4 +42,12 @@ export class UpdateTruckDto {
   @IsOptional()
   @Min(0)
   readonly maxVolume?: number;
+
+  @ApiPropertyOptional({
+    description: 'Maintenance end date/time (if truck is under maintenance)',
+    example: '2026-05-10T18:00:00.000Z',
+  })
+  @IsOptional()
+  @IsDateString()
+  readonly maintenanceEndAt?: string;
 }
