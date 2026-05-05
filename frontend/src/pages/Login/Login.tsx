@@ -70,7 +70,7 @@ export default function Login() {
    */
   const navigateByRole = (role: string): void => {
     const roleRoutes: Record<string, string> = {
-      MANAGER: '/commande',
+      MANAGER: '/commands',
       MAGASINIER: '/operateur',
     };
 
