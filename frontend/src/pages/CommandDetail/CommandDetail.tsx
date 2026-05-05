@@ -29,10 +29,14 @@ export default function CommandDetail() {
   const progress = totalItems > 0 ? (preparedCount / totalItems) * 100 : 0;
 
   const currentItem = useMemo(() => {
-    if (!command) return null;
+    if (!command || !preparation) return null;
 
-    return command.items.find((item) => !item.commandItemPreparation?.isPicked);
-  }, [command]);
+    return command.items.find(
+      (item) =>
+        !preparation.command.items.find((i: any) => i.id === item.id)
+          ?.commandItemPreparation?.isPicked,
+    );
+  }, [command, preparation]);
 
   const { mutate: markPicked } = useMarkItemPicked();
 
@@ -57,7 +61,7 @@ export default function CommandDetail() {
       handleCommandStatusUpdate('PENDING');
     }
 
-    if (preparedCount === totalItems - 1) {
+    if (preparedCount + 1 >= totalItems) {
       handleCommandStatusUpdate('DELIVERED');
     }
 

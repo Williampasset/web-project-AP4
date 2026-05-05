@@ -28,6 +28,9 @@ export const useMarkItemPicked = () => {
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
+        queryKey: ['command', variables.commandId],
+      });
+      queryClient.invalidateQueries({
         queryKey: ['preparation-status', variables.commandId],
       });
     },
@@ -136,6 +139,6 @@ export const usePreparationStatus = (commandId: number) => {
     queryKey: ['preparation-status', commandId],
     queryFn: () => getPreparationStatus(commandId),
     enabled: !!commandId,
-    refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
+    refetchInterval: 5000,
   });
 };
