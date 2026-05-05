@@ -55,6 +55,7 @@ export interface CommandItem {
     reference: string;
     label: string;
     weight: number;
+    volume: number;
     price: number;
     stock: number;
     location: Location;

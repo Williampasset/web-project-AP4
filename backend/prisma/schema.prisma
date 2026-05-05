@@ -126,6 +126,7 @@ model Article {
   reference  String   @unique
   label      String
   weight     Float
+  volume     Float    @default(0)
   price      Float
   stock      Int      @default(0)
   locationId Int

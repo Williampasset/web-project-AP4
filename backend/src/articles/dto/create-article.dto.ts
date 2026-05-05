@@ -2,6 +2,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   Min,
   Length,
@@ -21,6 +22,11 @@ export class CreateArticleDto {
   @IsNumber({ maxDecimalPlaces: 3 })
   @Min(0)
   readonly weight!: number;
+
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 3 })
+  @Min(0)
+  readonly volume?: number;
 
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
