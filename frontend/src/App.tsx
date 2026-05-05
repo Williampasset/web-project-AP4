@@ -1,5 +1,5 @@
 import './App.css';
-import { Route, Routes } from 'react-router';
+import { Navigate, Route, Routes } from 'react-router';
 import Login from './pages/Login/Login';
 import Affectation from './pages/Affectation/Affectation';
 import Stock from './pages/Stock/Stock';
@@ -42,13 +42,14 @@ function App() {
         }
       ></Route>
       <Route
-        path='/commande'
+        path='/commands'
         element={
           <ProtectedRoute>
             <Command />
           </ProtectedRoute>
         }
       ></Route>
+      <Route path='/commande' element={<Navigate to='/commands' replace />} />
       <Route
         path='/operateur'
         element={

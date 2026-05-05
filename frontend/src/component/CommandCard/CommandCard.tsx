@@ -159,12 +159,17 @@ export default function CommandCard({
             <ul className='command-card__items-list'>
               {command.items.slice(0, 2).map((item) => (
                 <li key={item.id} className='command-card__item'>
-                  <span className='command-card__item-ref'>
-                    {item.article?.label || 'Inconnu'}
-                  </span>
-                  <span className='command-card__item-qty'>
-                    ×{item.quantity}
-                  </span>
+                  <div className='command-card__item-main'>
+                    <span className='command-card__item-ref'>
+                      {item.article?.label || 'Inconnu'}
+                    </span>
+                    <span className='command-card__item-meta'>
+                      Poids: {((item.article?.weight ?? 0) * item.quantity).toFixed(2)} kg
+                      {' · '}
+                      Volume: {((item.article?.volume ?? 0) * item.quantity).toFixed(2)} m³
+                    </span>
+                  </div>
+                  <span className='command-card__item-qty'>×{item.quantity}</span>
                   <span className='command-card__item-price'>
                     {(item.quantity * item.unitPrice).toFixed(2)} €
                   </span>

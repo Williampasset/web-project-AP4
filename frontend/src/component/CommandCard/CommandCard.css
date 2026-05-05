@@ -210,12 +210,27 @@
   border: 1px solid var(--border);
 }
 
-.command-card__item-ref {
+.command-card__item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
   flex: 1;
+}
+
+.command-card__item-ref {
   color: #374151;
   font-weight: 600;
   word-break: break-word;
   min-width: 0;
+}
+
+.command-card__item-meta {
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .command-card__item-qty {
