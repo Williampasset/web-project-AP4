@@ -10,6 +10,7 @@ import { PublicRoute } from './guards/PublicRoute';
 import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 import CommandDetail from './pages/CommandDetail/CommandDetail';
 import Truck from './pages/Truck/Truck';
+import TruckHistory from './pages/Truck/TruckHistory';
 // import PreparationPage from './pages/PreparationPage/PreparationPage';
 
 function App() {
@@ -56,6 +57,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Truck />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/truck/history'
+        element={
+          <ProtectedRoute>
+            <TruckHistory />
           </ProtectedRoute>
         }
       ></Route>

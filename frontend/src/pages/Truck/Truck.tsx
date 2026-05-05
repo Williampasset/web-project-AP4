@@ -3,9 +3,16 @@ import Loading from '@component/Loading/Loading';
 import { useTrucks } from '../../hooks/trucks.hooks';
 import { useCommands } from '../../hooks/commands.hooks';
 import type { CommandStatus } from '@type/command.type';
+import { formatDate } from '@service/date.service';
 import './Truck.css';
 
 const ACTIVE_STATUSES: CommandStatus[] = ['WAITING', 'PENDING'];
+
+type FleetStatus =
+  | 'MAINTENANCE'
+  | 'IN_DELIVERY'
+  | 'LOADING_PENDING'
+  | 'AVAILABLE';
 
 export default function Truck() {
   const {
@@ -53,6 +60,7 @@ export default function Truck() {
     const usagePercent = Math.max(weightUsagePercent, volumeUsagePercent);
 
     return {
+      truckCommands,
       activeCommandsCount: truckCommands.length,
       usedWeight,
       usedVolume,
@@ -63,12 +71,59 @@ export default function Truck() {
     };
   };
 
+  const getFleetStatus = (
+    maintenanceEndAt: string | null | undefined,
+    hasPending: boolean,
+    hasWaiting: boolean,
+  ): FleetStatus => {
+    if (maintenanceEndAt && new Date(maintenanceEndAt) > new Date()) {
+      return 'MAINTENANCE';
+    }
+
+    if (hasPending) {
+      return 'IN_DELIVERY';
+    }
+
+    if (hasWaiting) {
+      return 'LOADING_PENDING';
+    }
+
+    return 'AVAILABLE';
+  };
+
+  const getStatusLabel = (status: FleetStatus) => {
+    switch (status) {
+      case 'MAINTENANCE':
+        return 'Maintenance';
+      case 'IN_DELIVERY':
+        return 'En cours de livraison';
+      case 'LOADING_PENDING':
+        return 'En attente de chargement';
+      default:
+        return 'Disponible';
+    }
+  };
+
+  const getEstimatedReturn = (truckCommandDates: Array<string | null>) => {
+    const dates = truckCommandDates
+      .filter((date): date is string => !!date)
+      .map((date) => new Date(date).getTime())
+      .filter((time) => !Number.isNaN(time));
+
+    if (dates.length === 0) return null;
+
+    return new Date(Math.max(...dates)).toISOString();
+  };
+
   return (
     <DefaultLayout>
       <section className='truck-page'>
         <div className='truck-page__header'>
-          <h1>Suivi des camions</h1>
-          <p>Capacité poids/volume et taux d'utilisation selon les commandes actives.</p>
+          <h1>Flotte de camions</h1>
+          <p>
+            Statut opérationnel, ordre de passage, résumé des livraisons et capacité
+            poids/volume.
+          </p>
         </div>
 
         {isLoading && <Loading message='Chargement des camions...' size='large' />}
@@ -99,60 +154,129 @@ export default function Truck() {
         )}
 
         {!isLoading && !isError && trucks.length > 0 && (
-          <div className='truck-page__table-wrapper'>
-            <table className='truck-page__table'>
-              <thead>
-                <tr>
-                  <th>Immatriculation</th>
-                  <th>Poids max</th>
-                  <th>Volume max</th>
-                  <th>Utilisation poids</th>
-                  <th>Utilisation volume</th>
-                  <th>Utilisation globale</th>
-                  <th>Commandes actives</th>
-                  <th>Alerte</th>
-                </tr>
-              </thead>
-              <tbody>
-                {trucks.map((truck) => {
-                  const usage = getTruckUsage(truck.id, truck.maxLoad, truck.maxVolume);
+          <div className='truck-page__fleet'>
+            {trucks.map((truck) => {
+              const usage = getTruckUsage(truck.id, truck.maxLoad, truck.maxVolume);
+              const sortedRoute = [...usage.truckCommands].sort((a, b) => {
+                const aDate = a.deliveryDate
+                  ? new Date(a.deliveryDate).getTime()
+                  : new Date(a.commandDate).getTime();
+                const bDate = b.deliveryDate
+                  ? new Date(b.deliveryDate).getTime()
+                  : new Date(b.commandDate).getTime();
+                return aDate - bDate;
+              });
 
-                  return (
-                    <tr
-                      key={truck.id}
-                      className={usage.isOverLimit ? 'truck-page__row--alert' : ''}
+              const hasPending = usage.truckCommands.some((command) => command.status === 'PENDING');
+              const hasWaiting = usage.truckCommands.some((command) => command.status === 'WAITING');
+              const fleetStatus = getFleetStatus(truck.maintenanceEndAt, hasPending, hasWaiting);
+
+              const nearestDelivery = sortedRoute[0]?.deliveryDate ?? null;
+              const estimatedReturn = getEstimatedReturn(
+                sortedRoute.map((command) => command.deliveryDate),
+              );
+
+              return (
+                <article
+                  key={truck.id}
+                  className={`truck-page__card ${usage.isOverLimit ? 'truck-page__card--alert' : ''}`}
+                >
+                  <header className='truck-page__card-header'>
+                    <div>
+                      <h3>{truck.imat}</h3>
+                      <p>
+                        Poids max: {truck.maxLoad.toFixed(2)} kg · Volume max:{' '}
+                        {truck.maxVolume.toFixed(2)} m³
+                      </p>
+                    </div>
+                    <span
+                      className={`truck-page__status truck-page__status--${fleetStatus.toLowerCase()}`}
                     >
-                      <td className='truck-page__cell--strong'>{truck.imat}</td>
-                      <td>{truck.maxLoad.toFixed(2)} kg</td>
-                      <td>{truck.maxVolume.toFixed(2)} m³</td>
-                      <td>{usage.weightUsagePercent.toFixed(1)}%</td>
-                      <td>{usage.volumeUsagePercent.toFixed(1)}%</td>
-                      <td>
-                        <span
-                          className={`truck-page__usage-badge ${
-                            usage.isOverLimit
-                              ? 'truck-page__usage-badge--danger'
-                              : usage.usagePercent >= 80
-                                ? 'truck-page__usage-badge--warning'
-                                : 'truck-page__usage-badge--ok'
-                          }`}
-                        >
-                          {usage.usagePercent.toFixed(1)}%
-                        </span>
-                      </td>
-                      <td>{usage.activeCommandsCount}</td>
-                      <td>
-                        {usage.isOverLimit ? (
-                          <span className='truck-page__alert'>⚠️ Dépassement</span>
-                        ) : (
-                          <span className='truck-page__ok'>OK</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      {getStatusLabel(fleetStatus)}
+                    </span>
+                  </header>
+
+                  <div className='truck-page__metrics'>
+                    <div>
+                      <span>Utilisation poids</span>
+                      <strong>{usage.weightUsagePercent.toFixed(1)}%</strong>
+                    </div>
+                    <div>
+                      <span>Utilisation volume</span>
+                      <strong>{usage.volumeUsagePercent.toFixed(1)}%</strong>
+                    </div>
+                    <div>
+                      <span>Utilisation globale</span>
+                      <strong>{usage.usagePercent.toFixed(1)}%</strong>
+                    </div>
+                  </div>
+
+                  {usage.isOverLimit && (
+                    <div className='truck-page__alert-box'>
+                      ⚠️ Dépassement de capacité poids/volume
+                    </div>
+                  )}
+
+                  {fleetStatus === 'LOADING_PENDING' && (
+                    <section className='truck-page__section'>
+                      <h4>Chargement à venir</h4>
+                      <p>
+                        Date de livraison la plus proche:{' '}
+                        {nearestDelivery ? formatDate(nearestDelivery) : 'Non définie'}
+                      </p>
+                    </section>
+                  )}
+
+                  {fleetStatus === 'IN_DELIVERY' && (
+                    <section className='truck-page__section'>
+                      <h4>Ordre de passage & résumé</h4>
+                      <ol className='truck-page__route-list'>
+                        {sortedRoute.map((command, index) => {
+                          const commandWeight = command.items.reduce(
+                            (sum, item) =>
+                              sum + (item.article?.weight ?? 0) * item.quantity,
+                            0,
+                          );
+                          const commandVolume = command.items.reduce(
+                            (sum, item) =>
+                              sum + (item.article?.volume ?? 0) * item.quantity,
+                            0,
+                          );
+
+                          return (
+                            <li key={command.id}>
+                              <span className='truck-page__route-order'>#{index + 1}</span>
+                              <div>
+                                <strong>
+                                  {command.client.name} · {command.reference}
+                                </strong>
+                                <p>
+                                  Livraison: {command.deliveryDate ? formatDate(command.deliveryDate) : 'N/A'} ·
+                                  Poids: {commandWeight.toFixed(2)} kg · Volume: {commandVolume.toFixed(2)} m³
+                                </p>
+                              </div>
+                            </li>
+                          );
+                        })}
+                      </ol>
+                      <p className='truck-page__return'>
+                        Retour dépôt estimé: {estimatedReturn ? formatDate(estimatedReturn) : 'Non défini'}
+                      </p>
+                    </section>
+                  )}
+
+                  {fleetStatus === 'MAINTENANCE' && (
+                    <section className='truck-page__section'>
+                      <h4>Maintenance</h4>
+                      <p>
+                        Fin de maintenance prévue:{' '}
+                        {truck.maintenanceEndAt ? formatDate(truck.maintenanceEndAt) : 'Non définie'}
+                      </p>
+                    </section>
+                  )}
+                </article>
+              );
+            })}
           </div>
         )}
       </section>
