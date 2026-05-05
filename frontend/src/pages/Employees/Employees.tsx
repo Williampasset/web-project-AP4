@@ -1,4 +1,4 @@
-import DefaultLayout from '@component/default';
+import DefaultLayout from '@component/default/DefaultLayout';
 import { useEffect, useState } from 'react';
 import './Employees.css';
 
@@ -16,19 +16,19 @@ export default function Employees() {
 
   useEffect(() => {
     fetch('/src/data/users.json')
-      .then(response => response.json())
-      .then(data => setEmployees(data.users || []));
+      .then((response) => response.json())
+      .then((data) => setEmployees(data.users || []));
   }, []);
 
   return (
     <DefaultLayout>
-      <div className="employees-page">
+      <div className='employees-page'>
         <h1>Liste des employés</h1>
-        <div className="employees-table-wrapper">
+        <div className='employees-table-wrapper'>
           {employees.length === 0 ? (
-            <div className="employees-loading">Chargement des employés...</div>
+            <div className='employees-loading'>Chargement des employés...</div>
           ) : (
-            <table className="employees-table">
+            <table className='employees-table'>
               <thead>
                 <tr>
                   <th>ID</th>
@@ -40,9 +40,9 @@ export default function Employees() {
                 </tr>
               </thead>
               <tbody>
-                {employees.map(employee => {
+                {employees.map((employee) => {
                   const manager = employee.managerId
-                    ? employees.find(item => item.id === employee.managerId)
+                    ? employees.find((item) => item.id === employee.managerId)
                     : null;
 
                   return (
@@ -52,7 +52,11 @@ export default function Employees() {
                       <td>{employee.firstName}</td>
                       <td>{employee.lastName}</td>
                       <td>{employee.role}</td>
-                      <td>{manager ? `${manager.firstName} ${manager.lastName}` : 'Aucun'}</td>
+                      <td>
+                        {manager
+                          ? `${manager.firstName} ${manager.lastName}`
+                          : 'Aucun'}
+                      </td>
                     </tr>
                   );
                 })}

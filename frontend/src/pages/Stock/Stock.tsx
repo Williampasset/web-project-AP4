@@ -1,4 +1,4 @@
-import DefaultLayout from '@component/default';
+import DefaultLayout from '@component/default/DefaultLayout';
 import { useState } from 'react';
 import type { StockItem } from '@type/StockItem';
 import type { Command } from '@type/command.type';
