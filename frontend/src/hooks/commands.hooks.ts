@@ -8,7 +8,7 @@ import {
   updateCommandStatus,
   deleteCommand,
 } from '../service/api/commands.service';
-import type { Command } from '@type/command';
+import type { Command } from '@type/command.type';
 
 /**
  * Custom hooks for managing commands using react-query.
