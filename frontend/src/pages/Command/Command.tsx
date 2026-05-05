@@ -19,27 +19,54 @@ export default function Command() {
   const navigate = useNavigate();
   const [statusFilter, setStatusFilter] = useState<'ALL' | CommandStatus>('ALL');
   const [search, setSearch] = useState('');
+  const [showLateOnly, setShowLateOnly] = useState(false);
 
   const { data: commands = [], isLoading, isError, error, refetch } = useCommands(
     statusFilter === 'ALL' ? undefined : { status: statusFilter },
   );
 
   const filteredCommands = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
+    const now = new Date();
+    let filtered = commands;
 
-    if (!normalizedSearch) {
-      return commands;
+    // Default filter: exclude only CANCELLED, show all others including DELIVERED
+    if (statusFilter === 'ALL') {
+      filtered = filtered.filter(
+        (cmd) => cmd.status !== 'CANCELLED'
+      );
     }
 
-    return commands.filter((command) => {
-      const assignedUser = `${command.user.firstName} ${command.user.lastName}`.toLowerCase();
-      return (
-        command.reference.toLowerCase().includes(normalizedSearch) ||
-        command.client.name.toLowerCase().includes(normalizedSearch) ||
-        assignedUser.includes(normalizedSearch)
-      );
+    // Filter by search
+    const normalizedSearch = search.trim().toLowerCase();
+    if (normalizedSearch) {
+      filtered = filtered.filter((command) => {
+        const assignedUser = `${command.user.firstName} ${command.user.lastName}`.toLowerCase();
+        return (
+          command.reference.toLowerCase().includes(normalizedSearch) ||
+          command.client.name.toLowerCase().includes(normalizedSearch) ||
+          assignedUser.includes(normalizedSearch)
+        );
+      });
+    }
+
+    // Filter late commands
+    if (showLateOnly) {
+      filtered = filtered.filter((command) => {
+        if (!command.deliveryDate) return false;
+        const deliveryDate = new Date(command.deliveryDate);
+        return deliveryDate < now && command.status !== 'DELIVERED';
+      });
+    }
+
+    // Sort by delivery date (nearest or late first)
+    const sorted = [...filtered].sort((a, b) => {
+      const aDate = a.deliveryDate ? new Date(a.deliveryDate).getTime() : Infinity;
+      const bDate = b.deliveryDate ? new Date(b.deliveryDate).getTime() : Infinity;
+      return aDate - bDate;
     });
-  }, [commands, search]);
+
+    return sorted;
+  }, [commands, search, showLateOnly, statusFilter]);
 
   return (
     <DefaultLayout>
@@ -66,17 +93,27 @@ export default function Command() {
             onChange={(event) => setSearch(event.target.value)}
           />
 
-          <div className='commands-page__filters'>
-            {STATUS_FILTERS.map((filter) => (
+          <div className='commands-page__filters-bar'>
+            <div className='commands-page__filters'>
+              {STATUS_FILTERS.map((filter) => (
+                <button
+                  key={filter.value}
+                  type='button'
+                  className={`commands-page__filter ${statusFilter === filter.value ? 'commands-page__filter--active' : ''}`}
+                  onClick={() => setStatusFilter(filter.value)}
+                >
+                  {filter.label}
+                </button>
+              ))}
               <button
-                key={filter.value}
                 type='button'
-                className={`commands-page__filter ${statusFilter === filter.value ? 'commands-page__filter--active' : ''}`}
-                onClick={() => setStatusFilter(filter.value)}
+                className={`commands-page__filter commands-page__filter--late ${showLateOnly ? 'commands-page__filter--active' : ''}`}
+                onClick={() => setShowLateOnly(!showLateOnly)}
+                title='Afficher uniquement les commandes en retard'
               >
-                {filter.label}
+                ⚠️ Retard
               </button>
-            ))}
+            </div>
           </div>
         </div>
 

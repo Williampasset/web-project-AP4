@@ -1,4 +1,4 @@
-import { Eye, Calendar, Package, Truck } from 'lucide-react';
+import { Eye, Calendar, Package, Truck, User } from 'lucide-react';
 import { formatDate } from '@service/date.service';
 import { getStatusClass, getStatusLabel } from '@service/mapper.service';
 import type { Command } from '@type/command.type';
@@ -14,6 +14,44 @@ export default function CommandCard({
   onViewDetails,
 }: CommandCardProps) {
   /**
+   * Check if command is late
+   */
+  const isLate = (): boolean => {
+    if (!command.deliveryDate || command.status === 'DELIVERED') return false;
+    return new Date(command.deliveryDate) < new Date();
+  };
+
+  /**
+   * Get status to display (with late indicator)
+   */
+  const getDisplayStatus = (): string => {
+    if (isLate()) {
+      return 'En retard';
+    }
+    return getStatusLabel(command.status);
+  };
+
+  /**
+   * Get status class (with late indicator)
+   */
+  const getDisplayStatusClass = (): string => {
+    if (isLate()) {
+      return 'late';
+    }
+    return getStatusClass(command.status);
+  };
+
+  /**
+   * Check if stock is insufficient for any item
+   */
+  const hasInsufficientStock = (): boolean => {
+    return command.items.some((item) => {
+      const availableStock = item.article?.stock ?? 0;
+      return availableStock < item.quantity;
+    });
+  };
+
+  /**
    * Get total command value
    */
   const getTotalValue = (): number => {
@@ -26,13 +64,13 @@ export default function CommandCard({
   return (
     <>
       <div
-        className={`command-card command-card--${getStatusClass(command.status)}`}
+        className={`command-card command-card--${getDisplayStatusClass()}`}
       >
         <div className='command-card__status-badge'>
           <span
-            className={`command-card__status command-card__status--${getStatusClass(command.status)}`}
+            className={`command-card__status command-card__status--${getDisplayStatusClass()}`}
           >
-            {getStatusLabel(command.status)}
+            {getDisplayStatus()}
           </span>
         </div>
 
@@ -51,6 +89,12 @@ export default function CommandCard({
           </div>
         </div>
 
+        {hasInsufficientStock() && (
+          <div className='command-card__alert'>
+            <p className='command-card__alert-text'>⚠️ Stock insuffisant</p>
+          </div>
+        )}
+
         <div className='command-card__info-grid'>
           <div className='command-card__info-item'>
             <Calendar size={16} className='command-card__info-icon' />
@@ -62,11 +106,21 @@ export default function CommandCard({
             </div>
           </div>
 
+          <div className='command-card__info-item'>
+            <User size={16} className='command-card__info-icon' />
+            <div className='command-card__info-content'>
+              <span className='command-card__info-label'>Opérateur</span>
+              <span className='command-card__info-value'>
+                {command.user.firstName} {command.user.lastName}
+              </span>
+            </div>
+          </div>
+
           {command.deliveryDate && (
             <div className='command-card__info-item'>
               <Calendar size={16} className='command-card__info-icon' />
               <div className='command-card__info-content'>
-                <span className='command-card__info-label'>Terminée</span>
+                <span className='command-card__info-label'>Livraison</span>
                 <span className='command-card__info-value'>
                   {formatDate(command.deliveryDate)}
                 </span>
