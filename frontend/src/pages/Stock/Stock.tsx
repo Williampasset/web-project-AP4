@@ -1,7 +1,7 @@
 import DefaultLayout from '@component/default';
 import { useState } from 'react';
 import type { StockItem } from '@type/StockItem';
-import type { Command } from '@type/command';
+import type { Command } from '@type/command.type';
 import articlesData from '@data/articles.json';
 import suppliersData from '@data/suppliers.json';
 import commandsData from '@data/commands.json';

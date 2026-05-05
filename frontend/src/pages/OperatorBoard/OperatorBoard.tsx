@@ -9,7 +9,7 @@ import {
   useUpdateCommandStatus,
   useDeleteCommand,
 } from '../../hooks/commands.hooks';
-import { type CommandStatus, COMMAND_STATUSES } from '@type/command';
+import { type CommandStatus, COMMAND_STATUSES } from '@type/command.type';
 import StatCard from '@component/StatCard/StatCard';
 import CommandCard from '@component/CommandCard/CommandCard';
 
@@ -34,7 +34,6 @@ export default function OperatorBoard() {
   });
 
   const updateStatusMutation = useUpdateCommandStatus();
-  const deleteMutation = useDeleteCommand();
 
   const [filters, setFilters] = useState<FilterOptions>({
     status: 'ALL',
@@ -118,18 +117,6 @@ export default function OperatorBoard() {
   };
 
   /**
-   * Handle command deletion
-   */
-  const handleDelete = async (commandId: number) => {
-    try {
-      await deleteMutation.mutateAsync(commandId);
-    } catch (err) {
-      console.error('Failed to delete command:', err);
-      throw err;
-    }
-  };
-
-  /**
    * Handle command details navigation
    */
   const handleViewDetails = (commandId: number) => {
@@ -196,7 +183,7 @@ export default function OperatorBoard() {
           variant='pending'
         />
         <StatCard
-          label='Livrées'
+          label='Terminées'
           value={statistics.delivered}
           variant='delivered'
         />
@@ -316,12 +303,7 @@ export default function OperatorBoard() {
             <CommandCard
               key={command.id}
               command={command}
-              onStatusChange={handleStatusChange}
               onViewDetails={handleViewDetails}
-              isUpdating={
-                updateStatusMutation.isPending &&
-                updateStatusMutation.variables?.id === command.id
-              }
             />
           ))}
         </div>
