@@ -27,8 +27,10 @@ export function getStatusLabel(status: string) {
       return 'En attente';
     case 'PENDING':
       return 'En cours';
-    case 'FINISH':
+    case 'DELIVERED':
       return 'Terminée';
+    case 'CANCELLED':
+      return 'Annulée';
     default:
       return status;
   }

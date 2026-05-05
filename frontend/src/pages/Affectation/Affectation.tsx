@@ -3,7 +3,7 @@ import DefaultLayout from '@component/default';
 import { Link } from 'react-router';
 import { useState } from 'react';
 import type { User } from '@type/User';
-import type { Command } from '@type/command';
+import type { Command } from '@type/command.type';
 import type { StockItem } from '@type/StockItem';
 
 import usersData from '@data/users.json';

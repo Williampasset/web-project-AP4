@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import './login.css';
 import { useNavigate } from 'react-router';
 import { jwtDecode } from 'jwt-decode';
-import type { TokenPayload } from '@type/TokenPayload.type';
+import type { TokenPayload } from '@type/token.type';
 import { useLogin } from '../../hooks/login.hooks';
 
 export default function Login() {

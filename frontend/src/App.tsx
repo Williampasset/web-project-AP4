@@ -8,6 +8,7 @@ import { ProtectedRoute } from './guards/ProtectedRoute';
 import OperateurBoard from './pages/OperatorBoard/OperatorBoard';
 import { PublicRoute } from './guards/PublicRoute';
 import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
+import CommandDetail from './pages/CommandDetail/CommandDetail';
 // import PreparationPage from './pages/PreparationPage/PreparationPage';
 
 function App() {
@@ -53,6 +54,14 @@ function App() {
         element={
           <ProtectedRoute>
             <OperateurBoard />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/commands/:id'
+        element={
+          <ProtectedRoute>
+            <CommandDetail />
           </ProtectedRoute>
         }
       ></Route>
