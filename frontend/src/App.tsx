@@ -9,6 +9,7 @@ import OperateurBoard from './pages/OperatorBoard/OperatorBoard';
 import { PublicRoute } from './guards/PublicRoute';
 import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 import CommandDetail from './pages/CommandDetail/CommandDetail';
+import Truck from './pages/Truck/Truck';
 // import PreparationPage from './pages/PreparationPage/PreparationPage';
 
 function App() {
@@ -50,6 +51,15 @@ function App() {
         }
       ></Route>
       <Route path='/commande' element={<Navigate to='/commands' replace />} />
+      <Route
+        path='/truck'
+        element={
+          <ProtectedRoute>
+            <Truck />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route path='/trucks' element={<Navigate to='/truck' replace />} />
       <Route
         path='/operateur'
         element={

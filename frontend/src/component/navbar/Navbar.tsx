@@ -70,7 +70,7 @@ const Navbar: React.FC<NavbarProps> = ({
           href: '/commands',
           icon: <Package size={16} />,
         },
-        { label: 'Camions', href: '/trucks', icon: <Package size={16} /> },
+        { label: 'Camions', href: '/truck', icon: <Package size={16} /> },
         { label: 'Clients', href: '/clients', icon: <Package size={16} /> },
       ],
     },
