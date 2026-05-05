@@ -24,4 +24,15 @@ export class UpdateTruckDto {
   @IsOptional()
   @Min(0)
   readonly maxLoad?: number;
+
+  @ApiPropertyOptional({
+    description: 'Maximum volume capacity in m³',
+    example: 35,
+    minimum: 0,
+    type: 'number',
+  })
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  readonly maxVolume?: number;
 }

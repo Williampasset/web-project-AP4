@@ -176,6 +176,7 @@ model Truck {
   id       Int       @id @default(autoincrement())
   imat     String    @unique
   maxLoad  Float
+  maxVolume Float    @default(0)
   commands Command[]
 
   createdAt DateTime @default(now())
