@@ -130,4 +130,53 @@ export class SuppliersService {
 
     return count;
   }
+
+  /**
+   * Increase article stock when placing an order to a supplier
+   * @param supplierId Supplier identifier
+   * @param articleId Article identifier
+   * @param quantity Ordered quantity to add in stock
+   * @returns Restock summary with updated stock
+   */
+  async restockArticle(supplierId: number, articleId: number, quantity: number) {
+    await this.findSupplierOrThrow(supplierId);
+
+    const article = await this.prisma.article.findFirst({
+      where: {
+        id: articleId,
+        supplierId,
+      },
+      include: {
+        location: true,
+        supplier: true,
+      },
+    });
+
+    if (!article) {
+      throw new NotFoundException(
+        `Article #${articleId} is not provided by supplier #${supplierId}`,
+      );
+    }
+
+    const updatedArticle = await this.prisma.article.update({
+      where: { id: articleId },
+      data: {
+        stock: {
+          increment: quantity,
+        },
+      },
+      include: {
+        location: true,
+        supplier: true,
+      },
+    });
+
+    return {
+      supplierId,
+      articleId,
+      orderedQuantity: quantity,
+      updatedStock: updatedArticle.stock,
+      article: updatedArticle,
+    };
+  }
 }

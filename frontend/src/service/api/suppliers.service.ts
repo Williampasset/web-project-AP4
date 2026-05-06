@@ -24,3 +24,45 @@ export const fetchSupplierById = async (id: number): Promise<Supplier> => {
 
   return res.json();
 };
+
+export const restockSupplierArticle = async (
+  supplierId: number,
+  articleId: number,
+  quantity: number,
+) => {
+  const res = await fetch(
+    `${BASE_URL}/${supplierId}/articles/${articleId}/restock`,
+    {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({ quantity }),
+    },
+  );
+
+  if (!res.ok) {
+    let details = '';
+
+    try {
+      const errorBody = await res.json();
+      if (typeof errorBody?.message === 'string') {
+        details = errorBody.message;
+      } else if (Array.isArray(errorBody?.message)) {
+        details = errorBody.message.join(', ');
+      } else if (errorBody?.error) {
+        details = String(errorBody.error);
+      }
+    } catch {
+      try {
+        details = await res.text();
+      } catch {
+        details = '';
+      }
+    }
+
+    throw new Error(
+      `Erreur ${res.status} lors de l'enregistrement en stock${details ? `: ${details}` : ''}`,
+    );
+  }
+
+  return res.json();
+};

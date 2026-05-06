@@ -2,6 +2,8 @@ import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { restockSupplierArticle } from '@service/api/suppliers.service';
 import { useSuppliers } from '../../hooks/suppliers.hooks';
 import type { Supplier, SupplierArticle } from '@type/supplier.type';
 import './Suppliers.css';
@@ -21,6 +23,8 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
     quantity: number;
     message: string;
   } | null>(null);
+  const [isSending, setIsSending] = useState(false);
+  const queryClient = useQueryClient();
 
   // Auto-ouvre si la recherche correspond à un article
   const isOpen = open || articleMatch;
@@ -51,21 +55,38 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
     });
   };
 
-  const sendEmail = () => {
+  const sendEmail = async () => {
     if (!modal || !supplier.email) return;
-    const subject = encodeURIComponent(
-      `Demande de réapprovisionnement – ${modal.article.reference}`,
-    );
-    const body = encodeURIComponent(
-      `Bonjour,\n\nNous souhaitons passer commande pour l'article suivant :\n\n` +
-      `Référence : ${modal.article.reference}\n` +
-      `Désignation : ${modal.article.label}\n` +
-      `Quantité souhaitée : ${modal.quantity}\n` +
-      (modal.message ? `\nMessage complémentaire :\n${modal.message}\n` : '') +
-      `\nCordialement`,
-    );
-    window.location.href = `mailto:${supplier.email}?subject=${subject}&body=${body}`;
-    setModal(null);
+
+    setIsSending(true);
+
+    try {
+      await restockSupplierArticle(supplier.id, modal.article.id, modal.quantity);
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['suppliers'] }),
+        queryClient.invalidateQueries({ queryKey: ['articles'] }),
+        queryClient.invalidateQueries({ queryKey: ['articles', 'live-stock'] }),
+      ]);
+
+      const subject = encodeURIComponent(
+        `Demande de réapprovisionnement – ${modal.article.reference}`,
+      );
+      const body = encodeURIComponent(
+        `Bonjour,\n\nNous souhaitons passer commande pour l'article suivant :\n\n` +
+        `Référence : ${modal.article.reference}\n` +
+        `Désignation : ${modal.article.label}\n` +
+        `Quantité souhaitée : ${modal.quantity}\n` +
+        (modal.message ? `\nMessage complémentaire :\n${modal.message}\n` : '') +
+        `\nCordialement`,
+      );
+      window.location.href = `mailto:${supplier.email}?subject=${subject}&body=${body}`;
+      setModal(null);
+    } catch (error) {
+      alert((error as Error)?.message ?? 'Impossible d’enregistrer la commande fournisseur.');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -183,7 +204,9 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
             </div>
             <div className='modal__footer'>
               <button className='btn-cancel' onClick={() => setModal(null)}>Annuler</button>
-              <button className='btn-send' onClick={sendEmail}>✉ Envoyer l’email</button>
+              <button className='btn-send' onClick={sendEmail} disabled={isSending}>
+                {isSending ? 'Envoi...' : '✉ Envoyer l’email'}
+              </button>
             </div>
           </div>
         </div>
