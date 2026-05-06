@@ -40,7 +40,13 @@ export class ArticlesService {
    * @returns All articles in database
    */
   async findAll() {
-    const result = await this.prisma.article.findMany();
+    const result = await this.prisma.article.findMany({
+      include: {
+        location: true,
+        supplier: true,
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
     return result;
   }
 
@@ -135,6 +141,10 @@ export class ArticlesService {
   private async findArticleOrThrow(id: number) {
     const article = await this.prisma.article.findUnique({
       where: { id },
+      include: {
+        location: true,
+        supplier: true,
+      },
     });
 
     if (!article) throw new NotFoundException(`Article #${id} not found`);

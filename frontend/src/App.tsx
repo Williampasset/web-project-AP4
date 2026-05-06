@@ -38,13 +38,14 @@ function App() {
         }
       ></Route>
       <Route
-        path='/stock'
+        path='/articles'
         element={
           <ProtectedRoute>
             <Stock />
           </ProtectedRoute>
         }
       ></Route>
+      <Route path='/stock' element={<Navigate to='/articles' replace />} />
       <Route
         path='/commands'
         element={

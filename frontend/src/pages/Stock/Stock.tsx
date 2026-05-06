@@ -1,50 +1,97 @@
 import DefaultLayout from '@component/default/DefaultLayout';
-import { useState } from 'react';
-import type { StockItem } from '@type/StockItem';
+import Loading from '@component/Loading/Loading';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchArticles } from '@service/api/articles.service';
+import { fetchCommands } from '@service/api/commands.service';
+import type { Article } from '@type/article.type';
 import type { Command } from '@type/command.type';
-import articlesData from '@data/articles.json';
-import suppliersData from '@data/suppliers.json';
-import commandsData from '@data/commands.json';
 import './Stock.css';
 
-interface Supplier {
-  id: number;
-  name: string;
-  address: string;
-  articleIds: number[];
-}
+const PENDING_LOADING_STATUSES: Command['status'][] = ['WAITING', 'PENDING'];
 
 export default function Stock() {
-  const stocks: StockItem[] = articlesData.articles as StockItem[];
-  const suppliers: Supplier[] = suppliersData.suppliers as Supplier[];
-  const commands: Command[] = commandsData.commands as Command[];
   const [searchFilter, setSearchFilter] = useState('');
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedArticleId, setSelectedArticleId] = useState<number | null>(
-    null,
-  );
-  const [qrModalOpen, setQrModalOpen] = useState(false);
-  const [qrArticleId, setQrArticleId] = useState<number | null>(null);
 
-  const getTotalCommandedQuantity = (articleId: number): number => {
-    const total = commands
-      .filter(
-        (cmd) => cmd.articleIds.includes(articleId) && cmd.status !== 'FINISH',
-      )
-      .reduce((total, cmd) => total + (cmd.weight ?? 1), 0);
-    return Math.ceil(total);
-  };
+  const {
+    data: articles = [],
+    isLoading: isLoadingArticles,
+    isError: isErrorArticles,
+    error: articlesError,
+    dataUpdatedAt: articlesUpdatedAt,
+    refetch: refetchArticles,
+  } = useQuery<Article[]>({
+    queryKey: ['articles', 'live-stock'],
+    queryFn: fetchArticles,
+    refetchInterval: 10000,
+  });
 
-  const isStockOvercommitted = (stock: StockItem): boolean => {
-    const totalCommanded = getTotalCommandedQuantity(stock.id);
-    return totalCommanded > stock.stock;
-  };
+  const {
+    data: commands = [],
+    isLoading: isLoadingCommands,
+    isError: isErrorCommands,
+    error: commandsError,
+    dataUpdatedAt: commandsUpdatedAt,
+    refetch: refetchCommands,
+  } = useQuery<Command[]>({
+    queryKey: ['commands', 'live-stock'],
+    queryFn: () => fetchCommands(),
+    refetchInterval: 10000,
+  });
 
-  const filtered = stocks.filter(
-    (stock) =>
-      stock.label.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      stock.id.toString().includes(searchFilter),
-  );
+  const pendingDemandByArticle = useMemo(() => {
+    const map = new Map<number, number>();
+
+    commands
+      .filter((command) => PENDING_LOADING_STATUSES.includes(command.status))
+      .forEach((command) => {
+        command.items.forEach((item) => {
+          map.set(item.articleId, (map.get(item.articleId) ?? 0) + item.quantity);
+        });
+      });
+
+    return map;
+  }, [commands]);
+
+  const rows = useMemo(() => {
+    return articles.map((article) => {
+      const pendingQty = pendingDemandByArticle.get(article.id) ?? 0;
+      const projectedStock = article.stock - pendingQty;
+      return {
+        article,
+        pendingQty,
+        projectedStock,
+        shortage: projectedStock < 0,
+      };
+    });
+  }, [articles, pendingDemandByArticle]);
+
+  const filtered = useMemo(() => {
+    const query = searchFilter.trim().toLowerCase();
+    if (!query) return rows;
+
+    return rows.filter(({ article }) => {
+      const supplierName = article.supplier?.name?.toLowerCase() ?? '';
+      const location = article.location
+        ? `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`.toLowerCase()
+        : '';
+
+      return (
+        article.reference.toLowerCase().includes(query) ||
+        article.label.toLowerCase().includes(query) ||
+        supplierName.includes(query) ||
+        location.includes(query)
+      );
+    });
+  }, [rows, searchFilter]);
+
+  const stats = useMemo(() => {
+    const total = rows.length;
+    const shortages = rows.filter((r) => r.shortage).length;
+    const lowSoon = rows.filter((r) => !r.shortage && r.projectedStock <= 5).length;
+
+    return { total, shortages, lowSoon };
+  }, [rows]);
 
   const getStockStatus = (quantity: number) => {
     if (quantity === 0) return 'out-of-stock';
@@ -52,46 +99,70 @@ export default function Stock() {
     return 'in-stock';
   };
 
-  const getStockLabel = (quantity: number) => {
-    if (quantity === 0) return '✗ Rupture';
-    if (quantity < 10) return '⚠ Faible';
-    return '✓ Disponible';
-  };
+  const isLoading = isLoadingArticles || isLoadingCommands;
+  const isError = isErrorArticles || isErrorCommands;
+  const lastUpdatedAt = Math.max(articlesUpdatedAt || 0, commandsUpdatedAt || 0);
 
-  const openSupplierModal = (articleId: number) => {
-    setSelectedArticleId(articleId);
-    setModalOpen(true);
-  };
+  if (isLoading) return <Loading />;
 
-  const getSuppliers = (articleId: number): Supplier[] => {
-    return suppliers.filter((s) => s.articleIds.includes(articleId));
-  };
-
-  const requestQuote = (supplierId: number, supplierName: string) => {
-    alert(`Demande de devis envoyée à ${supplierName} (ID: #${supplierId})\n`);
-  };
-
-  const openQRModal = (articleId: number) => {
-    setQrArticleId(articleId);
-    setQrModalOpen(true);
-  };
-
-  const getQRCodeUrl = (articleId: number): string => {
-    const data = JSON.stringify({
-      articleId,
-      label: stocks.find((s) => s.id === articleId)?.label,
-    });
-    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`;
-  };
+  if (isError) {
+    return (
+      <DefaultLayout>
+        <div className='stock-error'>
+          <p>
+            Erreur :
+            {' '}
+            {(articlesError as Error)?.message ||
+              (commandsError as Error)?.message ||
+              'Impossible de charger les données de stock.'}
+          </p>
+          <button
+            onClick={() => {
+              refetchArticles();
+              refetchCommands();
+            }}
+          >
+            Réessayer
+          </button>
+        </div>
+      </DefaultLayout>
+    );
+  }
 
   return (
     <DefaultLayout>
-      <h1>Suivi du stock</h1>
+      <div className='stock-page-header'>
+        <div>
+          <h1>Suivi des stocks en temps réel</h1>
+          <p>
+            Dernière mise à jour :
+            {' '}
+            {lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleTimeString('fr-FR') : '--:--:--'}
+            {' '}
+            (rafraîchissement auto toutes les 10s)
+          </p>
+        </div>
+      </div>
+
+      <div className='stock-kpis'>
+        <div className='kpi-card'>
+          <span>Articles suivis</span>
+          <strong>{stats.total}</strong>
+        </div>
+        <div className='kpi-card kpi-card--warn'>
+          <span>Pénuries probables</span>
+          <strong>{stats.shortages}</strong>
+        </div>
+        <div className='kpi-card kpi-card--low'>
+          <span>Stock faible à court terme</span>
+          <strong>{stats.lowSoon}</strong>
+        </div>
+      </div>
 
       <div className='stock-search'>
         <input
           type='text'
-          placeholder='Rechercher par ID ou label...'
+          placeholder='Rechercher par référence, article, fournisseur ou emplacement...'
           value={searchFilter}
           onChange={(e) => setSearchFilter(e.target.value)}
           className='search-input'
@@ -101,152 +172,53 @@ export default function Stock() {
       <table className='stock-table'>
         <thead>
           <tr>
-            <th>ID</th>
+            <th>Référence</th>
             <th>Label</th>
-            <th>Description</th>
-            <th>Quantité</th>
-            <th>Poids</th>
-            <th>État</th>
-            <th>Actions</th>
+            <th>Stock actuel</th>
+            <th>Demandé (attente/chargement)</th>
+            <th>Stock projeté</th>
+            <th>Risque</th>
+            <th>Fournisseur</th>
+            <th>Emplacement</th>
           </tr>
         </thead>
         <tbody>
-          {filtered.map((stock) => (
+          {filtered.map(({ article, pendingQty, projectedStock, shortage }) => (
             <tr
-              key={stock.id}
-              className={`row-${getStockStatus(stock.stock)} ${isStockOvercommitted(stock) ? 'overcommitted' : ''}`}
+              key={article.id}
+              className={`row-${getStockStatus(article.stock)} ${shortage ? 'overcommitted' : ''}`}
             >
-              <td>#{stock.id}</td>
+              <td>{article.reference}</td>
+              <td>{article.label}</td>
+              <td>{article.stock}</td>
+              <td>{pendingQty}</td>
+              <td className={projectedStock < 0 ? 'negative-stock' : ''}>{projectedStock}</td>
               <td>
-                <div>{stock.label}</div>
-                {isStockOvercommitted(stock) && (
-                  <span className='alert-overcommitted'>⚠️ Surengagement</span>
+                {shortage ? (
+                  <span className='stock-status overcommitted'>❌ Pénurie probable</span>
+                ) : projectedStock <= 5 ? (
+                  <span className='stock-status low-stock'>⚠️ Bas</span>
+                ) : (
+                  <span className='stock-status in-stock'>✅ OK</span>
                 )}
               </td>
-              <td>{stock.description || '—'}</td>
-              <td className='stock-quantity'>
-                <div>{stock.stock}</div>
-                {isStockOvercommitted(stock) && (
-                  <div className='commands-info'>
-                    Demandé: {getTotalCommandedQuantity(stock.id)}
-                  </div>
-                )}
-              </td>
-              <td>{stock.weight} kg</td>
               <td>
-                <span
-                  className={`stock-status ${getStockStatus(stock.stock)} ${isStockOvercommitted(stock) ? 'overcommitted' : ''}`}
-                >
-                  {isStockOvercommitted(stock)
-                    ? '❌ Surengagé'
-                    : getStockLabel(stock.stock)}
-                </span>
+                {article.supplier?.name || '—'}
               </td>
               <td>
-                <button
-                  className='supplier-btn'
-                  onClick={() => openSupplierModal(stock.id)}
-                >
-                  Fournisseurs
-                </button>
-                <button
-                  className='qr-btn'
-                  onClick={() => openQRModal(stock.id)}
-                  title='Générer QR Code'
-                >
-                  📱 QR
-                </button>
+                {article.location
+                  ? `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`
+                  : '—'}
               </td>
             </tr>
           ))}
           {filtered.length === 0 && (
             <tr>
-              <td colSpan={7}>Aucun article trouvé.</td>
+              <td colSpan={8}>Aucun article trouvé.</td>
             </tr>
           )}
         </tbody>
       </table>
-
-      {/* Modal Fournisseurs */}
-      {modalOpen && selectedArticleId !== null && (
-        <div className='modal-overlay' onClick={() => setModalOpen(false)}>
-          <div className='modal-content' onClick={(e) => e.stopPropagation()}>
-            <div className='modal-header'>
-              <h2>Fournisseurs pour l'article #{selectedArticleId}</h2>
-              <button
-                className='modal-close'
-                onClick={() => setModalOpen(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className='modal-body'>
-              {getSuppliers(selectedArticleId).length > 0 ? (
-                <div className='suppliers-list'>
-                  {getSuppliers(selectedArticleId).map((supplier) => (
-                    <div key={supplier.id} className='supplier-card'>
-                      <div className='supplier-info'>
-                        <h3>{supplier.name}</h3>
-                        <p className='supplier-address'>
-                          📍 {supplier.address}
-                        </p>
-                      </div>
-                      <button
-                        className='quote-btn'
-                        onClick={() => requestQuote(supplier.id, supplier.name)}
-                      >
-                        Demander un devis
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p>Aucun fournisseur trouvé pour cet article.</p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal QR Code */}
-      {qrModalOpen && qrArticleId !== null && (
-        <div className='modal-overlay' onClick={() => setQrModalOpen(false)}>
-          <div className='modal-content' onClick={(e) => e.stopPropagation()}>
-            <div className='modal-header'>
-              <h2>QR Code - Article #{qrArticleId}</h2>
-              <button
-                className='modal-close'
-                onClick={() => setQrModalOpen(false)}
-              >
-                ✕
-              </button>
-            </div>
-            <div className='modal-body qr-body'>
-              <div className='qr-container'>
-                <img
-                  src={getQRCodeUrl(qrArticleId)}
-                  alt={`QR Code article ${qrArticleId}`}
-                  className='qr-code-img'
-                />
-                <p className='qr-label'>
-                  {stocks.find((s) => s.id === qrArticleId)?.label}
-                </p>
-              </div>
-              <button
-                className='download-btn'
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = getQRCodeUrl(qrArticleId);
-                  link.download = `QR_Article_${qrArticleId}.png`;
-                  link.click();
-                }}
-              >
-                ⬇️ Télécharger
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </DefaultLayout>
   );
 }
