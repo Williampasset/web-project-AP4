@@ -126,6 +126,22 @@
   justify-content: center;
   gap: 3px;
   padding: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.prep-slot:hover {
+  background: #fef3c7;
+}
+
+.prep-slot.focused {
+  outline: 2px solid #2563eb;
+}
+
+.prep-slot--occupied {
+  border-style: solid;
+  border-color: #f59e0b;
+  background: #fde68a;
 }
 
 .prep-slot__code {
@@ -337,6 +353,12 @@
   background: #fee2e2;
   color: #991b1b;
   border: 1px solid #fca5a5;
+}
+
+.zone-badge--prep {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
 }
 
 .inspector-article-ref {

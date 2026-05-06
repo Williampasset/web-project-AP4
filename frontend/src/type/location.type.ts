@@ -1,5 +1,5 @@
-export type BuildingName = 'A' | 'B' | 'C' | 'D';
-export type LocationZone = 'BULK' | 'PICK';
+export type BuildingName = 'A' | 'B' | 'C' | 'D' | 'P';
+export type LocationZone = 'BULK' | 'PICK' | 'PREP';
 
 export interface Location {
   id: number;

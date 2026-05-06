@@ -277,11 +277,13 @@ enum BuildingName {
   A
   B
   C
+  P
 }
 
 enum LocationZone {
   BULK
   PICK
+  PREP
 }
 
 enum ValidationMethod {

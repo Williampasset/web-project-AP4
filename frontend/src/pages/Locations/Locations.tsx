@@ -27,16 +27,16 @@ export default function Locations() {
   });
 
   const buildings = useMemo(() => {
-    return Array.from(new Set(locations.map((l) => l.building))).sort((a, b) =>
-      a.localeCompare(b),
-    );
+    return Array.from(new Set(locations.map((l) => l.building)))
+      .filter((b) => b !== 'P')
+      .sort((a, b) => a.localeCompare(b));
   }, [locations]);
 
   const activeBuilding = selectedBuilding ?? buildings[0] ?? null;
 
   const buildingLocations = useMemo(() => {
     if (!activeBuilding) return [];
-    return locations.filter((l) => l.building === activeBuilding);
+    return locations.filter((l) => l.building === activeBuilding && l.zone !== 'PREP');
   }, [locations, activeBuilding]);
 
   const mappedLocations = useMemo(() => {
@@ -56,9 +56,6 @@ export default function Locations() {
       });
   }, [buildingLocations]);
 
-  const focusedLocation =
-    mappedLocations.find((cell) => cell.id === focusedLocationId) ?? mappedLocations[0] ?? null;
-
   const bulkLocations = useMemo(
     () => mappedLocations.filter((l) => l.zone === 'BULK'),
     [mappedLocations],
@@ -68,6 +65,24 @@ export default function Locations() {
     () => mappedLocations.filter((l) => l.zone === 'PICK'),
     [mappedLocations],
   );
+
+  const prepLocations = useMemo(() => {
+    return locations
+      .filter((l) => l.zone === 'PREP')
+      .sort((a, b) => a.aisle - b.aisle || a.shelf - b.shelf || a.cell - b.cell)
+      .map((location) => {
+        const totalStock = location.articles.reduce((sum, a) => sum + a.stock, 0);
+        const hasLowStock = location.articles.some((a) => a.stock < 10);
+        const status = location.articles.length === 0 ? 'empty' : hasLowStock ? 'alert' : 'ok';
+        return { ...location, totalStock, status };
+      });
+  }, [locations]);
+
+  const focusedLocation =
+    mappedLocations.find((cell) => cell.id === focusedLocationId) ??
+    prepLocations.find((cell) => cell.id === focusedLocationId) ??
+    mappedLocations[0] ??
+    null;
 
   const renderCell = (cell: (typeof mappedLocations)[number]) => {
     const label = cell.articles[0]?.label ?? null;
@@ -151,12 +166,22 @@ export default function Locations() {
           <section className='zone zone-prep'>
             <h3>ZONES DE PRÉPARATION</h3>
             <div className='zone-grid zone-grid--prep'>
-              {Array.from({ length: 12 }, (_, i) => (
-                <div key={i} className='prep-slot'>
-                  <span className='prep-slot__code'>PZ-{String(i + 1).padStart(2, '0')}</span>
-                  <span className='prep-slot__status muted'>Libre</span>
-                </div>
-              ))}
+              {prepLocations.length > 0
+                ? prepLocations.map((cell, i) => (
+                    <button
+                      key={cell.id}
+                      type='button'
+                      className={`prep-slot ${cell.articles.length > 0 ? 'prep-slot--occupied' : ''} ${focusedLocation?.id === cell.id ? 'focused' : ''}`}
+                      onClick={() => setFocusedLocationId(cell.id)}
+                      title={`Zone PZ-${String(i + 1).padStart(2, '0')} — ${cell.articles[0]?.label ?? 'Libre'}`}
+                    >
+                      <span className='prep-slot__code'>PZ-{String(i + 1).padStart(2, '0')}</span>
+                      <span className='prep-slot__status'>
+                        {cell.articles.length > 0 ? cell.articles[0].label.slice(0, 12) + '…' : 'Libre'}
+                      </span>
+                    </button>
+                  ))
+                : <span className='muted'>Aucune zone de préparation</span>}
             </div>
           </section>
 
