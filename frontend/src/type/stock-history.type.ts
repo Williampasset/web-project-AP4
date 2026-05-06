@@ -21,4 +21,10 @@ export interface StockHistoryEntry {
   note: string | null;
   createdByUserId: number | null;
   createdAt: string;
+  // Champs enrichis du backend
+  fromLocationName?: string | null;
+  toLocationName?: string | null;
+  supplierName?: string | null;
+  commandRef?: string | null;
+  jobId?: number | null;
 }

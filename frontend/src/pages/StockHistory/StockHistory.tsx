@@ -101,10 +101,10 @@ export default function StockHistory() {
                     <small>{entry.articleLabel ?? '—'}</small>
                   </td>
                   <td>{entry.quantity}</td>
-                  <td>{entry.fromLocationId ? `Loc #${entry.fromLocationId}` : '—'}</td>
-                  <td>{entry.toLocationId ? `Loc #${entry.toLocationId}` : '—'}</td>
+                  <td>{entry.fromLocationName ?? '—'}</td>
+                  <td>{entry.toLocationName ?? '—'}</td>
                   <td>
-                    {entry.commandId ? `CMD #${entry.commandId}` : entry.supplierId ? `SUP #${entry.supplierId}` : entry.stockJobId ? `JOB #${entry.stockJobId}` : '—'}
+                    {entry.supplierName ? `${entry.supplierName}` : entry.commandRef ? `${entry.commandRef}` : entry.jobId ? `JOB #${entry.jobId}` : '—'}
                   </td>
                   <td>{entry.note ?? '—'}</td>
                 </tr>
