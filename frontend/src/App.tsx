@@ -11,7 +11,6 @@ import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 import CommandDetail from './pages/CommandDetail/CommandDetail';
 import Truck from './pages/Truck/Truck';
 import TruckHistory from './pages/Truck/TruckHistory';
-// import PreparationPage from './pages/PreparationPage/PreparationPage';
 
 function App() {
   return (
@@ -22,7 +21,9 @@ function App() {
         path='/login'
         element={
           <PublicRoute>
-            <Login />
+            <div className='login-page'>
+              <Login />
+            </div>
           </PublicRoute>
         }
       ></Route>
@@ -85,14 +86,6 @@ function App() {
           </ProtectedRoute>
         }
       ></Route>
-      {/* <Route
-        path='/preparation/:id'
-        element={
-          <ProtectedRoute>
-            <PreparationPage />
-          </ProtectedRoute>
-        }
-      ></Route> */}
     </Routes>
   );
 }
