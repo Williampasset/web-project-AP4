@@ -1,5 +1,5 @@
 import './App.css';
-import { Route, Routes } from 'react-router';
+import { Navigate, Route, Routes } from 'react-router';
 import Login from './pages/Login/Login';
 import Affectation from './pages/Affectation/Affectation';
 import Stock from './pages/Stock/Stock';
@@ -9,7 +9,8 @@ import OperateurBoard from './pages/OperatorBoard/OperatorBoard';
 import { PublicRoute } from './guards/PublicRoute';
 import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 import CommandDetail from './pages/CommandDetail/CommandDetail';
-// import PreparationPage from './pages/PreparationPage/PreparationPage';
+import Truck from './pages/Truck/Truck';
+import TruckHistory from './pages/Truck/TruckHistory';
 
 function App() {
   return (
@@ -20,7 +21,9 @@ function App() {
         path='/login'
         element={
           <PublicRoute>
-            <Login />
+            <div className='login-page'>
+              <Login />
+            </div>
           </PublicRoute>
         }
       ></Route>
@@ -42,13 +45,31 @@ function App() {
         }
       ></Route>
       <Route
-        path='/commande'
+        path='/commands'
         element={
           <ProtectedRoute>
             <Command />
           </ProtectedRoute>
         }
       ></Route>
+      <Route path='/commande' element={<Navigate to='/commands' replace />} />
+      <Route
+        path='/truck'
+        element={
+          <ProtectedRoute>
+            <Truck />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/truck/history'
+        element={
+          <ProtectedRoute>
+            <TruckHistory />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route path='/trucks' element={<Navigate to='/truck' replace />} />
       <Route
         path='/operateur'
         element={
@@ -65,14 +86,6 @@ function App() {
           </ProtectedRoute>
         }
       ></Route>
-      {/* <Route
-        path='/preparation/:id'
-        element={
-          <ProtectedRoute>
-            <PreparationPage />
-          </ProtectedRoute>
-        }
-      ></Route> */}
     </Routes>
   );
 }

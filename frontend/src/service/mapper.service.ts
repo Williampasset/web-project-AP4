@@ -1,18 +1,20 @@
 /**
  * Retourne la classe CSS selon le statut de la commande
- * @param status - Statut de la commande ('WAITING', 'PENDING', 'FINISH')
- * @returns Classe CSS correspondante (ex: 'status-waiting')
+ * @param status - Statut de la commande ('WAITING', 'PENDING', 'DELIVERED', 'CANCELLED')
+ * @returns Modificateur de classe CSS (ex: 'waiting')
  */
 export function getStatusClass(status: string) {
   switch (status) {
     case 'WAITING':
-      return 'status-waiting';
+      return 'waiting';
     case 'PENDING':
-      return 'status-pending';
-    case 'FINISH':
-      return 'status-finish';
+      return 'pending';
+    case 'DELIVERED':
+      return 'delivered';
+    case 'CANCELLED':
+      return 'cancelled';
     default:
-      return 'status-default';
+      return 'default';
   }
 }
 

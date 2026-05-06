@@ -1,0 +1,122 @@
+.truck-history {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.truck-history__toolbar {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.truck-history__search {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+}
+
+.truck-history h1 {
+  margin: 0;
+}
+
+.truck-history__empty {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+}
+
+.truck-history__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.truck-history__card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.truck-history__card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.truck-history__card h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.truck-history__card-header span {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #3730a3;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+}
+
+.truck-history__summary {
+  margin-top: 0.7rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.55rem 0.65rem;
+}
+
+.truck-history__summary p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.84rem;
+}
+
+.truck-history__summary p + p {
+  margin-top: 0.2rem;
+}
+
+.truck-history__trip-list {
+  margin: 0.85rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.truck-history__trip-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f9fafb;
+  padding: 0.65rem 0.75rem;
+}
+
+.truck-history__trip-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.truck-history__trip-head strong {
+  color: #111827;
+}
+
+.truck-history__trip-head span {
+  color: #4b5563;
+  font-size: 0.85rem;
+}
+
+.truck-history__trip-item p {
+  margin: 0.3rem 0 0;
+  color: #6b7280;
+  font-size: 0.86rem;
+}

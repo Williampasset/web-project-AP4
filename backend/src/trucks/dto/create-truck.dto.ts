@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsNumber, Min, Matches } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  Min,
+  Matches,
+  IsOptional,
+  IsDateString,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTruckDto {
@@ -23,4 +31,25 @@ export class CreateTruckDto {
   @IsNumber()
   @Min(0)
   readonly maxLoad!: number;
+
+  @ApiProperty({
+    description: 'Maximum volume capacity in m³',
+    example: 30,
+    minimum: 0,
+    type: 'number',
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  readonly maxVolume?: number;
+
+  @ApiProperty({
+    description: 'Maintenance end date/time (if truck is under maintenance)',
+    example: '2026-05-10T18:00:00.000Z',
+    required: false,
+  })
+  @IsOptional()
+  @IsDateString()
+  readonly maintenanceEndAt?: string;
 }

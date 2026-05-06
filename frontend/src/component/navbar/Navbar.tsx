@@ -9,6 +9,8 @@ import {
   ChevronDown,
   Menu,
   X,
+  Truck,
+  History,
 } from 'lucide-react';
 import './Navbar.css';
 
@@ -70,8 +72,20 @@ const Navbar: React.FC<NavbarProps> = ({
           href: '/commands',
           icon: <Package size={16} />,
         },
-        { label: 'Camions', href: '/trucks', icon: <Package size={16} /> },
         { label: 'Clients', href: '/clients', icon: <Package size={16} /> },
+      ],
+    },
+    {
+      label: 'Logistique',
+      href: '/truck',
+      icon: <Truck size={20} />,
+      children: [
+        { label: 'Flotte camions', href: '/truck', icon: <Truck size={16} /> },
+        {
+          label: 'Historique',
+          href: '/truck/history',
+          icon: <History size={16} />,
+        },
       ],
     },
     {
