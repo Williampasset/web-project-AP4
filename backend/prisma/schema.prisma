@@ -151,6 +151,7 @@ model Location {
   aisle    Int
   shelf    Int
   cell     Int
+  zone     LocationZone @default(PICK)
   articles Article[]
 
   createdAt DateTime @default(now())
@@ -276,6 +277,11 @@ enum BuildingName {
   A
   B
   C
+}
+
+enum LocationZone {
+  BULK
+  PICK
 }
 
 enum ValidationMethod {

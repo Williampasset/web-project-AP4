@@ -12,6 +12,7 @@ import CommandDetail from './pages/CommandDetail/CommandDetail';
 import Truck from './pages/Truck/Truck';
 import TruckHistory from './pages/Truck/TruckHistory';
 import Suppliers from './pages/Suppliers/Suppliers';
+import Locations from './pages/Locations/Locations';
 
 function App() {
   return (
@@ -77,6 +78,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Suppliers />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/locations'
+        element={
+          <ProtectedRoute>
+            <Locations />
           </ProtectedRoute>
         }
       ></Route>
