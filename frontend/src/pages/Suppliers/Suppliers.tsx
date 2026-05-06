@@ -1,6 +1,7 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { useSuppliers } from '../../hooks/suppliers.hooks';
 import type { Supplier, SupplierArticle } from '@type/supplier.type';
 import './Suppliers.css';
@@ -192,8 +193,15 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
 }
 
 export default function Suppliers() {
+  const [searchParams] = useSearchParams();
+  const searchFromUrl = searchParams.get('search')?.trim() ?? '';
+
   const { data: suppliers = [], isLoading, isError, error, refetch } = useSuppliers();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchFromUrl);
+
+  useEffect(() => {
+    setSearch(searchFromUrl);
+  }, [searchFromUrl]);
 
   const filtered = suppliers.filter(
     (s) =>

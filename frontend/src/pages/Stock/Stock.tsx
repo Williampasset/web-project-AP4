@@ -1,6 +1,7 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { fetchArticles } from '@service/api/articles.service';
 import { fetchCommands } from '@service/api/commands.service';
@@ -25,6 +26,7 @@ type AggregatedStockRow = {
 
 export default function Stock() {
   const [searchFilter, setSearchFilter] = useState('');
+  const navigate = useNavigate();
 
   const {
     data: articles = [],
@@ -213,6 +215,10 @@ export default function Stock() {
     return 'in-stock';
   };
 
+  const openSuppliersForArticle = (articleLabel: string) => {
+    navigate(`/suppliers?search=${encodeURIComponent(articleLabel)}`);
+  };
+
   const isLoading = isLoadingArticles || isLoadingCommands || isLoadingSuppliers;
   const isError = isErrorArticles || isErrorCommands || isErrorSuppliers;
   const lastUpdatedAt = Math.max(
@@ -315,9 +321,23 @@ export default function Stock() {
               <td className={row.projectedStock < 0 ? 'negative-stock' : ''}>{row.projectedStock}</td>
               <td>
                 {row.shortage ? (
-                  <span className='stock-status overcommitted'>❌ Pénurie probable</span>
+                  <button
+                    type='button'
+                    className='stock-status overcommitted stock-status-clickable'
+                    onClick={() => openSuppliersForArticle(row.label)}
+                    title='Voir les fournisseurs pour cet article'
+                  >
+                    ❌ Pénurie probable
+                  </button>
                 ) : row.projectedStock <= 5 ? (
-                  <span className='stock-status low-stock'>⚠️ Bas</span>
+                  <button
+                    type='button'
+                    className='stock-status low-stock stock-status-clickable'
+                    onClick={() => openSuppliersForArticle(row.label)}
+                    title='Voir les fournisseurs pour cet article'
+                  >
+                    ⚠️ Bas
+                  </button>
                 ) : (
                   <span className='stock-status in-stock'>✅ OK</span>
                 )}
