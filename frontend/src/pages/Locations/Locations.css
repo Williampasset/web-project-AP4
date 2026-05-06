@@ -66,6 +66,7 @@
   grid-template-areas:
     'bulk bulk'
     'pick pick'
+    'prep prep'
     'office inbound'
     '. docks';
 }
@@ -99,6 +100,43 @@
 }
 
 .zone-pick { grid-area: pick; }
+
+.zone-prep {
+  grid-area: prep;
+  background: rgba(254, 243, 199, 0.7) !important;
+  border-color: #fbbf24 !important;
+}
+
+.zone-prep h3 { color: #92400e; }
+
+.zone-grid--prep {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+}
+
+.prep-slot {
+  border: 2px dashed #fbbf24;
+  border-radius: 4px;
+  background: #fffbeb;
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px;
+}
+
+.prep-slot__code {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #78350f;
+}
+
+.prep-slot__status {
+  font-size: 0.6rem;
+}
 
 .zone-office {
   grid-area: office;
@@ -201,22 +239,14 @@
 }
 
 .plan-cell__stock {
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #334155;
 }
 
-.plan-cell.compact .plan-cell__code {
-  font-size: 0.55rem;
-}
-
-.plan-cell.compact .plan-cell__stock {
-  font-size: 0.78rem;
-}
-
 .plan-cell {
   width: 100%;
-  min-height: 46px;
+  min-height: 62px;
   border-radius: 2px;
   border: 1px solid #991b1b;
   background: #fecaca;
@@ -227,6 +257,16 @@
   justify-content: center;
   gap: 2px;
   padding: 3px 4px;
+}
+
+.plan-cell__label {
+  font-size: 0.58rem;
+  color: #374151;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .plan-cell.empty {
@@ -274,6 +314,41 @@
   margin: 10px 0 4px;
   font-weight: 700;
   color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zone-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.04em;
+}
+
+.zone-badge--bulk {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+}
+
+.zone-badge--pick {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.inspector-article-ref {
+  display: block;
+  font-size: 0.7rem;
+  color: #6b7280;
+}
+
+.inspector-article-label {
+  display: block;
+  font-size: 0.84rem;
+  color: #1e293b;
 }
 
 .inspector-stock {
@@ -318,12 +393,115 @@
   cursor: pointer;
 }
 
+/* ── QR trigger button ── */
+.qr-trigger-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 12px;
+  border: 1px solid #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.qr-trigger-btn:hover {
+  background: #dbeafe;
+}
+
+/* ── QR modal ── */
+.qr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.qr-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+}
+
+.qr-modal__header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.qr-modal__close {
+  flex-shrink: 0;
+  border: none;
+  background: #f1f5f9;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.qr-modal__close:hover {
+  background: #e2e8f0;
+  color: #111827;
+}
+
+.qr-modal__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.qr-modal__sub {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: #475569;
+}
+
+.qr-modal__canvas {
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+}
+
+.qr-modal__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: center;
+}
+
 @media (max-width: 900px) {
   .warehouse-plan {
     grid-template-columns: 1fr;
     grid-template-areas:
       'bulk'
       'pick'
+      'prep'
       'office'
       'inbound'
       'docks';

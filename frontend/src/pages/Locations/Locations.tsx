@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchLocations } from '@service/api/locations.service';
 import type { WarehouseLocation } from '@type/warehouse-location.type';
+import { QRCodeSVG } from 'qrcode.react';
 import './Locations.css';
 
 type Building = WarehouseLocation['building'];
@@ -11,6 +12,7 @@ type Building = WarehouseLocation['building'];
 export default function Locations() {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [focusedLocationId, setFocusedLocationId] = useState<number | null>(null);
+  const [qrModalLocation, setQrModalLocation] = useState<(typeof mappedLocations)[number] | null>(null);
 
   const {
     data: locations = [],
@@ -67,18 +69,25 @@ export default function Locations() {
     [mappedLocations],
   );
 
-  const renderCell = (cell: (typeof mappedLocations)[number], compact = false) => (
-    <button
-      key={cell.id}
-      type='button'
-      className={`plan-cell ${cell.status} ${focusedLocation?.id === cell.id ? 'focused' : ''} ${compact ? 'compact' : ''}`}
-      onClick={() => setFocusedLocationId(cell.id)}
-      title={`${cell.building}-${cell.aisle}-${cell.shelf}-${cell.cell}`}
-    >
-      <span className='plan-cell__code'>{cell.building}{cell.aisle}S{cell.shelf}C{cell.cell}</span>
-      <span className='plan-cell__stock'>{cell.totalStock}u</span>
-    </button>
-  );
+  const renderCell = (cell: (typeof mappedLocations)[number]) => {
+    const label = cell.articles[0]?.label ?? null;
+    const shortLabel = label ? (label.length > 16 ? label.slice(0, 15) + '…' : label) : null;
+    return (
+      <button
+        key={cell.id}
+        type='button'
+        className={`plan-cell ${cell.status} ${focusedLocation?.id === cell.id ? 'focused' : ''}`}
+        onClick={() => setFocusedLocationId(cell.id)}
+        title={label ? `${cell.building}${cell.aisle}S${cell.shelf}C${cell.cell} — ${label}` : `${cell.building}${cell.aisle}S${cell.shelf}C${cell.cell} — Vide`}
+      >
+        <span className='plan-cell__code'>{cell.building}{cell.aisle}S{cell.shelf}C{cell.cell}</span>
+        {shortLabel
+          ? <span className='plan-cell__label'>{shortLabel}</span>
+          : <span className='plan-cell__label muted'>Vide</span>}
+        {cell.articles.length > 0 && <span className='plan-cell__stock'>{cell.totalStock}u</span>}
+      </button>
+    );
+  };
 
   if (isLoading) return <Loading />;
 
@@ -139,6 +148,18 @@ export default function Locations() {
             </div>
           </section>
 
+          <section className='zone zone-prep'>
+            <h3>ZONES DE PRÉPARATION</h3>
+            <div className='zone-grid zone-grid--prep'>
+              {Array.from({ length: 12 }, (_, i) => (
+                <div key={i} className='prep-slot'>
+                  <span className='prep-slot__code'>PZ-{String(i + 1).padStart(2, '0')}</span>
+                  <span className='prep-slot__status muted'>Libre</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
           <section className='zone zone-office'><strong>OFFICE</strong></section>
           <section className='zone zone-inbound'><strong>INBOUND</strong></section>
           <section className='zone zone-docks'><strong>DOCK DOORS</strong></section>
@@ -150,17 +171,28 @@ export default function Locations() {
               <>
                 <p className='inspector-ref'>
                   {focusedLocation.building}-{focusedLocation.aisle}-{focusedLocation.shelf}-{focusedLocation.cell}
+                  <span className={`zone-badge zone-badge--${focusedLocation.zone.toLowerCase()}`}>{focusedLocation.zone}</span>
                 </p>
                 <p className='inspector-stock'>
                   Stock total : {focusedLocation.articles.reduce((sum, article) => sum + article.stock, 0)} unités
                 </p>
+                <button
+                  type='button'
+                  className='qr-trigger-btn'
+                  onClick={() => setQrModalLocation(focusedLocation)}
+                >
+                  <span>📷</span> Afficher le QR code
+                </button>
                 <div className='inspector-articles'>
                   {focusedLocation.articles.length === 0 ? (
                     <span className='muted'>Aucun article stocké.</span>
                   ) : (
                     focusedLocation.articles.map((article) => (
                       <div key={article.id} className='inspector-article-row'>
-                        <span>{article.reference} · {article.label}</span>
+                        <div>
+                          <span className='inspector-article-ref'>{article.reference}</span>
+                          <span className='inspector-article-label'>{article.label}</span>
+                        </div>
                         <strong>{article.stock}</strong>
                       </div>
                     ))
@@ -172,6 +204,36 @@ export default function Locations() {
             )}
         </aside>
       </div>
+
+      {qrModalLocation && (() => {
+        const loc = qrModalLocation;
+        const code = `${loc.building}${loc.aisle}S${loc.shelf}C${loc.cell}`;
+        const articleLabel = loc.articles[0]?.label ?? 'Emplacement vide';
+        const qrValue = JSON.stringify({
+          id: loc.id,
+          code,
+          zone: loc.zone,
+          article: loc.articles[0]?.reference ?? null,
+        });
+        return (
+          <div className='qr-modal-overlay' onClick={() => setQrModalLocation(null)}>
+            <div className='qr-modal' onClick={(e) => e.stopPropagation()}>
+              <div className='qr-modal__header'>
+                <h3 className='qr-modal__title'>QR Code — {code}</h3>
+                <button className='qr-modal__close' onClick={() => setQrModalLocation(null)}>✕</button>
+              </div>
+              <p className='qr-modal__sub'>
+                <span className={`zone-badge zone-badge--${loc.zone.toLowerCase()}`}>{loc.zone}</span>
+                {articleLabel}
+              </p>
+              <div className='qr-modal__canvas'>
+                <QRCodeSVG value={qrValue} size={220} level='M' includeMargin />
+              </div>
+              <p className='qr-modal__hint'>Scannez ce code pour identifier l'emplacement</p>
+            </div>
+          </div>
+        );
+      })()}
     </DefaultLayout>
   );
 }
