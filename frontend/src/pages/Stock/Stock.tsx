@@ -12,6 +12,17 @@ import './Stock.css';
 
 const PENDING_LOADING_STATUSES: Command['status'][] = ['WAITING', 'PENDING'];
 
+type AggregatedStockRow = {
+  articleCode: string;
+  label: string;
+  stock: number;
+  pendingQty: number;
+  projectedStock: number;
+  shortage: boolean;
+  suppliers: string[];
+  locations: string[];
+};
+
 export default function Stock() {
   const [searchFilter, setSearchFilter] = useState('');
 
@@ -97,45 +108,96 @@ export default function Stock() {
     return map;
   }, [commands]);
 
-  const rows = useMemo(() => {
-    return articles.map((article) => {
+  const rows = useMemo<AggregatedStockRow[]>(() => {
+    const groups = new Map<
+      string,
+      {
+        label: string;
+        references: Set<string>;
+        stock: number;
+        pendingQty: number;
+        suppliers: Set<string>;
+        locations: Set<string>;
+      }
+    >();
+
+    articles.forEach((article) => {
+      const key = article.label.trim().toLowerCase();
       const pendingQty = pendingDemandByArticle.get(article.id) ?? 0;
-      const projectedStock = article.stock - pendingQty;
-      return {
-        article,
-        pendingQty,
-        projectedStock,
-        shortage: projectedStock < 0,
-      };
+
+      const supplierName =
+        article.supplier?.name || articleSupplierNameById.get(article.id) || '';
+
+      const locationText =
+        (article.location
+          ? `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`
+          : '') || articleLocationById.get(article.id) || '';
+
+      if (!groups.has(key)) {
+        groups.set(key, {
+          label: article.label,
+          references: new Set<string>(),
+          stock: 0,
+          pendingQty: 0,
+          suppliers: new Set<string>(),
+          locations: new Set<string>(),
+        });
+      }
+
+      const group = groups.get(key)!;
+      group.references.add(article.reference);
+      group.stock += article.stock;
+      group.pendingQty += pendingQty;
+      if (supplierName) group.suppliers.add(supplierName);
+      if (locationText) group.locations.add(locationText);
     });
-  }, [articles, pendingDemandByArticle]);
+
+    return Array.from(groups.values())
+      .map((group) => {
+        const sortedReferences = Array.from(group.references).sort((a, b) =>
+          a.localeCompare(b),
+        );
+        const projectedStock = group.stock - group.pendingQty;
+
+        return {
+          articleCode: sortedReferences[0] ?? 'N/A',
+          label: group.label,
+          stock: group.stock,
+          pendingQty: group.pendingQty,
+          projectedStock,
+          shortage: projectedStock < 0,
+          suppliers: Array.from(group.suppliers).sort((a, b) =>
+            a.localeCompare(b),
+          ),
+          locations: Array.from(group.locations).sort((a, b) =>
+            a.localeCompare(b),
+          ),
+        };
+      })
+      .sort((a, b) => a.articleCode.localeCompare(b.articleCode));
+  }, [
+    articles,
+    pendingDemandByArticle,
+    articleSupplierNameById,
+    articleLocationById,
+  ]);
 
   const filtered = useMemo(() => {
     const query = searchFilter.trim().toLowerCase();
     if (!query) return rows;
 
-    return rows.filter(({ article }) => {
-      const supplierName = (
-        article.supplier?.name ||
-        articleSupplierNameById.get(article.id) ||
-        ''
-      ).toLowerCase();
-      const location = (
-        (article.location
-          ? `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`
-          : '') ||
-        articleLocationById.get(article.id) ||
-        ''
-      ).toLowerCase();
+    return rows.filter((row) => {
+      const supplierName = row.suppliers.join(' ').toLowerCase();
+      const location = row.locations.join(' ').toLowerCase();
 
       return (
-        article.reference.toLowerCase().includes(query) ||
-        article.label.toLowerCase().includes(query) ||
+        row.articleCode.toLowerCase().includes(query) ||
+        row.label.toLowerCase().includes(query) ||
         supplierName.includes(query) ||
         location.includes(query)
       );
     });
-  }, [rows, searchFilter, articleSupplierNameById, articleLocationById]);
+  }, [rows, searchFilter]);
 
   const stats = useMemo(() => {
     const total = rows.length;
@@ -144,32 +206,6 @@ export default function Stock() {
 
     return { total, shortages, lowSoon };
   }, [rows]);
-
-  const formatSupplier = (article: Article) => {
-    if (article.supplier?.name) return article.supplier.name;
-    if (articleSupplierNameById.has(article.id)) {
-      return articleSupplierNameById.get(article.id);
-    }
-    return 'Non renseigné';
-  };
-
-  const formatLocation = (article: Article) => {
-    if (
-      article.location &&
-      article.location.building &&
-      article.location.aisle !== undefined &&
-      article.location.shelf !== undefined &&
-      article.location.cell !== undefined
-    ) {
-      return `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`;
-    }
-
-    if (articleLocationById.has(article.id)) {
-      return articleLocationById.get(article.id);
-    }
-
-    return 'Non renseigné';
-  };
 
   const getStockStatus = (quantity: number) => {
     if (quantity === 0) return 'out-of-stock';
@@ -267,30 +303,30 @@ export default function Stock() {
           </tr>
         </thead>
         <tbody>
-          {filtered.map(({ article, pendingQty, projectedStock, shortage }) => (
+          {filtered.map((row) => (
             <tr
-              key={article.id}
-              className={`row-${getStockStatus(article.stock)} ${shortage ? 'overcommitted' : ''}`}
+              key={row.label}
+              className={`row-${getStockStatus(row.stock)} ${row.shortage ? 'overcommitted' : ''}`}
             >
-              <td>{article.reference}</td>
-              <td>{article.label}</td>
-              <td>{article.stock}</td>
-              <td>{pendingQty}</td>
-              <td className={projectedStock < 0 ? 'negative-stock' : ''}>{projectedStock}</td>
+              <td>{row.articleCode}</td>
+              <td>{row.label}</td>
+              <td>{row.stock}</td>
+              <td>{row.pendingQty}</td>
+              <td className={row.projectedStock < 0 ? 'negative-stock' : ''}>{row.projectedStock}</td>
               <td>
-                {shortage ? (
+                {row.shortage ? (
                   <span className='stock-status overcommitted'>❌ Pénurie probable</span>
-                ) : projectedStock <= 5 ? (
+                ) : row.projectedStock <= 5 ? (
                   <span className='stock-status low-stock'>⚠️ Bas</span>
                 ) : (
                   <span className='stock-status in-stock'>✅ OK</span>
                 )}
               </td>
               <td>
-                {formatSupplier(article)}
+                {row.suppliers.length > 0 ? row.suppliers.join(' / ') : 'Non renseigné'}
               </td>
               <td>
-                {formatLocation(article)}
+                {row.locations.length > 0 ? row.locations.join(' / ') : 'Non renseigné'}
               </td>
             </tr>
           ))}
