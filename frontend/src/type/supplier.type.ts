@@ -12,9 +12,19 @@ export interface SupplierArticle {
     aisle: number;
     shelf: number;
     cell: number;
+    zone: 'BULK' | 'PICK' | 'PREP' | 'TRANSIT';
   };
   createdAt: string;
   updatedAt: string;
+}
+
+export interface FreeTransitLocation {
+  id: number;
+  building: string;
+  aisle: number;
+  shelf: number;
+  cell: number;
+  zone: 'TRANSIT';
 }
 
 export interface Supplier {

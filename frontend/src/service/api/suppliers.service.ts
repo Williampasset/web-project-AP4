@@ -1,5 +1,5 @@
 import { getHeaders } from './api.helper';
-import type { Supplier } from '@type/supplier.type';
+import type { FreeTransitLocation, Supplier } from '@type/supplier.type';
 
 const BASE_URL = 'http://localhost:3000/suppliers';
 
@@ -25,17 +25,29 @@ export const fetchSupplierById = async (id: number): Promise<Supplier> => {
   return res.json();
 };
 
+export const fetchFreeTransitLocations = async (): Promise<FreeTransitLocation[]> => {
+  const res = await fetch(`${BASE_URL}/transit/free`, {
+    headers: getHeaders(),
+    cache: 'no-store',
+  });
+
+  if (!res.ok) throw new Error('Failed to fetch free inbound transit locations');
+
+  return res.json();
+};
+
 export const restockSupplierArticle = async (
   supplierId: number,
   articleId: number,
   quantity: number,
+  transitLocationId: number,
 ) => {
   const res = await fetch(
     `${BASE_URL}/${supplierId}/articles/${articleId}/restock`,
     {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ quantity }),
+      body: JSON.stringify({ quantity, transitLocationId }),
     },
   );
 

@@ -36,7 +36,9 @@ export default function Locations() {
 
   const buildingLocations = useMemo(() => {
     if (!activeBuilding) return [];
-    return locations.filter((l) => l.building === activeBuilding && l.zone !== 'PREP');
+    return locations.filter(
+      (l) => l.building === activeBuilding && l.zone !== 'PREP' && l.zone !== 'TRANSIT',
+    );
   }, [locations, activeBuilding]);
 
   const mappedLocations = useMemo(() => {
@@ -68,7 +70,7 @@ export default function Locations() {
 
   const prepLocations = useMemo(() => {
     return locations
-      .filter((l) => l.zone === 'PREP')
+      .filter((l) => l.zone === 'PREP' && l.building === activeBuilding)
       .sort((a, b) => a.aisle - b.aisle || a.shelf - b.shelf || a.cell - b.cell)
       .map((location) => {
         const totalStock = location.articles.reduce((sum, a) => sum + a.stock, 0);
@@ -76,11 +78,24 @@ export default function Locations() {
         const status = location.articles.length === 0 ? 'empty' : hasLowStock ? 'alert' : 'ok';
         return { ...location, totalStock, status };
       });
-  }, [locations]);
+  }, [locations, activeBuilding]);
+
+  const transitLocations = useMemo(() => {
+    return locations
+      .filter((l) => l.zone === 'TRANSIT' && l.building === activeBuilding)
+      .sort((a, b) => a.aisle - b.aisle || a.shelf - b.shelf || a.cell - b.cell)
+      .map((location) => {
+        const totalStock = location.articles.reduce((sum, a) => sum + a.stock, 0);
+        const hasLowStock = location.articles.some((a) => a.stock < 10);
+        const status = location.articles.length === 0 ? 'empty' : hasLowStock ? 'alert' : 'ok';
+        return { ...location, totalStock, status };
+      });
+  }, [locations, activeBuilding]);
 
   const focusedLocation =
     mappedLocations.find((cell) => cell.id === focusedLocationId) ??
     prepLocations.find((cell) => cell.id === focusedLocationId) ??
+    transitLocations.find((cell) => cell.id === focusedLocationId) ??
     mappedLocations[0] ??
     null;
 
@@ -164,7 +179,7 @@ export default function Locations() {
           </section>
 
           <section className='zone zone-prep'>
-            <h3>ZONES DE PRÉPARATION</h3>
+            <h3>ZONES DE PRÉPARATION — Bâtiment {activeBuilding}</h3>
             <div className='zone-grid zone-grid--prep'>
               {prepLocations.length > 0
                 ? prepLocations.map((cell, i) => (
@@ -173,9 +188,9 @@ export default function Locations() {
                       type='button'
                       className={`prep-slot ${cell.articles.length > 0 ? 'prep-slot--occupied' : ''} ${focusedLocation?.id === cell.id ? 'focused' : ''}`}
                       onClick={() => setFocusedLocationId(cell.id)}
-                      title={`Zone PZ-${String(i + 1).padStart(2, '0')} — ${cell.articles[0]?.label ?? 'Libre'}`}
+                      title={`Zone ${cell.building}-PZ-${String(i + 1).padStart(2, '0')} — ${cell.articles[0]?.label ?? 'Libre'}`}
                     >
-                      <span className='prep-slot__code'>PZ-{String(i + 1).padStart(2, '0')}</span>
+                      <span className='prep-slot__code'>{cell.building}-PZ-{String(i + 1).padStart(2, '0')}</span>
                       <span className='prep-slot__status'>
                         {cell.articles.length > 0 ? cell.articles[0].label.slice(0, 12) + '…' : 'Libre'}
                       </span>
@@ -186,7 +201,27 @@ export default function Locations() {
           </section>
 
           <section className='zone zone-office'><strong>OFFICE</strong></section>
-          <section className='zone zone-inbound'><strong>INBOUND</strong></section>
+          <section className='zone zone-inbound'>
+            <h3>INBOUND — TRANSIT (Bâtiment {activeBuilding})</h3>
+            <div className='zone-grid zone-grid--inbound'>
+              {transitLocations.length > 0
+                ? transitLocations.map((cell, i) => (
+                    <button
+                      key={cell.id}
+                      type='button'
+                      className={`transit-slot ${cell.articles.length > 0 ? 'transit-slot--occupied' : ''} ${focusedLocation?.id === cell.id ? 'focused' : ''}`}
+                      onClick={() => setFocusedLocationId(cell.id)}
+                      title={`Transit ${cell.building}-IN-${String(i + 1).padStart(2, '0')} — ${cell.articles[0]?.label ?? 'Libre'}`}
+                    >
+                      <span className='transit-slot__code'>{cell.building}-IN-{String(i + 1).padStart(2, '0')}</span>
+                      <span className='transit-slot__status'>
+                        {cell.articles.length > 0 ? cell.articles[0].label.slice(0, 12) + '…' : 'Libre'}
+                      </span>
+                    </button>
+                  ))
+                : <span className='muted'>Aucune zone de transit</span>}
+            </div>
+          </section>
           <section className='zone zone-docks'><strong>DOCK DOORS</strong></section>
         </div>
 

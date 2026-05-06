@@ -2,13 +2,28 @@ import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import { useQueryClient } from '@tanstack/react-query';
-import { restockSupplierArticle } from '@service/api/suppliers.service';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  fetchFreeTransitLocations,
+  restockSupplierArticle,
+} from '@service/api/suppliers.service';
 import { useSuppliers } from '../../hooks/suppliers.hooks';
-import type { Supplier, SupplierArticle } from '@type/supplier.type';
+import type {
+  FreeTransitLocation,
+  Supplier,
+  SupplierArticle,
+} from '@type/supplier.type';
 import './Suppliers.css';
 
-function SupplierRow({ supplier, search }: { supplier: Supplier; search: string }) {
+function SupplierRow({
+  supplier,
+  search,
+  freeTransitLocations,
+}: {
+  supplier: Supplier;
+  search: string;
+  freeTransitLocations: FreeTransitLocation[];
+}) {
   const articleMatch =
     search.length > 0 &&
     supplier.articles.some(
@@ -21,6 +36,7 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
   const [modal, setModal] = useState<{
     article: SupplierArticle;
     quantity: number;
+    transitLocationId: number | null;
     message: string;
   } | null>(null);
   const [isSending, setIsSending] = useState(false);
@@ -46,25 +62,45 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
     return 'Disponible';
   };
 
+  const formatTransitLocation = (location: FreeTransitLocation, index: number) =>
+    `IN-${String(index + 1).padStart(2, '0')} (${location.building}-${location.aisle}-${location.shelf}-${location.cell})`;
+
   const openModal = (e: React.MouseEvent, article: SupplierArticle) => {
     e.stopPropagation();
     setModal({
       article,
       quantity: 1,
+      transitLocationId: freeTransitLocations[0]?.id ?? null,
       message: '',
     });
   };
 
   const sendEmail = async () => {
-    if (!modal || !supplier.email) return;
+    if (!modal || !supplier.email || !modal.transitLocationId) return;
+
+    const selectedTransit = freeTransitLocations.find(
+      (l) => l.id === modal.transitLocationId,
+    );
+
+    if (!selectedTransit) {
+      alert('La zone IN sélectionnée n’est plus libre. Choisissez-en une autre.');
+      return;
+    }
 
     setIsSending(true);
 
     try {
-      await restockSupplierArticle(supplier.id, modal.article.id, modal.quantity);
+      await restockSupplierArticle(
+        supplier.id,
+        modal.article.id,
+        modal.quantity,
+        modal.transitLocationId,
+      );
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['suppliers'] }),
+        queryClient.invalidateQueries({ queryKey: ['suppliers', 'free-transit'] }),
+        queryClient.invalidateQueries({ queryKey: ['locations', 'warehouse-view'] }),
         queryClient.invalidateQueries({ queryKey: ['articles'] }),
         queryClient.invalidateQueries({ queryKey: ['articles', 'live-stock'] }),
       ]);
@@ -77,6 +113,10 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
         `Référence : ${modal.article.reference}\n` +
         `Désignation : ${modal.article.label}\n` +
         `Quantité souhaitée : ${modal.quantity}\n` +
+        `Zone de dépôt IN : ${formatTransitLocation(
+          selectedTransit,
+          freeTransitLocations.findIndex((l) => l.id === selectedTransit.id),
+        )}\n` +
         (modal.message ? `\nMessage complémentaire :\n${modal.message}\n` : '') +
         `\nCordialement`,
       );
@@ -145,8 +185,14 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
                     <td>
                       <button
                         className='btn-order'
-                        disabled={!supplier.email}
-                        title={supplier.email ? 'Commander par email' : 'Aucun email renseigné'}
+                        disabled={!supplier.email || freeTransitLocations.length === 0}
+                        title={
+                          !supplier.email
+                            ? 'Aucun email renseigné'
+                            : freeTransitLocations.length === 0
+                              ? 'Aucune zone IN libre'
+                              : 'Commander par email'
+                        }
                         onClick={(e) => openModal(e, article)}
                       >
                         ✉ Commander
@@ -193,6 +239,34 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
                 />
               </div>
               <div className='modal__field'>
+                <label>Zone de dépôt IN</label>
+                <select
+                  value={modal.transitLocationId ?? ''}
+                  onChange={(e) =>
+                    setModal((m) =>
+                      m
+                        ? {
+                            ...m,
+                            transitLocationId:
+                              e.target.value.length > 0
+                                ? Number(e.target.value)
+                                : null,
+                          }
+                        : m,
+                    )
+                  }
+                >
+                  {freeTransitLocations.map((location, i) => (
+                    <option key={location.id} value={location.id}>
+                      {formatTransitLocation(location, i)}
+                    </option>
+                  ))}
+                </select>
+                {freeTransitLocations.length === 0 && (
+                  <span className='modal__hint'>Aucune zone IN libre actuellement.</span>
+                )}
+              </div>
+              <div className='modal__field'>
                 <label>Message complémentaire <span>(optionnel)</span></label>
                 <textarea
                   rows={3}
@@ -204,7 +278,11 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
             </div>
             <div className='modal__footer'>
               <button className='btn-cancel' onClick={() => setModal(null)}>Annuler</button>
-              <button className='btn-send' onClick={sendEmail} disabled={isSending}>
+              <button
+                className='btn-send'
+                onClick={sendEmail}
+                disabled={isSending || !modal.transitLocationId || freeTransitLocations.length === 0}
+              >
                 {isSending ? 'Envoi...' : '✉ Envoyer l’email'}
               </button>
             </div>
@@ -220,6 +298,11 @@ export default function Suppliers() {
   const searchFromUrl = searchParams.get('search')?.trim() ?? '';
 
   const { data: suppliers = [], isLoading, isError, error, refetch } = useSuppliers();
+  const { data: freeTransitLocations = [] } = useQuery<FreeTransitLocation[]>({
+    queryKey: ['suppliers', 'free-transit'],
+    queryFn: fetchFreeTransitLocations,
+    refetchInterval: 10000,
+  });
   const [search, setSearch] = useState(searchFromUrl);
 
   useEffect(() => {
@@ -272,7 +355,12 @@ export default function Suppliers() {
         ) : (
           <div className='suppliers-page__list'>
             {filtered.map((supplier) => (
-              <SupplierRow key={supplier.id} supplier={supplier} search={search} />
+              <SupplierRow
+                key={supplier.id}
+                supplier={supplier}
+                search={search}
+                freeTransitLocations={freeTransitLocations}
+              />
             ))}
           </div>
         )}

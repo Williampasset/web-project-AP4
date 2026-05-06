@@ -39,6 +39,15 @@ export class SuppliersController {
   }
 
   /**
+   * Retrieve free inbound transit locations
+   * GET /suppliers/transit/free
+   */
+  @Get('transit/free')
+  async findFreeTransitLocations() {
+    return this.suppliersService.findFreeTransitLocations();
+  }
+
+  /**
    * Retrieve a supplier by id
    * GET /suppliers/:id
    */
@@ -80,6 +89,7 @@ export class SuppliersController {
       supplierId,
       articleId,
       restockArticleDto.quantity,
+      restockArticleDto.transitLocationId,
     );
   }
 

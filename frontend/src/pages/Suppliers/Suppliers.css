@@ -286,6 +286,7 @@
 }
 
 .modal__field input,
+.modal__field select,
 .modal__field textarea {
   padding: 8px 12px;
   border: 1px solid #d1d5db;
@@ -298,6 +299,7 @@
 }
 
 .modal__field input:focus,
+.modal__field select:focus,
 .modal__field textarea:focus {
   border-color: #3b82f6;
 }
@@ -305,6 +307,11 @@
 .modal__field input:disabled {
   background: #f9fafb;
   color: #6b7280;
+}
+
+.modal__hint {
+  font-size: 0.78rem;
+  color: #b45309;
 }
 
 .modal__footer {

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { PrismaService } from '../prisma.service';
@@ -132,13 +136,41 @@ export class SuppliersService {
   }
 
   /**
+   * Retrieve free inbound transit locations (zone TRANSIT with no article assigned)
+   */
+  async findFreeTransitLocations() {
+    return this.prisma.location.findMany({
+      where: {
+        zone: 'TRANSIT',
+        articles: {
+          none: {},
+        },
+      } as any,
+      orderBy: [{ aisle: 'asc' }, { shelf: 'asc' }, { cell: 'asc' }],
+      select: {
+        id: true,
+        building: true,
+        aisle: true,
+        shelf: true,
+        cell: true,
+        zone: true,
+      } as any,
+    });
+  }
+
+  /**
    * Increase article stock when placing an order to a supplier
    * @param supplierId Supplier identifier
    * @param articleId Article identifier
    * @param quantity Ordered quantity to add in stock
    * @returns Restock summary with updated stock
    */
-  async restockArticle(supplierId: number, articleId: number, quantity: number) {
+  async restockArticle(
+    supplierId: number,
+    articleId: number,
+    quantity: number,
+    transitLocationId: number,
+  ) {
     await this.findSupplierOrThrow(supplierId);
 
     const article = await this.prisma.article.findFirst({
@@ -158,12 +190,35 @@ export class SuppliersService {
       );
     }
 
-    const updatedArticle = await this.prisma.article.update({
-      where: { id: articleId },
+    const transitLocation = await this.prisma.location.findUnique({
+      where: { id: transitLocationId },
+      include: { articles: true },
+    });
+
+    if (!transitLocation || (transitLocation as any).zone !== 'TRANSIT') {
+      throw new NotFoundException(
+        `Transit location #${transitLocationId} not found`,
+      );
+    }
+
+    if (transitLocation.articles.length > 0) {
+      throw new ConflictException(
+        `Transit location #${transitLocationId} is already occupied`,
+      );
+    }
+
+    const newReference = `${article.reference}-IN-${transitLocationId}-${Date.now()}`;
+
+    const createdArticle = await this.prisma.article.create({
       data: {
-        stock: {
-          increment: quantity,
-        },
+        reference: newReference,
+        label: article.label,
+        weight: article.weight,
+        volume: article.volume,
+        price: article.price,
+        stock: quantity,
+        locationId: transitLocationId,
+        supplierId,
       },
       include: {
         location: true,
@@ -175,8 +230,8 @@ export class SuppliersService {
       supplierId,
       articleId,
       orderedQuantity: quantity,
-      updatedStock: updatedArticle.stock,
-      article: updatedArticle,
+      transitLocationId,
+      article: createdArticle,
     };
   }
 }
