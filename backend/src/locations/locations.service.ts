@@ -303,6 +303,21 @@ export class LocationsService {
           });
         }
 
+        await tx.stockHistory.create({
+          data: {
+            eventType: 'MOVE_VALIDATED',
+            quantity: job.quantity,
+            articleId: source.id,
+            articleReference: source.reference,
+            articleLabel: source.label,
+            fromLocationId: source.locationId,
+            toLocationId: job.targetLocationId,
+            stockJobId: jobId,
+            createdByUserId: validatedByUserId,
+            note: `Validation déplacement job #${jobId}`,
+          },
+        });
+
         await tx.stockJob.update({
           where: { id: jobId },
           data: {
@@ -401,6 +416,21 @@ export class LocationsService {
           });
         }
 
+        await tx.stockHistory.create({
+          data: {
+            eventType: 'MERGE_VALIDATED',
+            quantity: qty,
+            articleId: source.id,
+            articleReference: source.reference,
+            articleLabel: source.label,
+            fromLocationId: source.locationId,
+            toLocationId: target.locationId,
+            stockJobId: jobId,
+            createdByUserId: validatedByUserId,
+            note: `Validation fusion job #${jobId}`,
+          },
+        });
+
         await tx.stockJob.update({
           where: { id: jobId },
           data: {
@@ -449,6 +479,18 @@ export class LocationsService {
       }
       throw error;
     }
+
+    await this.prisma.stockHistory.create({
+      data: {
+        eventType: 'CELL_CLEARED',
+        quantity: 0,
+        articleId: article.id,
+        articleReference: article.reference,
+        articleLabel: article.label,
+        fromLocationId: article.locationId,
+        note: `Suppression affectation cellule vide article #${article.id}`,
+      },
+    });
 
     return {
       action: 'delete-zero-stock',

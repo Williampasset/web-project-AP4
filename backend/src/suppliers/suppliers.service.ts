@@ -226,6 +226,19 @@ export class SuppliersService {
       },
     });
 
+    await this.prisma.stockHistory.create({
+      data: {
+        eventType: 'SUPPLIER_INBOUND',
+        quantity,
+        articleId: createdArticle.id,
+        articleReference: createdArticle.reference,
+        articleLabel: createdArticle.label,
+        toLocationId: transitLocationId,
+        supplierId,
+        note: `Réception fournisseur ${createdArticle.supplier?.name ?? `#${supplierId}`} vers zone IN`,
+      },
+    });
+
     return {
       supplierId,
       articleId,

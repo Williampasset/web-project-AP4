@@ -192,6 +192,29 @@ model StockJob {
   @@index([targetArticleId])
 }
 
+model StockHistory {
+  id               Int              @id @default(autoincrement())
+  eventType        StockHistoryType
+  quantity         Int              @default(0)
+  articleId        Int?
+  articleReference String?          @db.VarChar(80)
+  articleLabel     String?          @db.VarChar(255)
+  fromLocationId   Int?
+  toLocationId     Int?
+  supplierId       Int?
+  commandId        Int?
+  stockJobId       Int?
+  note             String?          @db.VarChar(500)
+  createdByUserId  Int?
+  createdAt        DateTime         @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([articleId])
+  @@index([commandId])
+  @@index([supplierId])
+}
+
 model Client {
   id       Int       @id @default(autoincrement())
   name     String
@@ -328,6 +351,15 @@ enum StockJobStatus {
   PENDING
   COMPLETED
   CANCELLED
+}
+
+enum StockHistoryType {
+  SUPPLIER_INBOUND
+  COMMAND_SHIPMENT
+  COMMAND_REVERT
+  MOVE_VALIDATED
+  MERGE_VALIDATED
+  CELL_CLEARED
 }
 
 enum ValidationMethod {

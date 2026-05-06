@@ -13,6 +13,7 @@ import Truck from './pages/Truck/Truck';
 import TruckHistory from './pages/Truck/TruckHistory';
 import Suppliers from './pages/Suppliers/Suppliers';
 import Locations from './pages/Locations/Locations';
+import StockHistory from './pages/StockHistory/StockHistory';
 
 function App() {
   return (
@@ -89,6 +90,15 @@ function App() {
           </ProtectedRoute>
         }
       ></Route>
+      <Route
+        path='/stock-historiy'
+        element={
+          <ProtectedRoute>
+            <StockHistory />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route path='/stock-history' element={<Navigate to='/stock-historiy' replace />} />
       <Route
         path='/operateur'
         element={

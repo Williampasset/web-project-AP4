@@ -1,0 +1,20 @@
+.stock-history-page { display: flex; flex-direction: column; gap: 14px; }
+.stock-history-header h1 { margin: 0; }
+.stock-history-header p { margin: 4px 0 0; color: #64748b; }
+.stock-history-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi { border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; background: #fff; display: flex; justify-content: space-between; }
+.kpi--in { background: #ecfeff; border-color: #67e8f9; }
+.kpi--out { background: #fef2f2; border-color: #fca5a5; }
+.stock-history-table-wrap { overflow: auto; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.stock-history-table { width: 100%; border-collapse: collapse; min-width: 980px; }
+.stock-history-table th { background: #0f172a; color: #fff; text-align: left; padding: 10px; font-size: 0.82rem; }
+.stock-history-table td { border-bottom: 1px solid #e2e8f0; padding: 10px; font-size: 0.84rem; color: #334155; }
+.history-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+.history-badge--in { background: #dcfce7; color: #166534; }
+.history-badge--out { background: #fee2e2; color: #991b1b; }
+.history-badge--revert { background: #dbeafe; color: #1d4ed8; }
+.history-badge--move { background: #fef3c7; color: #92400e; }
+.history-badge--merge { background: #ede9fe; color: #6d28d9; }
+.history-badge--clear { background: #f1f5f9; color: #475569; }
+.stock-history-error { text-align: center; color: #b91c1c; padding: 30px; }
+.stock-history-error button { margin-top: 8px; border: none; background: #2563eb; color: #fff; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
