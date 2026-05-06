@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 import { LocationsService } from './locations.service';
 import { MoveArticleDto } from './dto/move-article.dto';
 import { MergeArticleDto } from './dto/merge-article.dto';
+import { ValidateStockJobDto } from './dto/validate-stock-job.dto';
 
 @Controller('locations')
 @UseGuards(JwtAuthGuard)
@@ -28,10 +29,11 @@ export class LocationsController {
     @Param('articleId', ParseIntPipe) articleId: number,
     @Body() moveArticleDto: MoveArticleDto,
   ) {
-    return this.locationsService.moveArticle(
+    return this.locationsService.createMoveJob(
       articleId,
       moveArticleDto.targetLocationId,
       moveArticleDto.quantity,
+      moveArticleDto.assignedUserId,
     );
   }
 
@@ -40,7 +42,22 @@ export class LocationsController {
     @Param('articleId', ParseIntPipe) articleId: number,
     @Body() mergeArticleDto: MergeArticleDto,
   ) {
-    return this.locationsService.mergeArticles(articleId, mergeArticleDto.targetArticleId);
+    return this.locationsService.createMergeJob(
+      articleId,
+      mergeArticleDto.targetArticleId,
+      mergeArticleDto.assignedUserId,
+    );
+  }
+
+  @Post('jobs/:jobId/validate')
+  async validateJob(
+    @Param('jobId', ParseIntPipe) jobId: number,
+    @Body() validateStockJobDto: ValidateStockJobDto,
+  ) {
+    return this.locationsService.validateStockJob(
+      jobId,
+      validateStockJobDto.validatedByUserId,
+    );
   }
 
   @Delete('articles/:articleId/zero-stock')

@@ -53,6 +53,7 @@
 .dot--empty { background: #e5e7eb; }
 .dot--ok { background: #86efac; }
 .dot--alert { background: #fca5a5; }
+.dot--pending { background: #f59e0b; }
 
 
 .warehouse-plan {
@@ -144,6 +145,12 @@
   background: #fde68a;
 }
 
+.prep-slot--pending {
+  border-style: solid;
+  border-color: #d97706;
+  background: #fcd34d;
+}
+
 .prep-slot__code {
   font-size: 0.65rem;
   font-weight: 800;
@@ -201,6 +208,12 @@
   border-style: solid;
   border-color: #2563eb;
   background: #bfdbfe;
+}
+
+.transit-slot--pending {
+  border-style: solid;
+  border-color: #1d4ed8;
+  background: #93c5fd;
 }
 
 .transit-slot__code {
@@ -299,6 +312,12 @@
   color: #334155;
 }
 
+.plan-cell__pending {
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #92400e;
+}
+
 .plan-cell {
   width: 100%;
   min-height: 62px;
@@ -337,6 +356,11 @@
 .plan-cell.alert {
   background: #b91c1c;
   border-color: #7f1d1d;
+}
+
+.plan-cell.pending {
+  background: #fef3c7;
+  border-color: #f59e0b;
 }
 
 .plan-cell.alert .plan-cell__code,
@@ -493,6 +517,32 @@
   border-color: #b91c1c;
   background: #fee2e2;
   color: #991b1b;
+}
+
+.inspector-btn--pending {
+  border-color: #92400e;
+  background: #fef3c7;
+  color: #78350f;
+}
+
+.inspector-actions--pending {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.pending-job {
+  border: 1px dashed #f59e0b;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.pending-job__meta {
+  font-size: 0.76rem;
+  color: #7c2d12;
 }
 
 .inspector-actions__error {

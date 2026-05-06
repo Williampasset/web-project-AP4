@@ -7,8 +7,11 @@ import {
   fetchLocations,
   mergeLocationArticle,
   moveLocationArticle,
+  validateStockJob,
 } from '@service/api/locations.service';
 import type { WarehouseLocation } from '@type/warehouse-location.type';
+import { fetchUsers } from '@service/api/users.service';
+import type { User } from '@type/user.type';
 import { QRCodeSVG } from 'qrcode.react';
 import './Locations.css';
 
@@ -21,6 +24,7 @@ export default function Locations() {
   const [moveTargetLocationId, setMoveTargetLocationId] = useState<number | null>(null);
   const [moveQuantity, setMoveQuantity] = useState(1);
   const [mergeTargetArticleId, setMergeTargetArticleId] = useState<number | null>(null);
+  const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
   const [isActing, setIsActing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -35,6 +39,12 @@ export default function Locations() {
     queryKey: ['locations', 'warehouse-view'],
     queryFn: fetchLocations,
     refetchInterval: 15000,
+  });
+
+  const { data: users = [] } = useQuery<User[]>({
+    queryKey: ['users'],
+    queryFn: fetchUsers,
+    refetchInterval: 30000,
   });
 
   const buildings = useMemo(() => {
@@ -58,8 +68,15 @@ export default function Locations() {
       .map((location) => {
         const totalStock = location.articles.reduce((sum, article) => sum + article.stock, 0);
         const hasLowStock = location.articles.some((article) => article.stock < 10);
+        const hasPending = (location.pendingJobs?.length ?? 0) > 0;
         const status =
-          location.articles.length === 0 ? 'empty' : hasLowStock ? 'alert' : 'ok';
+          hasPending
+            ? 'pending'
+            : location.articles.length === 0
+              ? 'empty'
+              : hasLowStock
+                ? 'alert'
+                : 'ok';
 
         return {
           ...location,
@@ -86,7 +103,14 @@ export default function Locations() {
       .map((location) => {
         const totalStock = location.articles.reduce((sum, a) => sum + a.stock, 0);
         const hasLowStock = location.articles.some((a) => a.stock < 10);
-        const status = location.articles.length === 0 ? 'empty' : hasLowStock ? 'alert' : 'ok';
+        const hasPending = (location.pendingJobs?.length ?? 0) > 0;
+        const status = hasPending
+          ? 'pending'
+          : location.articles.length === 0
+            ? 'empty'
+            : hasLowStock
+              ? 'alert'
+              : 'ok';
         return { ...location, totalStock, status };
       });
   }, [locations, activeBuilding]);
@@ -98,7 +122,14 @@ export default function Locations() {
       .map((location) => {
         const totalStock = location.articles.reduce((sum, a) => sum + a.stock, 0);
         const hasLowStock = location.articles.some((a) => a.stock < 10);
-        const status = location.articles.length === 0 ? 'empty' : hasLowStock ? 'alert' : 'ok';
+        const hasPending = (location.pendingJobs?.length ?? 0) > 0;
+        const status = hasPending
+          ? 'pending'
+          : location.articles.length === 0
+            ? 'empty'
+            : hasLowStock
+              ? 'alert'
+              : 'ok';
         return { ...location, totalStock, status };
       });
   }, [locations, activeBuilding]);
@@ -111,6 +142,8 @@ export default function Locations() {
     null;
 
   const focusedArticle = focusedLocation?.articles?.[0] ?? null;
+  const pendingJobs = focusedLocation?.pendingJobs ?? [];
+  const hasPendingJobs = pendingJobs.length > 0;
 
   useEffect(() => {
     setMoveTargetLocationId(null);
@@ -118,6 +151,12 @@ export default function Locations() {
     setMoveQuantity(1);
     setActionError(null);
   }, [focusedLocationId]);
+
+  useEffect(() => {
+    if (!assignedUserId && users.length > 0) {
+      setAssignedUserId(users[0].id);
+    }
+  }, [users, assignedUserId]);
 
   const availableMoveTargets = useMemo(() => {
     if (!focusedLocation) return [];
@@ -164,12 +203,17 @@ export default function Locations() {
   };
 
   const handleMove = async () => {
-    if (!focusedArticle || !moveTargetLocationId) return;
+    if (!focusedArticle || !moveTargetLocationId || !assignedUserId) return;
     const quantity = Math.max(1, Math.min(moveQuantity, focusedArticle.stock));
     setActionError(null);
     setIsActing(true);
     try {
-      await moveLocationArticle(focusedArticle.id, moveTargetLocationId, quantity);
+      await moveLocationArticle(
+        focusedArticle.id,
+        moveTargetLocationId,
+        quantity,
+        assignedUserId,
+      );
       await refreshData();
       setMoveTargetLocationId(null);
       setMoveQuantity(1);
@@ -181,15 +225,28 @@ export default function Locations() {
   };
 
   const handleMerge = async () => {
-    if (!focusedArticle || !mergeTargetArticleId) return;
+    if (!focusedArticle || !mergeTargetArticleId || !assignedUserId) return;
     setActionError(null);
     setIsActing(true);
     try {
-      await mergeLocationArticle(focusedArticle.id, mergeTargetArticleId);
+      await mergeLocationArticle(focusedArticle.id, mergeTargetArticleId, assignedUserId);
       await refreshData();
       setMergeTargetArticleId(null);
     } catch (e) {
       setActionError((e as Error).message || 'Échec de la fusion');
+    } finally {
+      setIsActing(false);
+    }
+  };
+
+  const handleValidateJob = async (jobId: number, userId: number) => {
+    setActionError(null);
+    setIsActing(true);
+    try {
+      await validateStockJob(jobId, userId);
+      await refreshData();
+    } catch (e) {
+      setActionError((e as Error).message || 'Échec de validation du job');
     } finally {
       setIsActing(false);
     }
@@ -221,6 +278,7 @@ export default function Locations() {
         title={label ? `${cell.building}${cell.aisle}S${cell.shelf}C${cell.cell} — ${label}` : `${cell.building}${cell.aisle}S${cell.shelf}C${cell.cell} — Vide`}
       >
         <span className='plan-cell__code'>{cell.building}{cell.aisle}S{cell.shelf}C{cell.cell}</span>
+        {((cell.pendingJobs?.length ?? 0) > 0) && <span className='plan-cell__pending'>⏳ En attente</span>}
         {shortLabel
           ? <span className='plan-cell__label'>{shortLabel}</span>
           : <span className='plan-cell__label muted'>Vide</span>}
@@ -267,6 +325,7 @@ export default function Locations() {
           <span><i className='dot dot--empty' /> Vide</span>
           <span><i className='dot dot--ok' /> Occupé</span>
           <span><i className='dot dot--alert' /> Stock faible (article &lt; 10)</span>
+          <span><i className='dot dot--pending' /> En attente d'action</span>
         </div>
 
         <div className='warehouse-plan'>
@@ -296,13 +355,17 @@ export default function Locations() {
                     <button
                       key={cell.id}
                       type='button'
-                      className={`prep-slot ${cell.articles.length > 0 ? 'prep-slot--occupied' : ''} ${focusedLocation?.id === cell.id ? 'focused' : ''}`}
+                      className={`prep-slot ${cell.articles.length > 0 ? 'prep-slot--occupied' : ''} ${(cell.pendingJobs?.length ?? 0) > 0 ? 'prep-slot--pending' : ''} ${focusedLocation?.id === cell.id ? 'focused' : ''}`}
                       onClick={() => setFocusedLocationId(cell.id)}
                       title={`Zone ${cell.building}-PZ-${String(i + 1).padStart(2, '0')} — ${cell.articles[0]?.label ?? 'Libre'}`}
                     >
                       <span className='prep-slot__code'>{cell.building}-PZ-{String(i + 1).padStart(2, '0')}</span>
                       <span className='prep-slot__status'>
-                        {cell.articles.length > 0 ? cell.articles[0].label.slice(0, 12) + '…' : 'Libre'}
+                        {(cell.pendingJobs?.length ?? 0) > 0
+                          ? '⏳ En attente'
+                          : cell.articles.length > 0
+                            ? cell.articles[0].label.slice(0, 12) + '…'
+                            : 'Libre'}
                       </span>
                     </button>
                   ))
@@ -319,13 +382,17 @@ export default function Locations() {
                     <button
                       key={cell.id}
                       type='button'
-                      className={`transit-slot ${cell.articles.length > 0 ? 'transit-slot--occupied' : ''} ${focusedLocation?.id === cell.id ? 'focused' : ''}`}
+                      className={`transit-slot ${cell.articles.length > 0 ? 'transit-slot--occupied' : ''} ${(cell.pendingJobs?.length ?? 0) > 0 ? 'transit-slot--pending' : ''} ${focusedLocation?.id === cell.id ? 'focused' : ''}`}
                       onClick={() => setFocusedLocationId(cell.id)}
                       title={`Transit ${cell.building}-IN-${String(i + 1).padStart(2, '0')} — ${cell.articles[0]?.label ?? 'Libre'}`}
                     >
                       <span className='transit-slot__code'>{cell.building}-IN-{String(i + 1).padStart(2, '0')}</span>
                       <span className='transit-slot__status'>
-                        {cell.articles.length > 0 ? cell.articles[0].label.slice(0, 12) + '…' : 'Libre'}
+                        {(cell.pendingJobs?.length ?? 0) > 0
+                          ? '⏳ En attente'
+                          : cell.articles.length > 0
+                            ? cell.articles[0].label.slice(0, 12) + '…'
+                            : 'Libre'}
                       </span>
                     </button>
                   ))
@@ -353,6 +420,50 @@ export default function Locations() {
                 >
                   <span>📷</span> Afficher le QR code
                 </button>
+
+                <div className='inspector-actions'>
+                  <h4>Affectation employé</h4>
+                  <div className='inspector-actions__row'>
+                    <label>Employé assigné pour nouvelle tâche</label>
+                    <select
+                      value={assignedUserId ?? ''}
+                      onChange={(e) =>
+                        setAssignedUserId(e.target.value ? Number(e.target.value) : null)
+                      }
+                      disabled={isActing}
+                    >
+                      <option value=''>Sélectionner un employé</option>
+                      {users.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.firstName} {u.lastName} ({u.matricule})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {hasPendingJobs && (
+                  <div className='inspector-actions inspector-actions--pending'>
+                    <h4>Jobs en attente sur cette cellule</h4>
+                    {pendingJobs.map((job) => (
+                      <div key={job.id} className='pending-job'>
+                        <div className='pending-job__meta'>
+                          <strong>#{job.id}</strong> · {job.type} · {job.quantity}u
+                          <br />
+                          Assigné à {job.assignedUser.firstName} {job.assignedUser.lastName}
+                        </div>
+                        <button
+                          type='button'
+                          className='inspector-btn inspector-btn--pending'
+                          disabled={isActing}
+                          onClick={() => handleValidateJob(job.id, job.assignedUser.id)}
+                        >
+                          Valider (par {job.assignedUser.matricule})
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {focusedArticle && (
                   <div className='inspector-actions'>
@@ -399,13 +510,15 @@ export default function Locations() {
                         className='inspector-btn'
                         disabled={
                           isActing ||
+                          hasPendingJobs ||
+                          !assignedUserId ||
                           !moveTargetLocationId ||
                           moveQuantity < 1 ||
                           moveQuantity > focusedArticle.stock
                         }
                         onClick={handleMove}
                       >
-                        Déplacer {moveQuantity} u
+                        Créer job déplacement ({moveQuantity} u)
                       </button>
                     </div>
 
@@ -430,10 +543,10 @@ export default function Locations() {
                       <button
                         type='button'
                         className='inspector-btn inspector-btn--merge'
-                        disabled={isActing || !mergeTargetArticleId}
+                        disabled={isActing || hasPendingJobs || !assignedUserId || !mergeTargetArticleId}
                         onClick={handleMerge}
                       >
-                        Fusionner
+                        Créer job fusion
                       </button>
                     </div>
 
