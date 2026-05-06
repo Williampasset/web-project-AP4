@@ -1,8 +1,13 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { fetchLocations } from '@service/api/locations.service';
+import { useEffect, useMemo, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  deleteZeroStockLocationArticle,
+  fetchLocations,
+  mergeLocationArticle,
+  moveLocationArticle,
+} from '@service/api/locations.service';
 import type { WarehouseLocation } from '@type/warehouse-location.type';
 import { QRCodeSVG } from 'qrcode.react';
 import './Locations.css';
@@ -13,6 +18,12 @@ export default function Locations() {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [focusedLocationId, setFocusedLocationId] = useState<number | null>(null);
   const [qrModalLocation, setQrModalLocation] = useState<(typeof mappedLocations)[number] | null>(null);
+  const [moveTargetLocationId, setMoveTargetLocationId] = useState<number | null>(null);
+  const [moveQuantity, setMoveQuantity] = useState(1);
+  const [mergeTargetArticleId, setMergeTargetArticleId] = useState<number | null>(null);
+  const [isActing, setIsActing] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const {
     data: locations = [],
@@ -98,6 +109,105 @@ export default function Locations() {
     transitLocations.find((cell) => cell.id === focusedLocationId) ??
     mappedLocations[0] ??
     null;
+
+  const focusedArticle = focusedLocation?.articles?.[0] ?? null;
+
+  useEffect(() => {
+    setMoveTargetLocationId(null);
+    setMergeTargetArticleId(null);
+    setMoveQuantity(1);
+    setActionError(null);
+  }, [focusedLocationId]);
+
+  const availableMoveTargets = useMemo(() => {
+    if (!focusedLocation) return [];
+    return locations
+      .filter((l) => l.id !== focusedLocation.id && l.articles.length === 0)
+      .sort(
+        (a, b) =>
+          a.building.localeCompare(b.building) ||
+          a.aisle - b.aisle ||
+          a.shelf - b.shelf ||
+          a.cell - b.cell,
+      );
+  }, [locations, focusedLocation]);
+
+  const availableMergeTargets = useMemo(() => {
+    if (!focusedArticle) return [];
+    const label = focusedArticle.label.trim().toLowerCase();
+    return locations
+      .filter(
+        (l) =>
+          l.articles.length > 0 &&
+          l.articles[0].id !== focusedArticle.id &&
+          l.articles[0].label.trim().toLowerCase() === label,
+      )
+      .sort(
+        (a, b) =>
+          a.building.localeCompare(b.building) ||
+          a.aisle - b.aisle ||
+          a.shelf - b.shelf ||
+          a.cell - b.cell,
+      );
+  }, [locations, focusedArticle]);
+
+  const formatLoc = (loc: WarehouseLocation) =>
+    `${loc.building}-${loc.aisle}-${loc.shelf}-${loc.cell} [${loc.zone}]`;
+
+  const refreshData = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['locations', 'warehouse-view'] }),
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] }),
+      queryClient.invalidateQueries({ queryKey: ['articles'] }),
+      queryClient.invalidateQueries({ queryKey: ['articles', 'live-stock'] }),
+    ]);
+  };
+
+  const handleMove = async () => {
+    if (!focusedArticle || !moveTargetLocationId) return;
+    const quantity = Math.max(1, Math.min(moveQuantity, focusedArticle.stock));
+    setActionError(null);
+    setIsActing(true);
+    try {
+      await moveLocationArticle(focusedArticle.id, moveTargetLocationId, quantity);
+      await refreshData();
+      setMoveTargetLocationId(null);
+      setMoveQuantity(1);
+    } catch (e) {
+      setActionError((e as Error).message || 'Échec du déplacement');
+    } finally {
+      setIsActing(false);
+    }
+  };
+
+  const handleMerge = async () => {
+    if (!focusedArticle || !mergeTargetArticleId) return;
+    setActionError(null);
+    setIsActing(true);
+    try {
+      await mergeLocationArticle(focusedArticle.id, mergeTargetArticleId);
+      await refreshData();
+      setMergeTargetArticleId(null);
+    } catch (e) {
+      setActionError((e as Error).message || 'Échec de la fusion');
+    } finally {
+      setIsActing(false);
+    }
+  };
+
+  const handleDeleteZeroStock = async () => {
+    if (!focusedArticle || focusedArticle.stock !== 0) return;
+    setActionError(null);
+    setIsActing(true);
+    try {
+      await deleteZeroStockLocationArticle(focusedArticle.id);
+      await refreshData();
+    } catch (e) {
+      setActionError((e as Error).message || 'Échec de suppression');
+    } finally {
+      setIsActing(false);
+    }
+  };
 
   const renderCell = (cell: (typeof mappedLocations)[number]) => {
     const label = cell.articles[0]?.label ?? null;
@@ -243,6 +353,107 @@ export default function Locations() {
                 >
                   <span>📷</span> Afficher le QR code
                 </button>
+
+                {focusedArticle && (
+                  <div className='inspector-actions'>
+                    <h4>Actions cellule</h4>
+
+                    <div className='inspector-actions__row'>
+                      <label>Déplacer vers cellule vide</label>
+                      <input
+                        type='number'
+                        min={1}
+                        max={focusedArticle.stock}
+                        value={moveQuantity}
+                        onChange={(e) =>
+                          setMoveQuantity(
+                            Math.max(
+                              1,
+                              Math.min(
+                                focusedArticle.stock,
+                                Number.parseInt(e.target.value || '1', 10) || 1,
+                              ),
+                            ),
+                          )
+                        }
+                        disabled={isActing}
+                      />
+                      <select
+                        value={moveTargetLocationId ?? ''}
+                        onChange={(e) =>
+                          setMoveTargetLocationId(
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
+                        disabled={isActing || availableMoveTargets.length === 0}
+                      >
+                        <option value=''>Sélectionner une cellule</option>
+                        {availableMoveTargets.map((loc) => (
+                          <option key={loc.id} value={loc.id}>
+                            {formatLoc(loc)}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type='button'
+                        className='inspector-btn'
+                        disabled={
+                          isActing ||
+                          !moveTargetLocationId ||
+                          moveQuantity < 1 ||
+                          moveQuantity > focusedArticle.stock
+                        }
+                        onClick={handleMove}
+                      >
+                        Déplacer {moveQuantity} u
+                      </button>
+                    </div>
+
+                    <div className='inspector-actions__row'>
+                      <label>Fusionner avec même article</label>
+                      <select
+                        value={mergeTargetArticleId ?? ''}
+                        onChange={(e) =>
+                          setMergeTargetArticleId(
+                            e.target.value ? Number(e.target.value) : null,
+                          )
+                        }
+                        disabled={isActing || availableMergeTargets.length === 0}
+                      >
+                        <option value=''>Sélectionner une cellule</option>
+                        {availableMergeTargets.map((loc) => (
+                          <option key={loc.id} value={loc.articles[0].id}>
+                            {formatLoc(loc)} ({loc.articles[0].stock}u)
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type='button'
+                        className='inspector-btn inspector-btn--merge'
+                        disabled={isActing || !mergeTargetArticleId}
+                        onClick={handleMerge}
+                      >
+                        Fusionner
+                      </button>
+                    </div>
+
+                    {focusedArticle.stock === 0 && (
+                      <div className='inspector-actions__row'>
+                        <label>Cellule vide en stock (0 unité)</label>
+                        <button
+                          type='button'
+                          className='inspector-btn inspector-btn--danger'
+                          disabled={isActing}
+                          onClick={handleDeleteZeroStock}
+                        >
+                          Supprimer le contenu (libérer cellule)
+                        </button>
+                      </div>
+                    )}
+
+                    {actionError && <p className='inspector-actions__error'>{actionError}</p>}
+                  </div>
+                )}
                 <div className='inspector-articles'>
                   {focusedLocation.articles.length === 0 ? (
                     <span className='muted'>Aucun article stocké.</span>
