@@ -26,7 +26,16 @@ export class SuppliersService {
    * @returns All suppliers in database
    */
   async findAll() {
-    const result = await this.prisma.supplier.findMany();
+    const result = await this.prisma.supplier.findMany({
+      include: {
+        articles: {
+          include: {
+            location: true,
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
     return result;
   }
 
@@ -93,6 +102,13 @@ export class SuppliersService {
   private async findSupplierOrThrow(id: number) {
     const supplier = await this.prisma.supplier.findUnique({
       where: { id },
+      include: {
+        articles: {
+          include: {
+            location: true,
+          },
+        },
+      },
     });
 
     if (!supplier) throw new NotFoundException(`Supplier #${id} not found`);

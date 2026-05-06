@@ -11,6 +11,7 @@ import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 import CommandDetail from './pages/CommandDetail/CommandDetail';
 import Truck from './pages/Truck/Truck';
 import TruckHistory from './pages/Truck/TruckHistory';
+import Suppliers from './pages/Suppliers/Suppliers';
 
 function App() {
   return (
@@ -70,6 +71,14 @@ function App() {
         }
       ></Route>
       <Route path='/trucks' element={<Navigate to='/truck' replace />} />
+      <Route
+        path='/suppliers'
+        element={
+          <ProtectedRoute>
+            <Suppliers />
+          </ProtectedRoute>
+        }
+      ></Route>
       <Route
         path='/operateur'
         element={
