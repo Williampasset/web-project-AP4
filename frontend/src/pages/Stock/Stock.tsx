@@ -4,8 +4,10 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchArticles } from '@service/api/articles.service';
 import { fetchCommands } from '@service/api/commands.service';
+import { fetchSuppliers } from '@service/api/suppliers.service';
 import type { Article } from '@type/article.type';
 import type { Command } from '@type/command.type';
+import type { Supplier } from '@type/supplier.type';
 import './Stock.css';
 
 const PENDING_LOADING_STATUSES: Command['status'][] = ['WAITING', 'PENDING'];
@@ -39,6 +41,48 @@ export default function Stock() {
     refetchInterval: 10000,
   });
 
+  const {
+    data: suppliers = [],
+    isLoading: isLoadingSuppliers,
+    isError: isErrorSuppliers,
+    error: suppliersError,
+    dataUpdatedAt: suppliersUpdatedAt,
+    refetch: refetchSuppliers,
+  } = useQuery<Supplier[]>({
+    queryKey: ['suppliers', 'live-stock'],
+    queryFn: fetchSuppliers,
+    refetchInterval: 10000,
+  });
+
+  const articleSupplierNameById = useMemo(() => {
+    const map = new Map<number, string>();
+
+    suppliers.forEach((supplier) => {
+      supplier.articles.forEach((article) => {
+        map.set(article.id, supplier.name);
+      });
+    });
+
+    return map;
+  }, [suppliers]);
+
+  const articleLocationById = useMemo(() => {
+    const map = new Map<number, string>();
+
+    suppliers.forEach((supplier) => {
+      supplier.articles.forEach((article) => {
+        const location = article.location;
+        if (!location) return;
+        map.set(
+          article.id,
+          `${location.building}-${location.aisle}-${location.shelf}-${location.cell}`,
+        );
+      });
+    });
+
+    return map;
+  }, [suppliers]);
+
   const pendingDemandByArticle = useMemo(() => {
     const map = new Map<number, number>();
 
@@ -71,10 +115,18 @@ export default function Stock() {
     if (!query) return rows;
 
     return rows.filter(({ article }) => {
-      const supplierName = article.supplier?.name?.toLowerCase() ?? '';
-      const location = article.location
-        ? `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`.toLowerCase()
-        : '';
+      const supplierName = (
+        article.supplier?.name ||
+        articleSupplierNameById.get(article.id) ||
+        ''
+      ).toLowerCase();
+      const location = (
+        (article.location
+          ? `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`
+          : '') ||
+        articleLocationById.get(article.id) ||
+        ''
+      ).toLowerCase();
 
       return (
         article.reference.toLowerCase().includes(query) ||
@@ -83,7 +135,7 @@ export default function Stock() {
         location.includes(query)
       );
     });
-  }, [rows, searchFilter]);
+  }, [rows, searchFilter, articleSupplierNameById, articleLocationById]);
 
   const stats = useMemo(() => {
     const total = rows.length;
@@ -93,15 +145,45 @@ export default function Stock() {
     return { total, shortages, lowSoon };
   }, [rows]);
 
+  const formatSupplier = (article: Article) => {
+    if (article.supplier?.name) return article.supplier.name;
+    if (articleSupplierNameById.has(article.id)) {
+      return articleSupplierNameById.get(article.id);
+    }
+    return 'Non renseigné';
+  };
+
+  const formatLocation = (article: Article) => {
+    if (
+      article.location &&
+      article.location.building &&
+      article.location.aisle !== undefined &&
+      article.location.shelf !== undefined &&
+      article.location.cell !== undefined
+    ) {
+      return `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`;
+    }
+
+    if (articleLocationById.has(article.id)) {
+      return articleLocationById.get(article.id);
+    }
+
+    return 'Non renseigné';
+  };
+
   const getStockStatus = (quantity: number) => {
     if (quantity === 0) return 'out-of-stock';
     if (quantity < 10) return 'low-stock';
     return 'in-stock';
   };
 
-  const isLoading = isLoadingArticles || isLoadingCommands;
-  const isError = isErrorArticles || isErrorCommands;
-  const lastUpdatedAt = Math.max(articlesUpdatedAt || 0, commandsUpdatedAt || 0);
+  const isLoading = isLoadingArticles || isLoadingCommands || isLoadingSuppliers;
+  const isError = isErrorArticles || isErrorCommands || isErrorSuppliers;
+  const lastUpdatedAt = Math.max(
+    articlesUpdatedAt || 0,
+    commandsUpdatedAt || 0,
+    suppliersUpdatedAt || 0,
+  );
 
   if (isLoading) return <Loading />;
 
@@ -114,12 +196,14 @@ export default function Stock() {
             {' '}
             {(articlesError as Error)?.message ||
               (commandsError as Error)?.message ||
+              (suppliersError as Error)?.message ||
               'Impossible de charger les données de stock.'}
           </p>
           <button
             onClick={() => {
               refetchArticles();
               refetchCommands();
+              refetchSuppliers();
             }}
           >
             Réessayer
@@ -203,12 +287,10 @@ export default function Stock() {
                 )}
               </td>
               <td>
-                {article.supplier?.name || '—'}
+                {formatSupplier(article)}
               </td>
               <td>
-                {article.location
-                  ? `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`
-                  : '—'}
+                {formatLocation(article)}
               </td>
             </tr>
           ))}
