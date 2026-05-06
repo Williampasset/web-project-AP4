@@ -358,35 +358,6 @@ export class LocationsService {
       const qty = Math.min(job.quantity, source.stock);
       const isFullMerge = qty === source.stock;
 
-      let parkingLocationId: number | null = null;
-      if (isFullMerge) {
-        const parkingLocation = await this.prisma.location.findFirst({
-          where: {
-            id: {
-              notIn: [source.locationId, target.locationId],
-            },
-            articles: {
-              none: {},
-            },
-          },
-          orderBy: [
-            { building: 'asc' },
-            { aisle: 'asc' },
-            { shelf: 'asc' },
-            { cell: 'asc' },
-          ],
-          select: { id: true },
-        });
-
-        if (!parkingLocation) {
-          throw new ConflictException(
-            'Impossible de valider la fusion: aucune cellule vide disponible pour libérer la cellule source',
-          );
-        }
-
-        parkingLocationId = parkingLocation.id;
-      }
-
       await this.prisma.$transaction(async (tx) => {
         await tx.article.update({
           where: { id: target.id },
@@ -396,25 +367,6 @@ export class LocationsService {
             },
           },
         });
-
-        if (isFullMerge) {
-          await tx.article.update({
-            where: { id: source.id },
-            data: {
-              stock: 0,
-              locationId: parkingLocationId!,
-            },
-          });
-        } else {
-          await tx.article.update({
-            where: { id: source.id },
-            data: {
-              stock: {
-                decrement: qty,
-              },
-            },
-          });
-        }
 
         await tx.stockHistory.create({
           data: {
@@ -431,14 +383,40 @@ export class LocationsService {
           },
         });
 
-        await tx.stockJob.update({
-          where: { id: jobId },
-          data: {
-            status: 'COMPLETED',
-            validatedByUserId,
-            validatedAt: new Date(),
-          },
-        });
+        if (isFullMerge) {
+          // Supprimer tous les jobs qui référencent encore l'article source,
+          // y compris le job courant, pour libérer la contrainte FK sourceArticleId.
+          await tx.stockJob.deleteMany({
+            where: {
+              OR: [
+                { sourceArticleId: source.id },
+                { targetArticleId: source.id },
+              ],
+            },
+          });
+
+          // Supprimer complètement l'article source après fusion complète
+          await tx.article.delete({
+            where: { id: source.id },
+          });
+        } else {
+          await tx.article.update({
+            where: { id: source.id },
+            data: {
+              stock: {
+                decrement: qty,
+              },
+            },
+          });
+          await tx.stockJob.update({
+            where: { id: jobId },
+            data: {
+              status: 'COMPLETED',
+              validatedByUserId,
+              validatedAt: new Date(),
+            },
+          });
+        }
       });
 
       return {
@@ -446,7 +424,6 @@ export class LocationsService {
         jobId,
         status: 'COMPLETED',
         sourceFreed: isFullMerge,
-        parkingLocationId,
       };
     }
 
