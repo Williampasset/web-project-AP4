@@ -185,6 +185,167 @@
   cursor: pointer;
 }
 
+/* ── Order button ── */
+.btn-order {
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.btn-order:hover:not(:disabled) {
+  background: #dbeafe;
+}
+
+.btn-order:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal__header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #111827;
+}
+
+.modal__close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #9ca3af;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.modal__close:hover {
+  color: #374151;
+}
+
+.modal__body {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.modal__field label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.modal__field label span {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.modal__field input,
+.modal__field textarea {
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 7px;
+  font-size: 0.92rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.modal__field input:focus,
+.modal__field textarea:focus {
+  border-color: #3b82f6;
+}
+
+.modal__field input:disabled {
+  background: #f9fafb;
+  color: #6b7280;
+}
+
+.modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 22px 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn-cancel {
+  padding: 8px 18px;
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.btn-send {
+  padding: 8px 20px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-send:hover {
+  background: #1d4ed8;
+}
+
 
 .suppliers-header h1 {
   margin: 0;

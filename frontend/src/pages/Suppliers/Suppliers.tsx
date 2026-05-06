@@ -15,6 +15,11 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
     );
 
   const [open, setOpen] = useState(false);
+  const [modal, setModal] = useState<{
+    article: SupplierArticle;
+    quantity: number;
+    message: string;
+  } | null>(null);
 
   // Auto-ouvre si la recherche correspond à un article
   const isOpen = open || articleMatch;
@@ -34,6 +39,32 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
     if (stock === 0) return 'Rupture';
     if (stock < 10) return 'Faible';
     return 'Disponible';
+  };
+
+  const openModal = (e: React.MouseEvent, article: SupplierArticle) => {
+    e.stopPropagation();
+    setModal({
+      article,
+      quantity: 1,
+      message: '',
+    });
+  };
+
+  const sendEmail = () => {
+    if (!modal || !supplier.email) return;
+    const subject = encodeURIComponent(
+      `Demande de réapprovisionnement – ${modal.article.reference}`,
+    );
+    const body = encodeURIComponent(
+      `Bonjour,\n\nNous souhaitons passer commande pour l'article suivant :\n\n` +
+      `Référence : ${modal.article.reference}\n` +
+      `Désignation : ${modal.article.label}\n` +
+      `Quantité souhaitée : ${modal.quantity}\n` +
+      (modal.message ? `\nMessage complémentaire :\n${modal.message}\n` : '') +
+      `\nCordialement`,
+    );
+    window.location.href = `mailto:${supplier.email}?subject=${subject}&body=${body}`;
+    setModal(null);
   };
 
   return (
@@ -75,6 +106,7 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
                   <th>Volume</th>
                   <th>Stock</th>
                   <th>Statut</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -88,11 +120,71 @@ function SupplierRow({ supplier, search }: { supplier: Supplier; search: string 
                     <td>{article.volume} m³</td>
                     <td>{article.stock}</td>
                     <td><span className={getStockClass(article.stock)}>{getStockLabel(article.stock)}</span></td>
+                    <td>
+                      <button
+                        className='btn-order'
+                        disabled={!supplier.email}
+                        title={supplier.email ? 'Commander par email' : 'Aucun email renseigné'}
+                        onClick={(e) => openModal(e, article)}
+                      >
+                        ✉ Commander
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
+        </div>
+      )}
+
+      {/* Modal commande email */}
+      {modal && (
+        <div className='modal-overlay' onClick={() => setModal(null)}>
+          <div className='modal' onClick={(e) => e.stopPropagation()}>
+            <div className='modal__header'>
+              <h2>Commande par email</h2>
+              <button className='modal__close' onClick={() => setModal(null)}>×</button>
+            </div>
+            <div className='modal__body'>
+              <div className='modal__field'>
+                <label>Fournisseur</label>
+                <input type='text' value={supplier.name} disabled />
+              </div>
+              <div className='modal__field'>
+                <label>Destinataire</label>
+                <input type='text' value={supplier.email ?? ''} disabled />
+              </div>
+              <div className='modal__field'>
+                <label>Article</label>
+                <input type='text' value={`${modal.article.reference} – ${modal.article.label}`} disabled />
+              </div>
+              <div className='modal__field'>
+                <label>Quantité souhaitée</label>
+                <input
+                  type='number'
+                  min={1}
+                  value={modal.quantity}
+                  onChange={(e) =>
+                    setModal((m) => m ? { ...m, quantity: Math.max(1, parseInt(e.target.value) || 1) } : m)
+                  }
+                />
+              </div>
+              <div className='modal__field'>
+                <label>Message complémentaire <span>(optionnel)</span></label>
+                <textarea
+                  rows={3}
+                  placeholder='Informations supplémentaires…'
+                  value={modal.message}
+                  onChange={(e) => setModal((m) => m ? { ...m, message: e.target.value } : m)}
+                />
+              </div>
+            </div>
+            <div className='modal__footer'>
+              <button className='btn-cancel' onClick={() => setModal(null)}>Annuler</button>
+              <button className='btn-send' onClick={sendEmail}>✉ Envoyer l’email</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
