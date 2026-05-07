@@ -3,8 +3,8 @@ import Loading from '@component/Loading/Loading';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '../../hooks/clients.hooks';
-import ClientModal from './components/ClientModal';
-import DeleteConfirmModal from './components/DeleteConfirmModal';
+import ClientModal from '@component/ClientModal/ClientModal';
+import DeleteConfirmModal from '@component/DeleteConfirmModal/DeleteConfirmModal';
 import type { Client } from '@type/client.type';
 import './Clients.css';
 
