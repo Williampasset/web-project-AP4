@@ -41,8 +41,12 @@ describe('CommandsService', () => {
     id: 1,
     imat: 'AA-123-BB',
     maxLoad: 1000,
+    maxVolume: 50,
+    maintenanceEndAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
+    commands: [],
+    trips: [],
   };
 
   const mockArticle = {
@@ -50,6 +54,7 @@ describe('CommandsService', () => {
     reference: 'ART-001',
     label: 'Test Article',
     weight: 220.5,
+    volume: 1.2,
     price: 10.99,
     stock: 100,
     locationId: 1,
@@ -122,6 +127,9 @@ describe('CommandsService', () => {
         findUnique: jest.fn(),
         update: jest.fn(),
       },
+      stockHistory: {
+        create: jest.fn(),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -151,6 +159,31 @@ describe('CommandsService', () => {
       jest.spyOn(prisma.article, 'findUnique').mockResolvedValue(mockArticle);
       jest.spyOn(prisma.command, 'create').mockResolvedValue({
         ...mockCommand,
+      });
+      jest.spyOn(prisma.article, 'update').mockResolvedValue({
+        ...mockArticle,
+        stock: mockArticle.stock - createCommandDto.items[0].quantity,
+      });
+      jest.spyOn(prisma.stockHistory, 'create').mockResolvedValue({
+        id: 1,
+        eventType: 'SUPPLIER_INBOUND',
+        quantity: 1,
+
+        articleId: null,
+        articleReference: null,
+        articleLabel: null,
+
+        fromLocationId: null,
+        toLocationId: null,
+
+        supplierId: null,
+        commandId: null,
+        stockJobId: null,
+
+        note: null,
+        createdByUserId: null,
+
+        createdAt: new Date(),
       });
 
       const result = await service.create(createCommandDto);
@@ -380,6 +413,27 @@ describe('CommandsService', () => {
         .mockResolvedValue([mockCommandItem]);
       jest.spyOn(prisma.command, 'delete').mockResolvedValue({
         ...mockCommand,
+      });
+      jest.spyOn(prisma.stockHistory, 'create').mockResolvedValue({
+        id: 1,
+        eventType: 'SUPPLIER_INBOUND',
+        quantity: 1,
+
+        articleId: null,
+        articleReference: null,
+        articleLabel: null,
+
+        fromLocationId: null,
+        toLocationId: null,
+
+        supplierId: null,
+        commandId: null,
+        stockJobId: null,
+
+        note: null,
+        createdByUserId: null,
+
+        createdAt: new Date(),
       });
 
       const result = await service.remove(1);

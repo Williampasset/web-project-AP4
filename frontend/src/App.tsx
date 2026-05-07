@@ -91,14 +91,17 @@ function App() {
         }
       ></Route>
       <Route
-        path='/stock-historiy'
+        path='/stock-history'
         element={
           <ProtectedRoute>
             <StockHistory />
           </ProtectedRoute>
         }
       ></Route>
-      <Route path='/stock-history' element={<Navigate to='/stock-historiy' replace />} />
+      <Route
+        path='/stock-history'
+        element={<Navigate to='/stock-history' replace />}
+      />
       <Route
         path='/operateur'
         element={

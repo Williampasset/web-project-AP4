@@ -62,7 +62,7 @@ const Navbar: React.FC<NavbarProps> = ({
         },
         {
           label: 'Historique stock',
-          href: '/stock-historiy',
+          href: '/stock-history',
           icon: <History size={16} />,
         },
       ],
