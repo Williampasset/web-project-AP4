@@ -1,8 +1,8 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
-import LocationQrModal from './components/LocationQrModal';
-import WarehouseInspector from './components/WarehouseInspector';
-import WarehousePlan from './components/WarehousePlan';
+import LocationQrModal from '@component/LocationQrModal/LocationQrModal';
+import WarehouseInspector from '@component/WarehouseInspector/WarehouseInspector';
+import WarehousePlan from '@component/WarehousePlan/WarehousePlan';
 import { useLocationsPage } from './useLocationsPage';
 import './Locations.css';
 
