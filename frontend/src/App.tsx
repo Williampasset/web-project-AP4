@@ -15,6 +15,7 @@ import Locations from './pages/Locations/Locations';
 import StockHistory from './pages/StockHistory/StockHistory';
 import Clients from './pages/Clients/Clients';
 import Users from './pages/Users/Users';
+import Assignments from './pages/Assignments/Assignments';
 
 function App() {
   return (
@@ -87,6 +88,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Users />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/assignments'
+        element={
+          <ProtectedRoute>
+            <Assignments />
           </ProtectedRoute>
         }
       ></Route>
