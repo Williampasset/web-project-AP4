@@ -35,6 +35,6 @@ export class UpdateCommandDto {
 
   @IsInt()
   @IsOptional()
-  @Min(1)
+  @Min(0)
   readonly userId?: number;
 }

@@ -42,8 +42,8 @@ model Command {
   client        Client                   @relation(fields: [clientId], references: [id])
   truckId       Int?
   truck         Truck?                   @relation(fields: [truckId], references: [id])
-  userId        Int
-  user          User                     @relation(fields: [userId], references: [id])
+  userId        Int?
+  user          User?                    @relation(fields: [userId], references: [id])
   items         CommandItem[]
   preparedItems CommandItemPreparation[]
   loadingStages CommandLoadingStage[]

@@ -209,8 +209,10 @@ export class CommandsService {
       await this.ensureClientExists(updateCommandDto.clientId);
     }
 
-    if (updateCommandDto.userId) {
-      await this.ensureUserExists(updateCommandDto.userId);
+    if (updateCommandDto.userId !== undefined) {
+      if (updateCommandDto.userId !== null) {
+        await this.ensureUserExists(updateCommandDto.userId);
+      }
     }
 
     if (updateCommandDto.truckId) {
