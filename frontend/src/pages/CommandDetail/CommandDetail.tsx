@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ArrowLeft, MapPin, Package, Check, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -40,6 +40,12 @@ export default function CommandDetail() {
 
   const { mutate: markPicked } = useMarkItemPicked();
 
+  /**
+   * Handles updating the status of the command.
+   * This function is called when the user marks an item as prepared
+   * or when the command status needs to be updated based on preparation progress.
+   * @param newStatus The new status to set for the command (e.g., 'PENDING', 'DELIVERED')
+   */
   const handleCommandStatusUpdate = (newStatus: CommandStatus) => {
     if (!command) return;
 
@@ -52,6 +58,9 @@ export default function CommandDetail() {
     );
   };
 
+  /**
+   * Handles marking the current item as prepared.
+   */
   const handleItemPrepared = () => {
     if (!currentItem) return;
 

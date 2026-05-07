@@ -1,7 +1,6 @@
 import './App.css';
 import { Navigate, Route, Routes } from 'react-router';
 import Login from './pages/Login/Login';
-import Affectation from './pages/Affectation/Affectation';
 import Stock from './pages/Stock/Stock';
 import Command from './pages/Command/Command';
 import { ProtectedRoute } from './guards/ProtectedRoute';
@@ -10,7 +9,7 @@ import { PublicRoute } from './guards/PublicRoute';
 import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 import CommandDetail from './pages/CommandDetail/CommandDetail';
 import Truck from './pages/Truck/Truck';
-import TruckHistory from './pages/Truck/TruckHistory';
+import TruckHistory from './pages/TruckHistory/TruckHistory';
 import Suppliers from './pages/Suppliers/Suppliers';
 import Locations from './pages/Locations/Locations';
 import StockHistory from './pages/StockHistory/StockHistory';
@@ -28,15 +27,6 @@ function App() {
               <Login />
             </div>
           </PublicRoute>
-        }
-      ></Route>
-
-      <Route
-        path='/affectation'
-        element={
-          <ProtectedRoute>
-            <Affectation />
-          </ProtectedRoute>
         }
       ></Route>
       <Route

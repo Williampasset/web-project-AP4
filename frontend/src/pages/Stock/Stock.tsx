@@ -96,6 +96,10 @@ export default function Stock() {
     return map;
   }, [suppliers]);
 
+  /**
+   * Calculates the total pending quantity for each article based on
+   * the commands that are in a waiting or pending status.
+   */
   const pendingDemandByArticle = useMemo(() => {
     const map = new Map<number, number>();
 
@@ -113,6 +117,10 @@ export default function Stock() {
     return map;
   }, [commands]);
 
+  /**
+   * Aggregates articles by label, summing stock and pending quantities,
+   * and collecting suppliers and locations.
+   */
   const rows = useMemo<AggregatedStockRow[]>(() => {
     const groups = new Map<
       string,
@@ -189,6 +197,10 @@ export default function Stock() {
     articleLocationById,
   ]);
 
+  /**
+   * Filters the aggregated stock rows based on the search filter,
+   * matching against article code, label, suppliers, and locations.
+   */
   const filtered = useMemo(() => {
     const query = searchFilter.trim().toLowerCase();
     if (!query) return rows;
@@ -216,12 +228,22 @@ export default function Stock() {
     return { total, shortages, lowSoon };
   }, [rows]);
 
+  /**
+   * Determines the stock status for an article based on its current stock level.
+   * @param quantity The current stock quantity of the article.
+   * @returns A string representing the stock status: 'out-of-stock', 'low-stock', or 'in-stock'.
+   */
   const getStockStatus = (quantity: number) => {
     if (quantity === 0) return 'out-of-stock';
     if (quantity < 10) return 'low-stock';
     return 'in-stock';
   };
 
+  /**
+   * Opens the suppliers page with a search query for the given article label.
+   * This allows users to quickly find suppliers for an article that is in shortage or low stock.
+   * @param articleLabel The label of the article to search for in the suppliers page.
+   */
   const openSuppliersForArticle = (articleLabel: string) => {
     navigate(`/suppliers?search=${encodeURIComponent(articleLabel)}`);
   };

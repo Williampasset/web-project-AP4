@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Eye, Calendar, Package, Truck, User } from 'lucide-react';
+import {
+  Eye,
+  Calendar,
+  Package,
+  Truck,
+  User,
+  TriangleAlertIcon,
+} from 'lucide-react';
 import { formatDate } from '@service/date.service';
 import { getStatusClass, getStatusLabel } from '@service/mapper.service';
 import type { Command } from '@type/command.type';
@@ -43,6 +50,11 @@ export default function CommandCard({
     setIsEditingTruck(false);
   }, [command.id, command.userId, command.truckId]);
 
+  /**
+   * Handle user assignment update
+   * @param value - The new user ID as a string (from the select input)
+   * @returns A promise that resolves when the update is complete
+   */
   const handleUserUpdate = async (value: string) => {
     const nextUserId = Number(value);
     if (Number.isNaN(nextUserId)) return;
@@ -56,6 +68,11 @@ export default function CommandCard({
     setIsEditingUser(false);
   };
 
+  /**
+   * Handle truck assignment update
+   * @param value - The new truck ID as a string (from the select input)
+   * @returns A promise that resolves when the update is complete
+   */
   const handleTruckUpdate = async (value: string) => {
     setSelectedTruckId(value);
 
@@ -128,6 +145,10 @@ export default function CommandCard({
     );
   };
 
+  /**
+   * Get total command weight
+   * @returns The total weight of the command
+   */
   const getTotalWeight = (): number => {
     return command.items.reduce(
       (total, item) => total + (item.article?.weight ?? 0) * item.quantity,
@@ -135,6 +156,10 @@ export default function CommandCard({
     );
   };
 
+  /**
+   * Get total command volume
+   * @returns The total volume of the command
+   */
   const getTotalVolume = (): number => {
     return command.items.reduce(
       (total, item) => total + (item.article?.volume ?? 0) * item.quantity,
@@ -142,6 +167,10 @@ export default function CommandCard({
     );
   };
 
+  /**
+   * Check if total volume exceeds truck's max volume
+   * @return True if there is a volume overflow, false otherwise
+   */
   const hasTruckVolumeOverflow = (): boolean => {
     if (command.status === 'DELIVERED' || command.status === 'CANCELLED') {
       return false;
@@ -153,9 +182,7 @@ export default function CommandCard({
 
   return (
     <>
-      <div
-        className={`command-card command-card--${getDisplayStatusClass()}`}
-      >
+      <div className={`command-card command-card--${getDisplayStatusClass()}`}>
         <div className='command-card__status-badge'>
           <span
             className={`command-card__status command-card__status--${getDisplayStatusClass()}`}
@@ -182,11 +209,15 @@ export default function CommandCard({
         {(hasInsufficientStock() || hasTruckVolumeOverflow()) && (
           <div className='command-card__alert'>
             {hasInsufficientStock() && (
-              <p className='command-card__alert-text'>⚠️ Stock insuffisant</p>
+              <p className='command-card__alert-text'>
+                <TriangleAlertIcon /> Stock insuffisant
+              </p>
             )}
             {hasTruckVolumeOverflow() && (
               <p className='command-card__alert-text'>
-                ⚠️ Dépassement du volume max camion ({getTotalVolume().toFixed(2)} m³ / {command.truck?.maxVolume.toFixed(2)} m³)
+                <TriangleAlertIcon /> Dépassement du volume max camion (
+                {getTotalVolume().toFixed(2)} m³ /{' '}
+                {command.truck?.maxVolume.toFixed(2)} m³)
               </p>
             )}
           </div>
@@ -300,9 +331,7 @@ export default function CommandCard({
                     }}
                     disabled={isUpdating}
                   >
-                    <option value=''>
-                      Désaffecter le camion
-                    </option>
+                    <option value=''>Désaffecter le camion</option>
                     {trucks.map((truck) => (
                       <option key={truck.id} value={truck.id}>
                         {truck.imat}
@@ -332,12 +361,20 @@ export default function CommandCard({
                       {item.article?.label || 'Inconnu'}
                     </span>
                     <span className='command-card__item-meta'>
-                      Poids: {((item.article?.weight ?? 0) * item.quantity).toFixed(2)} kg
+                      Poids:{' '}
+                      {((item.article?.weight ?? 0) * item.quantity).toFixed(2)}{' '}
+                      kg
                       {' · '}
-                      Volume: {((item.article?.volume ?? 0) * item.quantity).toFixed(2)} m³
+                      Volume:{' '}
+                      {((item.article?.volume ?? 0) * item.quantity).toFixed(
+                        2,
+                      )}{' '}
+                      m³
                     </span>
                   </div>
-                  <span className='command-card__item-qty'>×{item.quantity}</span>
+                  <span className='command-card__item-qty'>
+                    ×{item.quantity}
+                  </span>
                   <span className='command-card__item-price'>
                     {(item.quantity * item.unitPrice).toFixed(2)} €
                   </span>
