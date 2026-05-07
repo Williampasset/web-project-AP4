@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchFreeTransitLocations } from '@service/api/suppliers.service';
 import type { FreeTransitLocation } from '@type/supplier.type';
 import { useSuppliers } from '../../hooks/suppliers.hooks';
-import { supplierMatchesSearch } from './suppliers.utils';
+import { supplierMatchesSearch } from '@utils/suppliers.utils';
 
 export function useSuppliersPage() {
   const [searchParams] = useSearchParams();

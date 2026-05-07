@@ -10,8 +10,8 @@ import {
 import { fetchUsers } from '@service/api/users.service';
 import type { User } from '@type/user.type';
 import type { WarehouseLocation } from '@type/warehouse-location.type';
-import { sortByCoordinate, sortByFullCoordinate, toDisplayLocation } from './location.utils';
-import type { Building, DisplayLocation } from './types';
+import { sortByCoordinate, sortByFullCoordinate, toDisplayLocation } from '@utils/location.utils';
+import type { Building, DisplayLocation } from '@type/location-view.type';
 
 export function useLocationsPage() {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);

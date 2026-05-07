@@ -1,7 +1,7 @@
 import type { User } from '@type/user.type';
 import type { WarehouseLocation } from '@type/warehouse-location.type';
-import { formatLoc } from '../location.utils';
-import type { DisplayLocation } from '../types';
+import { formatLoc } from '@utils/location.utils';
+import type { DisplayLocation } from '@type/location-view.type';
 
 interface WarehouseInspectorProps {
   focusedLocation: DisplayLocation | null;

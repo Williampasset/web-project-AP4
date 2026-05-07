@@ -1,6 +1,6 @@
 interface DeleteConfirmModalProps {
   isOpen: boolean;
-  clientName: string;
+  userName: string;
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
@@ -8,7 +8,7 @@ interface DeleteConfirmModalProps {
 
 export default function DeleteConfirmModal({
   isOpen,
-  clientName,
+  userName,
   onConfirm,
   onCancel,
   isLoading = false,
@@ -19,11 +19,11 @@ export default function DeleteConfirmModal({
     <div className='delete-modal-overlay' onClick={onCancel}>
       <div className='delete-modal' onClick={(e) => e.stopPropagation()}>
         <div className='delete-modal-header'>
-          <h2>Supprimer le client</h2>
+          <h2>Supprimer l'utilisateur</h2>
         </div>
 
         <p className='delete-modal-message'>
-          Êtes-vous sûr de vouloir supprimer le client <strong>{clientName}</strong> ?
+          Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{userName}</strong> ?
           Cette action est irréversible.
         </p>
 

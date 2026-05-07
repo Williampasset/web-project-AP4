@@ -12,7 +12,8 @@
       "@component/*": ["component/*"],
       "@type/*": ["type/*"],
       "@data/*": ["data/*"],
-      "@service/*": ["service/*"]
+        "@service/*": ["service/*"],
+        "@utils/*": ["utils/*"]
     },
 
     /* Bundler mode */

@@ -4,8 +4,8 @@ import { useMemo, useState } from 'react';
 import { useUsers, useCreateUser, useDeleteUser } from '../../hooks/users.hooks';
 import { useCommands } from '../../hooks/commands.hooks';
 import { useStockJobsForAssignment } from '../../hooks/assignments.hooks';
-import UserModal from './components/UserModal';
-import DeleteConfirmModal from './components/DeleteConfirmModal';
+import UserModal from '@component/UserModal/UserModal';
+import DeleteConfirmModal from '@component/DeleteConfirmModal/DeleteConfirmModal';
 import type { User } from '@type/user.type';
 import './Users.css';
 

@@ -1,5 +1,5 @@
-import { getShortLabel } from '../location.utils';
-import type { DisplayLocation } from '../types';
+import { getShortLabel } from '@utils/location.utils';
+import type { DisplayLocation } from '@type/location-view.type';
 
 interface WarehousePlanProps {
   bulkLocations: DisplayLocation[];

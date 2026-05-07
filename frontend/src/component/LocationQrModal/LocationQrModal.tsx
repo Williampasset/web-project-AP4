@@ -1,5 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react';
-import type { DisplayLocation } from '../types';
+import type { DisplayLocation } from '@type/location-view.type';
 
 interface LocationQrModalProps {
   location: DisplayLocation | null;

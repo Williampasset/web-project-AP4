@@ -6,14 +6,14 @@ import type {
 import { useQueryClient } from '@tanstack/react-query';
 import { restockSupplierArticle } from '@service/api/suppliers.service';
 import { useMemo, useState } from 'react';
-import type { SupplierOrderModalState } from '../../pages/Suppliers/types';
+import type { SupplierOrderModalState } from '@type/supplier-modal.type';
 import {
   articleMatchesSearch,
   formatLocation,
   formatTransitLocation,
   getStockClass,
   getStockLabel,
-} from '../suppliers.utils';
+} from '@utils/suppliers.utils';
 import SupplierOrderModal from '@component/SupplierOrderModal/SupplierOrderModal';
 
 interface SupplierRowProps {

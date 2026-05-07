@@ -1,5 +1,5 @@
 import type { WarehouseLocation } from '@type/warehouse-location.type';
-import type { DisplayLocation } from './types';
+import type { DisplayLocation } from '@type/location-view.type';
 
 export const sortByCoordinate = (a: WarehouseLocation, b: WarehouseLocation) =>
   a.aisle - b.aisle || a.shelf - b.shelf || a.cell - b.cell;

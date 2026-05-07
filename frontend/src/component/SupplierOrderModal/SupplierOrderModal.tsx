@@ -1,7 +1,7 @@
 import type { FreeTransitLocation, Supplier } from '@type/supplier.type';
 import { XIcon } from 'lucide-react';
-import type { SupplierOrderModalState } from '../../pages/Suppliers/types';
-import { formatTransitLocation } from '../suppliers.utils';
+import type { SupplierOrderModalState } from '@type/supplier-modal.type';
+import { formatTransitLocation } from '@utils/suppliers.utils';
 
 interface SupplierOrderModalProps {
   supplier: Supplier;
