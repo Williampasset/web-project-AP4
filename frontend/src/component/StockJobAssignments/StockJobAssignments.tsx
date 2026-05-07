@@ -6,6 +6,7 @@ import {
 } from '../../hooks/assignments.hooks';
 import { useUsers } from '../../hooks/users.hooks';
 import type { StockJobAssignmentData } from '../../service/api/assignments.service';
+import { AlertCircle, Inbox } from 'lucide-react';
 
 export default function StockJobAssignments() {
   const { data: jobs = [], isLoading, isError, error } = useStockJobsForAssignment();
@@ -75,13 +76,19 @@ export default function StockJobAssignments() {
         <div className='assignments-empty'>
           {isError ? (
             <>
-              <p>❌ Erreur de chargement</p>
+              <p className='assignments-empty-title'>
+                <AlertCircle size={18} />
+                <span>Erreur de chargement</span>
+              </p>
               <p style={{ fontSize: '0.85rem', marginTop: '8px' }}>
                 {(error as Error)?.message || 'Les données ne sont pas disponibles'}
               </p>
             </>
           ) : (
-            <p>📭 Aucun travail de stock à affecter pour le moment.</p>
+            <p className='assignments-empty-title'>
+              <Inbox size={18} />
+              <span>Aucun travail de stock à affecter pour le moment.</span>
+            </p>
           )}
         </div>
       ) : (

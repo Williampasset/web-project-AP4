@@ -5,6 +5,7 @@ import {
   useUpdateLoadingStage,
 } from '../../hooks/assignments.hooks';
 import type { LoadingStageData } from '../../service/api/assignments.service';
+import { AlertCircle, Inbox } from 'lucide-react';
 
 export default function LoadingStageTracking() {
   const { data: stages = [], isLoading, isError, error } = useLoadingStages();
@@ -77,13 +78,19 @@ export default function LoadingStageTracking() {
         <div className='assignments-empty'>
           {isError ? (
             <>
-              <p>❌ Erreur de chargement</p>
+              <p className='assignments-empty-title'>
+                <AlertCircle size={18} />
+                <span>Erreur de chargement</span>
+              </p>
               <p style={{ fontSize: '0.85rem', marginTop: '8px' }}>
                 {(error as Error)?.message || 'Les données ne sont pas disponibles'}
               </p>
             </>
           ) : (
-            <p>📭 Aucune étape de chargement pour le moment.</p>
+            <p className='assignments-empty-title'>
+              <Inbox size={18} />
+              <span>Aucune étape de chargement pour le moment.</span>
+            </p>
           )}
         </div>
       ) : (

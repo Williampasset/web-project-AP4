@@ -38,6 +38,12 @@
   margin-bottom: -2px;
 }
 
+.assignments-tab-btn-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .assignments-tab-btn:hover {
   color: #334155;
   background: #f1f5f9;
@@ -89,6 +95,13 @@
   background: #f8fafc;
   border-radius: 10px;
   border: 1px dashed #cbd5e1;
+}
+
+.assignments-empty-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .assignments-table-wrap {
