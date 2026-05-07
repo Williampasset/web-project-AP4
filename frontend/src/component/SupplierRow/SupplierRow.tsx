@@ -6,7 +6,7 @@ import type {
 import { useQueryClient } from '@tanstack/react-query';
 import { restockSupplierArticle } from '@service/api/suppliers.service';
 import { useMemo, useState } from 'react';
-import type { SupplierOrderModalState } from '../types';
+import type { SupplierOrderModalState } from '../../pages/Suppliers/types';
 import {
   articleMatchesSearch,
   formatLocation,
@@ -14,7 +14,7 @@ import {
   getStockClass,
   getStockLabel,
 } from '../suppliers.utils';
-import SupplierOrderModal from './SupplierOrderModal';
+import SupplierOrderModal from '@component/SupplierOrderModal/SupplierOrderModal';
 
 interface SupplierRowProps {
   supplier: Supplier;

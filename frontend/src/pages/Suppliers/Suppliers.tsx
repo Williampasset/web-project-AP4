@@ -1,6 +1,6 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
-import SupplierRow from './components/SupplierRow';
+import SupplierRow from '@component/SupplierRow/SupplierRow';
 import { useSuppliersPage } from './useSuppliersPage';
 import './Suppliers.css';
 
