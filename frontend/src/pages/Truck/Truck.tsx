@@ -34,14 +34,20 @@ export default function Truck() {
   const isLoading = isLoadingTrucks || isLoadingCommands;
   const isError = isErrorTrucks || isErrorCommands;
 
-  const getTruckUsage = (truckId: number, maxLoad: number, maxVolume: number) => {
+  const getTruckUsage = (
+    truckId: number,
+    maxLoad: number,
+    maxVolume: number,
+  ) => {
     const truckCommands = commands.filter(
-      (command) => command.truckId === truckId && ACTIVE_STATUSES.includes(command.status),
+      (command) =>
+        command.truckId === truckId && ACTIVE_STATUSES.includes(command.status),
     );
 
     const usedWeight = truckCommands.reduce((commandSum, command) => {
       const commandWeight = command.items.reduce(
-        (itemSum, item) => itemSum + (item.article?.weight ?? 0) * item.quantity,
+        (itemSum, item) =>
+          itemSum + (item.article?.weight ?? 0) * item.quantity,
         0,
       );
       return commandSum + commandWeight;
@@ -49,14 +55,16 @@ export default function Truck() {
 
     const usedVolume = truckCommands.reduce((commandSum, command) => {
       const commandVolume = command.items.reduce(
-        (itemSum, item) => itemSum + (item.article?.volume ?? 0) * item.quantity,
+        (itemSum, item) =>
+          itemSum + (item.article?.volume ?? 0) * item.quantity,
         0,
       );
       return commandSum + commandVolume;
     }, 0);
 
     const weightUsagePercent = maxLoad > 0 ? (usedWeight / maxLoad) * 100 : 0;
-    const volumeUsagePercent = maxVolume > 0 ? (usedVolume / maxVolume) * 100 : 0;
+    const volumeUsagePercent =
+      maxVolume > 0 ? (usedVolume / maxVolume) * 100 : 0;
     const usagePercent = Math.max(weightUsagePercent, volumeUsagePercent);
 
     return {
@@ -121,15 +129,18 @@ export default function Truck() {
         <div className='truck-page__header'>
           <h1>Flotte de camions</h1>
           <p>
-            Statut opérationnel, ordre de passage, résumé des livraisons et capacité
-            poids/volume.
+            Statut opérationnel, ordre de passage, résumé des livraisons et
+            capacité poids/volume.
           </p>
         </div>
 
-        {isLoading && <Loading message='Chargement des camions...' size='large' />}
+        {isLoading && (
+          <Loading message='Chargement des camions...' size='large' />
+        )}
 
         {isError && (
           <div className='truck-page__feedback truck-page__feedback--error'>
+            <h3>Erreur de chargement</h3>
             <p>
               {trucksError instanceof Error
                 ? trucksError.message
@@ -156,7 +167,11 @@ export default function Truck() {
         {!isLoading && !isError && trucks.length > 0 && (
           <div className='truck-page__fleet'>
             {trucks.map((truck) => {
-              const usage = getTruckUsage(truck.id, truck.maxLoad, truck.maxVolume);
+              const usage = getTruckUsage(
+                truck.id,
+                truck.maxLoad,
+                truck.maxVolume,
+              );
               const sortedRoute = [...usage.truckCommands].sort((a, b) => {
                 const aDate = a.deliveryDate
                   ? new Date(a.deliveryDate).getTime()
@@ -167,9 +182,17 @@ export default function Truck() {
                 return aDate - bDate;
               });
 
-              const hasPending = usage.truckCommands.some((command) => command.status === 'PENDING');
-              const hasWaiting = usage.truckCommands.some((command) => command.status === 'WAITING');
-              const fleetStatus = getFleetStatus(truck.maintenanceEndAt, hasPending, hasWaiting);
+              const hasPending = usage.truckCommands.some(
+                (command) => command.status === 'PENDING',
+              );
+              const hasWaiting = usage.truckCommands.some(
+                (command) => command.status === 'WAITING',
+              );
+              const fleetStatus = getFleetStatus(
+                truck.maintenanceEndAt,
+                hasPending,
+                hasWaiting,
+              );
 
               const nearestDelivery = sortedRoute[0]?.deliveryDate ?? null;
               const estimatedReturn = getEstimatedReturn(
@@ -213,7 +236,7 @@ export default function Truck() {
 
                   {usage.isOverLimit && (
                     <div className='truck-page__alert-box'>
-                      ⚠️ Dépassement de capacité poids/volume
+                      Dépassement de capacité poids/volume
                     </div>
                   )}
 
@@ -222,7 +245,9 @@ export default function Truck() {
                       <h4>Chargement à venir</h4>
                       <p>
                         Date de livraison la plus proche:{' '}
-                        {nearestDelivery ? formatDate(nearestDelivery) : 'Non définie'}
+                        {nearestDelivery
+                          ? formatDate(nearestDelivery)
+                          : 'Non définie'}
                       </p>
                     </section>
                   )}
@@ -245,14 +270,20 @@ export default function Truck() {
 
                           return (
                             <li key={command.id}>
-                              <span className='truck-page__route-order'>#{index + 1}</span>
+                              <span className='truck-page__route-order'>
+                                #{index + 1}
+                              </span>
                               <div>
                                 <strong>
                                   {command.client.name} · {command.reference}
                                 </strong>
                                 <p>
-                                  Livraison: {command.deliveryDate ? formatDate(command.deliveryDate) : 'N/A'} ·
-                                  Poids: {commandWeight.toFixed(2)} kg · Volume: {commandVolume.toFixed(2)} m³
+                                  Livraison:{' '}
+                                  {command.deliveryDate
+                                    ? formatDate(command.deliveryDate)
+                                    : 'N/A'}{' '}
+                                  · Poids: {commandWeight.toFixed(2)} kg ·
+                                  Volume: {commandVolume.toFixed(2)} m³
                                 </p>
                               </div>
                             </li>
@@ -260,7 +291,10 @@ export default function Truck() {
                         })}
                       </ol>
                       <p className='truck-page__return'>
-                        Retour dépôt estimé: {estimatedReturn ? formatDate(estimatedReturn) : 'Non défini'}
+                        Retour dépôt estimé:{' '}
+                        {estimatedReturn
+                          ? formatDate(estimatedReturn)
+                          : 'Non défini'}
                       </p>
                     </section>
                   )}
@@ -270,7 +304,9 @@ export default function Truck() {
                       <h4>Maintenance</h4>
                       <p>
                         Fin de maintenance prévue:{' '}
-                        {truck.maintenanceEndAt ? formatDate(truck.maintenanceEndAt) : 'Non définie'}
+                        {truck.maintenanceEndAt
+                          ? formatDate(truck.maintenanceEndAt)
+                          : 'Non définie'}
                       </p>
                     </section>
                   )}

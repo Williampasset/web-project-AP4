@@ -30,7 +30,7 @@ const DefaultLayout: React.FC<DefaultLayoutProps> = ({
   const finalUserRole = userRole || user?.role || 'MANAGER';
 
   const handleLogout = useCallback(() => {
-    localStorage.removeItem('access_token');
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     sessionStorage.clear();
 

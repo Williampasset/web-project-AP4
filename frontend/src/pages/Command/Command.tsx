@@ -19,12 +19,20 @@ const STATUS_FILTERS: Array<{ value: 'ALL' | CommandStatus; label: string }> = [
 
 export default function Command() {
   const navigate = useNavigate();
-  const [statusFilter, setStatusFilter] = useState<'ALL' | CommandStatus>('ALL');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | CommandStatus>(
+    'ALL',
+  );
   const [search, setSearch] = useState('');
   const [showLateOnly, setShowLateOnly] = useState(false);
   const [savingCommandId, setSavingCommandId] = useState<number | null>(null);
 
-  const { data: commands = [], isLoading, isError, error, refetch } = useCommands(
+  const {
+    data: commands = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useCommands(
     statusFilter === 'ALL' ? undefined : { status: statusFilter },
   );
   const { data: users = [] } = useUsers();
@@ -37,16 +45,15 @@ export default function Command() {
 
     // Default filter: exclude only CANCELLED, show all others including DELIVERED
     if (statusFilter === 'ALL') {
-      filtered = filtered.filter(
-        (cmd) => cmd.status !== 'CANCELLED'
-      );
+      filtered = filtered.filter((cmd) => cmd.status !== 'CANCELLED');
     }
 
     // Filter by search
     const normalizedSearch = search.trim().toLowerCase();
     if (normalizedSearch) {
       filtered = filtered.filter((command) => {
-        const assignedUser = `${command.user.firstName} ${command.user.lastName}`.toLowerCase();
+        const assignedUser =
+          `${command.user.firstName} ${command.user.lastName}`.toLowerCase();
         return (
           command.reference.toLowerCase().includes(normalizedSearch) ||
           command.client.name.toLowerCase().includes(normalizedSearch) ||
@@ -75,8 +82,12 @@ export default function Command() {
         }
       }
 
-      const aDate = a.deliveryDate ? new Date(a.deliveryDate).getTime() : Infinity;
-      const bDate = b.deliveryDate ? new Date(b.deliveryDate).getTime() : Infinity;
+      const aDate = a.deliveryDate
+        ? new Date(a.deliveryDate).getTime()
+        : Infinity;
+      const bDate = b.deliveryDate
+        ? new Date(b.deliveryDate).getTime()
+        : Infinity;
       return aDate - bDate;
     });
 
@@ -141,7 +152,7 @@ export default function Command() {
                 onClick={() => setShowLateOnly(!showLateOnly)}
                 title='Afficher uniquement les commandes en retard'
               >
-                ⚠️ Retard
+                En retard
               </button>
             </div>
           </div>
@@ -153,6 +164,7 @@ export default function Command() {
 
         {isError && (
           <div className='commands-page__feedback commands-page__feedback--error'>
+            <h3>Erreur de chargement</h3>
             <p>
               {error instanceof Error
                 ? error.message
@@ -176,7 +188,9 @@ export default function Command() {
               <CommandCard
                 key={command.id}
                 command={command}
-                onViewDetails={(commandId) => navigate(`/commands/${commandId}`)}
+                onViewDetails={(commandId) =>
+                  navigate(`/commands/${commandId}`)
+                }
                 editableAssignments={command.status !== 'DELIVERED'}
                 users={users}
                 trucks={trucks}

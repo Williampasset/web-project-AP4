@@ -103,7 +103,10 @@ export default function Stock() {
       .filter((command) => PENDING_LOADING_STATUSES.includes(command.status))
       .forEach((command) => {
         command.items.forEach((item) => {
-          map.set(item.articleId, (map.get(item.articleId) ?? 0) + item.quantity);
+          map.set(
+            item.articleId,
+            (map.get(item.articleId) ?? 0) + item.quantity,
+          );
         });
       });
 
@@ -133,7 +136,9 @@ export default function Stock() {
       const locationText =
         (article.location
           ? `${article.location.building}-${article.location.aisle}-${article.location.shelf}-${article.location.cell}`
-          : '') || articleLocationById.get(article.id) || '';
+          : '') ||
+        articleLocationById.get(article.id) ||
+        '';
 
       if (!groups.has(key)) {
         groups.set(key, {
@@ -204,7 +209,9 @@ export default function Stock() {
   const stats = useMemo(() => {
     const total = rows.length;
     const shortages = rows.filter((r) => r.shortage).length;
-    const lowSoon = rows.filter((r) => !r.shortage && r.projectedStock <= 5).length;
+    const lowSoon = rows.filter(
+      (r) => !r.shortage && r.projectedStock <= 5,
+    ).length;
 
     return { total, shortages, lowSoon };
   }, [rows]);
@@ -219,7 +226,8 @@ export default function Stock() {
     navigate(`/suppliers?search=${encodeURIComponent(articleLabel)}`);
   };
 
-  const isLoading = isLoadingArticles || isLoadingCommands || isLoadingSuppliers;
+  const isLoading =
+    isLoadingArticles || isLoadingCommands || isLoadingSuppliers;
   const isError = isErrorArticles || isErrorCommands || isErrorSuppliers;
   const lastUpdatedAt = Math.max(
     articlesUpdatedAt || 0,
@@ -233,9 +241,8 @@ export default function Stock() {
     return (
       <DefaultLayout>
         <div className='stock-error'>
+          <h2>Erreur de chargement</h2>
           <p>
-            Erreur :
-            {' '}
             {(articlesError as Error)?.message ||
               (commandsError as Error)?.message ||
               (suppliersError as Error)?.message ||
@@ -261,11 +268,11 @@ export default function Stock() {
         <div>
           <h1>Suivi des stocks en temps réel</h1>
           <p>
-            Dernière mise à jour :
-            {' '}
-            {lastUpdatedAt ? new Date(lastUpdatedAt).toLocaleTimeString('fr-FR') : '--:--:--'}
-            {' '}
-            (rafraîchissement auto toutes les 10s)
+            Dernière mise à jour :{' '}
+            {lastUpdatedAt
+              ? new Date(lastUpdatedAt).toLocaleTimeString('fr-FR')
+              : '--:--:--'}{' '}
+            (rafraîchissement automatique toutes les 10s)
           </p>
         </div>
       </div>
@@ -275,7 +282,7 @@ export default function Stock() {
           <span>Articles suivis</span>
           <strong>{stats.total}</strong>
         </div>
-        <div className='kpi-card kpi-card--warn'>
+        <div className='kpi-card kpi-card--shortage'>
           <span>Pénuries probables</span>
           <strong>{stats.shortages}</strong>
         </div>
@@ -318,7 +325,9 @@ export default function Stock() {
               <td>{row.label}</td>
               <td>{row.stock}</td>
               <td>{row.pendingQty}</td>
-              <td className={row.projectedStock < 0 ? 'negative-stock' : ''}>{row.projectedStock}</td>
+              <td className={row.projectedStock < 0 ? 'negative-stock' : ''}>
+                {row.projectedStock}
+              </td>
               <td>
                 {row.shortage ? (
                   <button
@@ -327,7 +336,7 @@ export default function Stock() {
                     onClick={() => openSuppliersForArticle(row.label)}
                     title='Voir les fournisseurs pour cet article'
                   >
-                    ❌ Pénurie probable
+                    Pénurie probable
                   </button>
                 ) : row.projectedStock <= 5 ? (
                   <button
@@ -336,23 +345,29 @@ export default function Stock() {
                     onClick={() => openSuppliersForArticle(row.label)}
                     title='Voir les fournisseurs pour cet article'
                   >
-                    ⚠️ Bas
+                    Stock bas
                   </button>
                 ) : (
-                  <span className='stock-status in-stock'>✅ OK</span>
+                  <span className='stock-status in-stock'>OK</span>
                 )}
               </td>
               <td>
-                {row.suppliers.length > 0 ? row.suppliers.join(' / ') : 'Non renseigné'}
+                {row.suppliers.length > 0
+                  ? row.suppliers.join(' / ')
+                  : 'Non renseigné'}
               </td>
               <td>
-                {row.locations.length > 0 ? row.locations.join(' / ') : 'Non renseigné'}
+                {row.locations.length > 0
+                  ? row.locations.join(' / ')
+                  : 'Non renseigné'}
               </td>
             </tr>
           ))}
           {filtered.length === 0 && (
             <tr>
-              <td colSpan={8}>Aucun article trouvé.</td>
+              <td colSpan={8} className='empty-state'>
+                Aucun article trouvé.
+              </td>
             </tr>
           )}
         </tbody>
