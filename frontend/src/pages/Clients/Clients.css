@@ -96,6 +96,8 @@
   font-size: 0.75rem;
   font-weight: 700;
   margin-right: 6px;
+  border: none;
+  cursor: pointer;
 }
 
 .clients-badge--waiting { background: #fef3c7; color: #92400e; }

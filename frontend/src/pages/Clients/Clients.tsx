@@ -1,10 +1,12 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
 import { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { useClients } from '../../hooks/clients.hooks';
 import './Clients.css';
 
 export default function Clients() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const {
     data: clients = [],
@@ -153,15 +155,39 @@ export default function Clients() {
                       </td>
                       <td>{client.commands.length}</td>
                       <td>
-                        <span className='clients-badge clients-badge--waiting'>
+                        <button
+                          type='button'
+                          className='clients-badge clients-badge--waiting'
+                          onClick={() =>
+                            navigate(
+                              `/commands?status=WAITING&search=${encodeURIComponent(client.name)}`,
+                            )
+                          }
+                        >
                           WAITING: {waiting}
-                        </span>
-                        <span className='clients-badge clients-badge--pending'>
+                        </button>
+                        <button
+                          type='button'
+                          className='clients-badge clients-badge--pending'
+                          onClick={() =>
+                            navigate(
+                              `/commands?status=PENDING&search=${encodeURIComponent(client.name)}`,
+                            )
+                          }
+                        >
                           PENDING: {pending}
-                        </span>
-                        <span className='clients-badge clients-badge--delivered'>
+                        </button>
+                        <button
+                          type='button'
+                          className='clients-badge clients-badge--delivered'
+                          onClick={() =>
+                            navigate(
+                              `/commands?status=DELIVERED&search=${encodeURIComponent(client.name)}`,
+                            )
+                          }
+                        >
                           DELIVERED: {delivered}
-                        </span>
+                        </button>
                       </td>
                       <td>
                         {latest ? (

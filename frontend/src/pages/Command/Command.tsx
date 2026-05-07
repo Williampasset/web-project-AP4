@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import DefaultLayout from '@component/default/DefaultLayout';
 import CommandCard from '@component/CommandCard/CommandCard';
 import Loading from '@component/Loading/Loading';
@@ -19,10 +19,20 @@ const STATUS_FILTERS: Array<{ value: 'ALL' | CommandStatus; label: string }> = [
 
 export default function Command() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const getInitialStatusFilter = (): 'ALL' | CommandStatus => {
+    const status = searchParams.get('status');
+    if (status === 'WAITING' || status === 'PENDING' || status === 'DELIVERED' || status === 'CANCELLED') {
+      return status;
+    }
+    return 'ALL';
+  };
+
   const [statusFilter, setStatusFilter] = useState<'ALL' | CommandStatus>(
-    'ALL',
+    getInitialStatusFilter(),
   );
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(searchParams.get('search') ?? '');
   const [showLateOnly, setShowLateOnly] = useState(false);
   const [savingCommandId, setSavingCommandId] = useState<number | null>(null);
 
@@ -38,6 +48,19 @@ export default function Command() {
   const { data: users = [] } = useUsers();
   const { data: trucks = [] } = useTrucks();
   const updateCommandMutation = useUpdateCommand();
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    const searchFromParams = searchParams.get('search') ?? '';
+
+    if (status === 'WAITING' || status === 'PENDING' || status === 'DELIVERED' || status === 'CANCELLED') {
+      setStatusFilter(status);
+    } else {
+      setStatusFilter('ALL');
+    }
+
+    setSearch(searchFromParams);
+  }, [searchParams]);
 
   /**
    * Filters and sorts the list of commands based on the current status filter,
