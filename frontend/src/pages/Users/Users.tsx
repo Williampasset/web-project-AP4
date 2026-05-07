@@ -2,6 +2,8 @@ import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
 import { useMemo, useState } from 'react';
 import { useUsers, useCreateUser, useDeleteUser } from '../../hooks/users.hooks';
+import { useCommands } from '../../hooks/commands.hooks';
+import { useStockJobsForAssignment } from '../../hooks/assignments.hooks';
 import UserModal from './components/UserModal';
 import DeleteConfirmModal from './components/DeleteConfirmModal';
 import type { User } from '@type/user.type';
@@ -22,6 +24,9 @@ export default function Users() {
 
   const createMutation = useCreateUser();
   const deleteMutation = useDeleteUser();
+
+  const { data: commands = [] } = useCommands();
+  const { data: stockJobs = [] } = useStockJobsForAssignment();
 
   const filteredUsers = useMemo(() => {
     const normalized = search.trim().toLowerCase();
@@ -49,6 +54,26 @@ export default function Users() {
   const managers = useMemo(() => {
     return users.filter((u) => u.role === 'MANAGER');
   }, [users]);
+
+  const commandCountByUser = useMemo(() => {
+    const map: Record<number, number> = {};
+    for (const cmd of commands) {
+      if (cmd.userId != null && cmd.status !== 'DELIVERED' && cmd.status !== 'CANCELLED') {
+        map[cmd.userId] = (map[cmd.userId] ?? 0) + 1;
+      }
+    }
+    return map;
+  }, [commands]);
+
+  const stockJobCountByUser = useMemo(() => {
+    const map: Record<number, number> = {};
+    for (const job of stockJobs) {
+      if (job.status !== 'COMPLETED' && job.status !== 'CANCELLED') {
+        map[job.assignedUserId] = (map[job.assignedUserId] ?? 0) + 1;
+      }
+    }
+    return map;
+  }, [stockJobs]);
 
   const handleCloseModal = () => {
     setShowUserModal(false);
@@ -144,6 +169,8 @@ export default function Users() {
                   <th>Matricule</th>
                   <th>Rôle</th>
                   <th>Manager</th>
+                  <th>Commandes</th>
+                  <th>Tâches stock</th>
                   <th>Créé le</th>
                   <th>Actions</th>
                 </tr>
@@ -176,6 +203,24 @@ export default function Users() {
                           </div>
                         ) : (
                           <div className='users-muted'>—</div>
+                        )}
+                      </td>
+                      <td>
+                        {user.role === 'MAGASINIER' ? (
+                          <span className='users-count-badge'>
+                            {commandCountByUser[user.id] ?? 0}
+                          </span>
+                        ) : (
+                          <span className='users-muted'>—</span>
+                        )}
+                      </td>
+                      <td>
+                        {user.role === 'MAGASINIER' ? (
+                          <span className='users-count-badge users-count-badge--stock'>
+                            {stockJobCountByUser[user.id] ?? 0}
+                          </span>
+                        ) : (
+                          <span className='users-muted'>—</span>
                         )}
                       </td>
                       <td>
