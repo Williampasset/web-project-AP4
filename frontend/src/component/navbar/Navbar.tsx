@@ -113,18 +113,32 @@ const Navbar: React.FC<NavbarProps> = ({
     },
   ];
 
+  /**
+   * Checks if a navigation link is currently active based on the location.
+   * @param href The href of the link to check.
+   * @returns True if the link is active, false otherwise.
+   */
   const isActive = (href: string) => {
     return (
       location.pathname === href || location.pathname.startsWith(href + '/')
     );
   };
 
+  /**
+   * Handles the user logout process by calling the onLogout prop function if it exists.
+   * This function is triggered when the user clicks the logout button in the navbar.
+   */
   const handleLogout = () => {
     if (onLogout) {
       onLogout();
     }
   };
 
+  /**
+   * Toggles the expansion of a submenu in the navbar.
+   * If the submenu is already expanded, it collapses it; otherwise, it expands it.
+   * @param label The label of the menu to toggle
+   */
   const handleMenuToggle = (label: string) => {
     setExpandedMenu(expandedMenu === label ? null : label);
   };
