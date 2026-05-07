@@ -75,6 +75,144 @@
   margin-bottom: 24px;
 }
 
+.operator-board__stock-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.operator-board__section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: #111827;
+}
+
+.operator-board__section-empty {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.operator-board__stock-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.operator-board__stock-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.operator-board__stock-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.operator-board__stock-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.operator-board__stock-qty {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.operator-board__stock-article {
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.operator-board__stock-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.operator-board__stock-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.operator-board__stock-validation {
+  margin-top: 6px;
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
+
+.operator-board__stock-code-hint {
+  font-size: 12px;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.operator-board__stock-code-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.operator-board__stock-code-input {
+  flex: 1;
+  min-width: 220px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.operator-board__stock-code-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 188, 212, 0.12);
+}
+
+.operator-board__stock-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.operator-board__stock-btn--scan {
+  color: #1e40af;
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.operator-board__stock-btn--validate {
+  color: #166534;
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.operator-board__stock-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Filters Section */
 .operator-board__filters {
   display: flex;
