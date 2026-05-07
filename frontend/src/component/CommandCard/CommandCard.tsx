@@ -56,6 +56,16 @@ export default function CommandCard({
    * @returns A promise that resolves when the update is complete
    */
   const handleUserUpdate = async (value: string) => {
+    if (value === '') {
+      // Remove user assignment
+      setSelectedUserId(0); // Reset to invalid ID
+      if (onUpdateAssignments && command.userId !== null) {
+        await onUpdateAssignments(command.id, { userId: null as any });
+      }
+      setIsEditingUser(false);
+      return;
+    }
+
     const nextUserId = Number(value);
     if (Number.isNaN(nextUserId)) return;
 
@@ -254,6 +264,7 @@ export default function CommandCard({
                   }}
                   disabled={isUpdating}
                 >
+                  <option value=''>Désaffecter l'opérateur</option>
                   {users.map((user) => (
                     <option key={user.id} value={user.id}>
                       {user.firstName} {user.lastName}
@@ -262,7 +273,9 @@ export default function CommandCard({
                 </select>
               ) : (
                 <span className='command-card__info-value'>
-                  {command.user.firstName} {command.user.lastName}
+                  {command.user
+                    ? `${command.user.firstName} ${command.user.lastName}`
+                    : 'Non affecté'}
                 </span>
               )}
             </div>

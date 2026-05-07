@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import {
-  BarChart3,
   Package,
   Users,
-  Settings,
   LogOut,
   ChevronDown,
   Menu,
@@ -39,11 +37,6 @@ const Navbar: React.FC<NavbarProps> = ({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks: NavLink[] = [
-    {
-      label: 'Tableau de bord',
-      href: '/dashboard',
-      icon: <BarChart3 size={20} />,
-    },
     {
       label: 'Gestion des stocks',
       href: '/articles',
@@ -105,11 +98,6 @@ const Navbar: React.FC<NavbarProps> = ({
           icon: <Users size={16} />,
         },
       ],
-    },
-    {
-      label: 'Paramètres',
-      href: '/settings',
-      icon: <Settings size={20} />,
     },
   ];
 
