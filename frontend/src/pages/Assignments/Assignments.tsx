@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import DefaultLayout from '@component/default/DefaultLayout';
-import CommandAssignments from './components/CommandAssignments';
-import StockJobAssignments from './components/StockJobAssignments';
-import LoadingStageTracking from './components/LoadingStageTracking';
+import CommandAssignments from '@component/CommandAssignments/CommandAssignments';
+import StockJobAssignments from '@component/StockJobAssignments/StockJobAssignments';
+import LoadingStageTracking from '@component/LoadingStageTracking/LoadingStageTracking';
 import './Assignments.css';
 
 type TabType = 'commands' | 'jobs' | 'loading';
