@@ -14,6 +14,7 @@ import type {
   SupplierArticle,
 } from '@type/supplier.type';
 import './Suppliers.css';
+import { XIcon } from 'lucide-react';
 
 function SupplierRow({
   supplier,
@@ -62,7 +63,10 @@ function SupplierRow({
     return 'Disponible';
   };
 
-  const formatTransitLocation = (location: FreeTransitLocation, index: number) =>
+  const formatTransitLocation = (
+    location: FreeTransitLocation,
+    index: number,
+  ) =>
     `IN-${String(index + 1).padStart(2, '0')} (${location.building}-${location.aisle}-${location.shelf}-${location.cell})`;
 
   const openModal = (e: React.MouseEvent, article: SupplierArticle) => {
@@ -83,7 +87,9 @@ function SupplierRow({
     );
 
     if (!selectedTransit) {
-      alert('La zone IN sélectionnée n’est plus libre. Choisissez-en une autre.');
+      alert(
+        "La zone IN sélectionnée n'est plus libre. Choisissez-en une autre.",
+      );
       return;
     }
 
@@ -99,8 +105,12 @@ function SupplierRow({
 
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['suppliers'] }),
-        queryClient.invalidateQueries({ queryKey: ['suppliers', 'free-transit'] }),
-        queryClient.invalidateQueries({ queryKey: ['locations', 'warehouse-view'] }),
+        queryClient.invalidateQueries({
+          queryKey: ['suppliers', 'free-transit'],
+        }),
+        queryClient.invalidateQueries({
+          queryKey: ['locations', 'warehouse-view'],
+        }),
         queryClient.invalidateQueries({ queryKey: ['articles'] }),
         queryClient.invalidateQueries({ queryKey: ['articles', 'live-stock'] }),
       ]);
@@ -110,20 +120,25 @@ function SupplierRow({
       );
       const body = encodeURIComponent(
         `Bonjour,\n\nNous souhaitons passer commande pour l'article suivant :\n\n` +
-        `Référence : ${modal.article.reference}\n` +
-        `Désignation : ${modal.article.label}\n` +
-        `Quantité souhaitée : ${modal.quantity}\n` +
-        `Zone de dépôt IN : ${formatTransitLocation(
-          selectedTransit,
-          freeTransitLocations.findIndex((l) => l.id === selectedTransit.id),
-        )}\n` +
-        (modal.message ? `\nMessage complémentaire :\n${modal.message}\n` : '') +
-        `\nCordialement`,
+          `Référence : ${modal.article.reference}\n` +
+          `Désignation : ${modal.article.label}\n` +
+          `Quantité souhaitée : ${modal.quantity}\n` +
+          `Zone de dépôt IN : ${formatTransitLocation(
+            selectedTransit,
+            freeTransitLocations.findIndex((l) => l.id === selectedTransit.id),
+          )}\n` +
+          (modal.message
+            ? `\nMessage complémentaire :\n${modal.message}\n`
+            : '') +
+          `\nCordialement`,
       );
       window.location.href = `mailto:${supplier.email}?subject=${subject}&body=${body}`;
       setModal(null);
     } catch (error) {
-      alert((error as Error)?.message ?? 'Impossible d’enregistrer la commande fournisseur.');
+      alert(
+        (error as Error)?.message ??
+          "Impossible d'enregistrer la commande fournisseur.",
+      );
     } finally {
       setIsSending(false);
     }
@@ -144,9 +159,12 @@ function SupplierRow({
         </div>
         <div className='supplier-row__right'>
           <span className='badge badge--blue'>
-            {supplier.articles.length} article{supplier.articles.length !== 1 ? 's' : ''}
+            {supplier.articles.length} article
+            {supplier.articles.length !== 1 ? 's' : ''}
           </span>
-          <span className={`supplier-row__chevron ${isOpen ? 'supplier-row__chevron--open' : ''}`}>
+          <span
+            className={`supplier-row__chevron ${isOpen ? 'supplier-row__chevron--open' : ''}`}
+          >
             ›
           </span>
         </div>
@@ -155,7 +173,9 @@ function SupplierRow({
       {isOpen && (
         <div className='supplier-row__articles'>
           {supplier.articles.length === 0 ? (
-            <p className='supplier-row__empty'>Aucun article pour ce fournisseur.</p>
+            <p className='supplier-row__empty'>
+              Aucun article pour ce fournisseur.
+            </p>
           ) : (
             <table className='articles-table'>
               <thead>
@@ -174,18 +194,30 @@ function SupplierRow({
               <tbody>
                 {supplier.articles.map((article) => (
                   <tr key={article.id}>
-                    <td><code>{article.reference}</code></td>
+                    <td>
+                      <code>{article.reference}</code>
+                    </td>
                     <td>{article.label}</td>
-                    <td><span className='badge badge--gray'>{formatLocation(article)}</span></td>
+                    <td>
+                      <span className='badge badge--gray'>
+                        {formatLocation(article)}
+                      </span>
+                    </td>
                     <td>{article.price.toFixed(2)} €</td>
                     <td>{article.weight} kg</td>
                     <td>{article.volume} m³</td>
                     <td>{article.stock}</td>
-                    <td><span className={getStockClass(article.stock)}>{getStockLabel(article.stock)}</span></td>
+                    <td>
+                      <span className={getStockClass(article.stock)}>
+                        {getStockLabel(article.stock)}
+                      </span>
+                    </td>
                     <td>
                       <button
                         className='btn-order'
-                        disabled={!supplier.email || freeTransitLocations.length === 0}
+                        disabled={
+                          !supplier.email || freeTransitLocations.length === 0
+                        }
                         title={
                           !supplier.email
                             ? 'Aucun email renseigné'
@@ -195,7 +227,7 @@ function SupplierRow({
                         }
                         onClick={(e) => openModal(e, article)}
                       >
-                        ✉ Commander
+                        Commander
                       </button>
                     </td>
                   </tr>
@@ -212,7 +244,9 @@ function SupplierRow({
           <div className='modal' onClick={(e) => e.stopPropagation()}>
             <div className='modal__header'>
               <h2>Commande par email</h2>
-              <button className='modal__close' onClick={() => setModal(null)}>×</button>
+              <button className='modal__close' onClick={() => setModal(null)}>
+                <XIcon size={18} />
+              </button>
             </div>
             <div className='modal__body'>
               <div className='modal__field'>
@@ -225,7 +259,11 @@ function SupplierRow({
               </div>
               <div className='modal__field'>
                 <label>Article</label>
-                <input type='text' value={`${modal.article.reference} – ${modal.article.label}`} disabled />
+                <input
+                  type='text'
+                  value={`${modal.article.reference} – ${modal.article.label}`}
+                  disabled
+                />
               </div>
               <div className='modal__field'>
                 <label>Quantité souhaitée</label>
@@ -234,7 +272,17 @@ function SupplierRow({
                   min={1}
                   value={modal.quantity}
                   onChange={(e) =>
-                    setModal((m) => m ? { ...m, quantity: Math.max(1, parseInt(e.target.value) || 1) } : m)
+                    setModal((m) =>
+                      m
+                        ? {
+                            ...m,
+                            quantity: Math.max(
+                              1,
+                              parseInt(e.target.value) || 1,
+                            ),
+                          }
+                        : m,
+                    )
                   }
                 />
               </div>
@@ -263,27 +311,39 @@ function SupplierRow({
                   ))}
                 </select>
                 {freeTransitLocations.length === 0 && (
-                  <span className='modal__hint'>Aucune zone IN libre actuellement.</span>
+                  <span className='modal__hint'>
+                    Aucune zone IN libre actuellement.
+                  </span>
                 )}
               </div>
               <div className='modal__field'>
-                <label>Message complémentaire <span>(optionnel)</span></label>
+                <label>
+                  Message complémentaire <span>(optionnel)</span>
+                </label>
                 <textarea
                   rows={3}
                   placeholder='Informations supplémentaires…'
                   value={modal.message}
-                  onChange={(e) => setModal((m) => m ? { ...m, message: e.target.value } : m)}
+                  onChange={(e) =>
+                    setModal((m) => (m ? { ...m, message: e.target.value } : m))
+                  }
                 />
               </div>
             </div>
             <div className='modal__footer'>
-              <button className='btn-cancel' onClick={() => setModal(null)}>Annuler</button>
+              <button className='btn-cancel' onClick={() => setModal(null)}>
+                Annuler
+              </button>
               <button
                 className='btn-send'
                 onClick={sendEmail}
-                disabled={isSending || !modal.transitLocationId || freeTransitLocations.length === 0}
+                disabled={
+                  isSending ||
+                  !modal.transitLocationId ||
+                  freeTransitLocations.length === 0
+                }
               >
-                {isSending ? 'Envoi...' : '✉ Envoyer l’email'}
+                {isSending ? 'Envoi...' : "Envoyer l'email"}
               </button>
             </div>
           </div>
@@ -297,7 +357,13 @@ export default function Suppliers() {
   const [searchParams] = useSearchParams();
   const searchFromUrl = searchParams.get('search')?.trim() ?? '';
 
-  const { data: suppliers = [], isLoading, isError, error, refetch } = useSuppliers();
+  const {
+    data: suppliers = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSuppliers();
   const { data: freeTransitLocations = [] } = useQuery<FreeTransitLocation[]>({
     queryKey: ['suppliers', 'free-transit'],
     queryFn: fetchFreeTransitLocations,
@@ -327,7 +393,11 @@ export default function Suppliers() {
     return (
       <DefaultLayout>
         <div className='suppliers-error'>
-          <p>Erreur : {(error as Error)?.message ?? 'Impossible de charger les fournisseurs.'}</p>
+          <h2>Erreur de chargement</h2>
+          <p>
+            {(error as Error)?.message ??
+              'Impossible de charger les fournisseurs.'}
+          </p>
           <button onClick={() => refetch()}>Réessayer</button>
         </div>
       </DefaultLayout>
@@ -339,7 +409,9 @@ export default function Suppliers() {
       <div className='suppliers-page'>
         <div className='suppliers-page__header'>
           <h1>Fournisseurs</h1>
-          <p>{filtered.length} fournisseur{filtered.length !== 1 ? 's' : ''}</p>
+          <p>
+            {filtered.length} fournisseur{filtered.length !== 1 ? 's' : ''}
+          </p>
         </div>
 
         <input

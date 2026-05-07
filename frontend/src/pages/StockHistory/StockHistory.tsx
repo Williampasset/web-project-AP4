@@ -38,8 +38,12 @@ export default function StockHistory() {
   });
 
   const stats = useMemo(() => {
-    const inbound = entries.filter((e) => e.eventType === 'SUPPLIER_INBOUND').length;
-    const outbound = entries.filter((e) => e.eventType === 'COMMAND_SHIPMENT').length;
+    const inbound = entries.filter(
+      (e) => e.eventType === 'SUPPLIER_INBOUND',
+    ).length;
+    const outbound = entries.filter(
+      (e) => e.eventType === 'COMMAND_SHIPMENT',
+    ).length;
     return { inbound, outbound };
   }, [entries]);
 
@@ -49,7 +53,11 @@ export default function StockHistory() {
     return (
       <DefaultLayout>
         <div className='stock-history-error'>
-          <p>Erreur : {(error as Error)?.message ?? 'Impossible de charger l’historique stock.'}</p>
+          <h2>Erreur de chargement</h2>
+          <p>
+            {(error as Error)?.message ??
+              "Impossible de charger l'historique stock."}
+          </p>
           <button onClick={() => refetch()}>Réessayer</button>
         </div>
       </DefaultLayout>
@@ -61,7 +69,9 @@ export default function StockHistory() {
       <div className='stock-history-page'>
         <div className='stock-history-header'>
           <h1>Historique des mouvements de stock</h1>
-          <p>{entries.length} événement(s)</p>
+          <p>
+            {entries.length} événement{entries.length !== 1 ? 's' : ''}
+          </p>
         </div>
 
         <div className='stock-history-kpis'>
@@ -90,25 +100,45 @@ export default function StockHistory() {
               </tr>
             </thead>
             <tbody>
-              {entries.map((entry) => (
-                <tr key={entry.id}>
-                  <td>{new Date(entry.createdAt).toLocaleString('fr-FR')}</td>
-                  <td>
-                    <span className={eventClass[entry.eventType]}>{eventLabel[entry.eventType]}</span>
+              {entries.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className='empty-state'>
+                    Aucun événement enregistré.
                   </td>
-                  <td>
-                    <div>{entry.articleReference ?? '—'}</div>
-                    <small>{entry.articleLabel ?? '—'}</small>
-                  </td>
-                  <td>{entry.quantity}</td>
-                  <td>{entry.fromLocationName ?? '—'}</td>
-                  <td>{entry.toLocationName ?? '—'}</td>
-                  <td>
-                    {entry.supplierName ? `${entry.supplierName}` : entry.commandRef ? `${entry.commandRef}` : entry.jobId ? `JOB #${entry.jobId}` : '—'}
-                  </td>
-                  <td>{entry.note ?? '—'}</td>
                 </tr>
-              ))}
+              ) : (
+                entries.map((entry) => (
+                  <tr key={entry.id}>
+                    <td>{new Date(entry.createdAt).toLocaleString('fr-FR')}</td>
+                    <td>
+                      <span className={eventClass[entry.eventType]}>
+                        {eventLabel[entry.eventType]}
+                      </span>
+                    </td>
+                    <td>
+                      <div className='article-ref'>
+                        {entry.articleReference ?? '—'}
+                      </div>
+                      <small className='article-label'>
+                        {entry.articleLabel ?? '—'}
+                      </small>
+                    </td>
+                    <td>{entry.quantity}</td>
+                    <td>{entry.fromLocationName ?? '—'}</td>
+                    <td>{entry.toLocationName ?? '—'}</td>
+                    <td>
+                      {entry.supplierName
+                        ? `${entry.supplierName}`
+                        : entry.commandRef
+                          ? `${entry.commandRef}`
+                          : entry.jobId
+                            ? `JOB #${entry.jobId}`
+                            : '—'}
+                    </td>
+                    <td>{entry.note ?? '—'}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
