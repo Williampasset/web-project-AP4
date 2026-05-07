@@ -13,6 +13,7 @@ import TruckHistory from './pages/TruckHistory/TruckHistory';
 import Suppliers from './pages/Suppliers/Suppliers';
 import Locations from './pages/Locations/Locations';
 import StockHistory from './pages/StockHistory/StockHistory';
+import Clients from './pages/Clients/Clients';
 
 function App() {
   return (
@@ -69,6 +70,14 @@ function App() {
         element={
           <ProtectedRoute>
             <Suppliers />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/clients'
+        element={
+          <ProtectedRoute>
+            <Clients />
           </ProtectedRoute>
         }
       ></Route>
