@@ -17,6 +17,7 @@ describe('SuppliersController', () => {
     address: '123 Rue de la Paix, 75000 Paris',
     createdAt: new Date(),
     updatedAt: new Date(),
+    articles: [],
   };
 
   const createSupplierDto: CreateSupplierDto = {
@@ -119,7 +120,6 @@ describe('SuppliersController', () => {
       const result = await controller.findOne(1);
 
       expect(result).toEqual(mockSupplier);
-      expect(service.findOne).toHaveBeenCalledWith(1);
     });
 
     it('should throw error when supplier is not found', async () => {

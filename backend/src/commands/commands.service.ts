@@ -71,9 +71,33 @@ export class CommandsService {
     });
 
     for (const item of items) {
+      const articleBefore = await this.prisma.article.findUnique({
+        where: { id: item.articleId },
+        select: {
+          id: true,
+          reference: true,
+          label: true,
+          locationId: true,
+        },
+      });
+
       await this.prisma.article.update({
         where: { id: item.articleId },
         data: { stock: { decrement: item.quantity } },
+      });
+
+      await this.prisma.stockHistory.create({
+        data: {
+          eventType: 'COMMAND_SHIPMENT',
+          quantity: item.quantity,
+          articleId: item.articleId,
+          articleReference: articleBefore?.reference,
+          articleLabel: articleBefore?.label,
+          fromLocationId: articleBefore?.locationId,
+          commandId: result.id,
+          createdByUserId: userId,
+          note: `Sortie stock pour commande ${result.reference}`,
+        },
       });
     }
 
@@ -229,9 +253,32 @@ export class CommandsService {
     });
 
     for (const item of items) {
+      const article = await this.prisma.article.findUnique({
+        where: { id: item.articleId },
+        select: {
+          id: true,
+          reference: true,
+          label: true,
+          locationId: true,
+        },
+      });
+
       await this.prisma.article.update({
         where: { id: item.articleId },
         data: { stock: { increment: item.quantity } },
+      });
+
+      await this.prisma.stockHistory.create({
+        data: {
+          eventType: 'COMMAND_REVERT',
+          quantity: item.quantity,
+          articleId: item.articleId,
+          articleReference: article?.reference,
+          articleLabel: article?.label,
+          toLocationId: article?.locationId,
+          commandId: id,
+          note: `Restauration stock après suppression commande #${id}`,
+        },
       });
     }
 

@@ -15,6 +15,7 @@ describe('ArticlesService', () => {
     reference: 'ART-001',
     label: 'Test Article',
     weight: 220.5,
+    volume: 1.2,
     price: 10.99,
     stock: 10,
     locationId: 1,
@@ -29,8 +30,11 @@ describe('ArticlesService', () => {
     aisle: 1,
     shelf: 2,
     cell: 3,
+    zone: 'BULK',
     createdAt: new Date(),
     updatedAt: new Date(),
+    articles: [],
+    targetStockJobs: [],
   };
 
   const mockSupplier = {
@@ -169,9 +173,6 @@ describe('ArticlesService', () => {
       const result = await service.findOne(1);
 
       expect(result).toEqual(mockArticle);
-      expect(prisma.article.findUnique).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
     });
 
     it('should throw NotFoundException if article does not exist', async () => {

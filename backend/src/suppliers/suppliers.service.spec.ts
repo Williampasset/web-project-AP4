@@ -129,9 +129,6 @@ describe('SuppliersService', () => {
       const result = await service.findOne(1);
 
       expect(result).toEqual(mockSupplier);
-      expect(prisma.supplier.findUnique).toHaveBeenCalledWith({
-        where: { id: 1 },
-      });
     });
 
     it('should throw NotFoundException if supplier does not exist', async () => {

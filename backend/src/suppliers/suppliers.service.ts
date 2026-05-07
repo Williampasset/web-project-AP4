@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { PrismaService } from '../prisma.service';
@@ -26,7 +30,16 @@ export class SuppliersService {
    * @returns All suppliers in database
    */
   async findAll() {
-    const result = await this.prisma.supplier.findMany();
+    const result = await this.prisma.supplier.findMany({
+      include: {
+        articles: {
+          include: {
+            location: true,
+          },
+        },
+      },
+      orderBy: { name: 'asc' },
+    });
     return result;
   }
 
@@ -93,6 +106,13 @@ export class SuppliersService {
   private async findSupplierOrThrow(id: number) {
     const supplier = await this.prisma.supplier.findUnique({
       where: { id },
+      include: {
+        articles: {
+          include: {
+            location: true,
+          },
+        },
+      },
     });
 
     if (!supplier) throw new NotFoundException(`Supplier #${id} not found`);
@@ -113,5 +133,118 @@ export class SuppliersService {
     });
 
     return count;
+  }
+
+  /**
+   * Retrieve free inbound transit locations (zone TRANSIT with no article assigned)
+   */
+  async findFreeTransitLocations() {
+    return this.prisma.location.findMany({
+      where: {
+        zone: 'TRANSIT',
+        articles: {
+          none: {},
+        },
+      } as any,
+      orderBy: [{ aisle: 'asc' }, { shelf: 'asc' }, { cell: 'asc' }],
+      select: {
+        id: true,
+        building: true,
+        aisle: true,
+        shelf: true,
+        cell: true,
+        zone: true,
+      } as any,
+    });
+  }
+
+  /**
+   * Increase article stock when placing an order to a supplier
+   * @param supplierId Supplier identifier
+   * @param articleId Article identifier
+   * @param quantity Ordered quantity to add in stock
+   * @returns Restock summary with updated stock
+   */
+  async restockArticle(
+    supplierId: number,
+    articleId: number,
+    quantity: number,
+    transitLocationId: number,
+  ) {
+    await this.findSupplierOrThrow(supplierId);
+
+    const article = await this.prisma.article.findFirst({
+      where: {
+        id: articleId,
+        supplierId,
+      },
+      include: {
+        location: true,
+        supplier: true,
+      },
+    });
+
+    if (!article) {
+      throw new NotFoundException(
+        `Article #${articleId} is not provided by supplier #${supplierId}`,
+      );
+    }
+
+    const transitLocation = await this.prisma.location.findUnique({
+      where: { id: transitLocationId },
+      include: { articles: true },
+    });
+
+    if (!transitLocation || (transitLocation as any).zone !== 'TRANSIT') {
+      throw new NotFoundException(
+        `Transit location #${transitLocationId} not found`,
+      );
+    }
+
+    if (transitLocation.articles.length > 0) {
+      throw new ConflictException(
+        `Transit location #${transitLocationId} is already occupied`,
+      );
+    }
+
+    const newReference = `${article.reference}-IN-${transitLocationId}-${Date.now()}`;
+
+    const createdArticle = await this.prisma.article.create({
+      data: {
+        reference: newReference,
+        label: article.label,
+        weight: article.weight,
+        volume: article.volume,
+        price: article.price,
+        stock: quantity,
+        locationId: transitLocationId,
+        supplierId,
+      },
+      include: {
+        location: true,
+        supplier: true,
+      },
+    });
+
+    await this.prisma.stockHistory.create({
+      data: {
+        eventType: 'SUPPLIER_INBOUND',
+        quantity,
+        articleId: createdArticle.id,
+        articleReference: createdArticle.reference,
+        articleLabel: createdArticle.label,
+        toLocationId: transitLocationId,
+        supplierId,
+        note: `Réception fournisseur ${createdArticle.supplier?.name ?? `#${supplierId}`} vers zone IN`,
+      },
+    });
+
+    return {
+      supplierId,
+      articleId,
+      orderedQuantity: quantity,
+      transitLocationId,
+      article: createdArticle,
+    };
   }
 }

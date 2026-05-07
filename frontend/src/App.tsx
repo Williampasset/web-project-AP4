@@ -11,6 +11,9 @@ import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
 import CommandDetail from './pages/CommandDetail/CommandDetail';
 import Truck from './pages/Truck/Truck';
 import TruckHistory from './pages/Truck/TruckHistory';
+import Suppliers from './pages/Suppliers/Suppliers';
+import Locations from './pages/Locations/Locations';
+import StockHistory from './pages/StockHistory/StockHistory';
 
 function App() {
   return (
@@ -37,13 +40,14 @@ function App() {
         }
       ></Route>
       <Route
-        path='/stock'
+        path='/articles'
         element={
           <ProtectedRoute>
             <Stock />
           </ProtectedRoute>
         }
       ></Route>
+      <Route path='/stock' element={<Navigate to='/articles' replace />} />
       <Route
         path='/commands'
         element={
@@ -70,6 +74,34 @@ function App() {
         }
       ></Route>
       <Route path='/trucks' element={<Navigate to='/truck' replace />} />
+      <Route
+        path='/suppliers'
+        element={
+          <ProtectedRoute>
+            <Suppliers />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/locations'
+        element={
+          <ProtectedRoute>
+            <Locations />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/stock-history'
+        element={
+          <ProtectedRoute>
+            <StockHistory />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/stock-history'
+        element={<Navigate to='/stock-history' replace />}
+      />
       <Route
         path='/operateur'
         element={

@@ -1,4 +1,5 @@
-export type BuildingName = 'A' | 'B' | 'C' | 'D'; // adapte selon ton enum Prisma
+export type BuildingName = 'A' | 'B' | 'C' | 'D' | 'P';
+export type LocationZone = 'BULK' | 'PICK' | 'PREP' | 'TRANSIT';
 
 export interface Location {
   id: number;
@@ -7,6 +8,7 @@ export interface Location {
   aisle: number;
   shelf: number;
   cell: number;
+  zone: LocationZone;
 
   createdAt: string;
   updatedAt: string;

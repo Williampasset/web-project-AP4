@@ -12,6 +12,7 @@ import {
 import { SuppliersService } from './suppliers.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { RestockArticleDto } from './dto/restock-article.dto';
 import { JwtAuthGuard } from '../auth/jwt/jwt-auth.guard';
 
 @Controller('suppliers')
@@ -35,6 +36,15 @@ export class SuppliersController {
   @Get()
   async findAll() {
     return this.suppliersService.findAll();
+  }
+
+  /**
+   * Retrieve free inbound transit locations
+   * GET /suppliers/transit/free
+   */
+  @Get('transit/free')
+  async findFreeTransitLocations() {
+    return this.suppliersService.findFreeTransitLocations();
   }
 
   /**
@@ -63,6 +73,24 @@ export class SuppliersController {
   async countArticles(@Param('id', ParseIntPipe) id: number) {
     const count = await this.suppliersService.countArticles(id);
     return { supplierId: id, articlesCount: count };
+  }
+
+  /**
+   * Restock an article from a supplier
+   * POST /suppliers/:id/articles/:articleId/restock
+   */
+  @Post(':id/articles/:articleId/restock')
+  async restockArticle(
+    @Param('id', ParseIntPipe) supplierId: number,
+    @Param('articleId', ParseIntPipe) articleId: number,
+    @Body() restockArticleDto: RestockArticleDto,
+  ) {
+    return this.suppliersService.restockArticle(
+      supplierId,
+      articleId,
+      restockArticleDto.quantity,
+      restockArticleDto.transitLocationId,
+    );
   }
 
   /**

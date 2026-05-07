@@ -60,6 +60,11 @@ const Navbar: React.FC<NavbarProps> = ({
           href: '/suppliers',
           icon: <Package size={16} />,
         },
+        {
+          label: 'Historique stock',
+          href: '/stock-history',
+          icon: <History size={16} />,
+        },
       ],
     },
     {
