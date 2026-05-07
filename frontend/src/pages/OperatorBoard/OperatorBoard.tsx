@@ -4,12 +4,8 @@ import { toast } from 'react-hot-toast';
 import './OperatorBoard.css';
 import Loading from '../../component/Loading/Loading';
 import { getStatusLabel } from '@service/mapper.service';
-import {
-  useCommands,
-  useUpdateCommandStatus,
-  useDeleteCommand,
-} from '../../hooks/commands.hooks';
-import { type CommandStatus, COMMAND_STATUSES } from '@type/command.type';
+import { useCommands } from '../../hooks/commands.hooks';
+import { COMMAND_STATUSES } from '@type/command.type';
 import StatCard from '@component/StatCard/StatCard';
 import CommandCard from '@component/CommandCard/CommandCard';
 
@@ -32,8 +28,6 @@ export default function OperatorBoard() {
   } = useCommands({
     userId,
   });
-
-  const updateStatusMutation = useUpdateCommandStatus();
 
   const [filters, setFilters] = useState<FilterOptions>({
     status: 'ALL',
@@ -97,24 +91,6 @@ export default function OperatorBoard() {
       cancelled: commands.filter((c) => c.status === 'CANCELLED').length,
     };
   }, [commands]);
-
-  /**
-   * Handle status change for a command
-   */
-  const handleStatusChange = async (
-    commandId: number,
-    newStatus: CommandStatus,
-  ) => {
-    try {
-      await updateStatusMutation.mutateAsync({
-        id: commandId,
-        status: newStatus,
-      });
-    } catch (err) {
-      console.error('Failed to update command status:', err);
-      throw err;
-    }
-  };
 
   /**
    * Handle command details navigation
