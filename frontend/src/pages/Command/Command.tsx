@@ -39,6 +39,10 @@ export default function Command() {
   const { data: trucks = [] } = useTrucks();
   const updateCommandMutation = useUpdateCommand();
 
+  /**
+   * Filters and sorts the list of commands based on the current status filter,
+   * search query, and late-only toggle.
+   */
   const filteredCommands = useMemo(() => {
     const now = new Date();
     let filtered = commands;
@@ -94,6 +98,14 @@ export default function Command() {
     return sorted;
   }, [commands, search, showLateOnly, statusFilter]);
 
+  /**
+   * Handles updating the assigned user and/or truck for a command.
+   * Sets the savingCommandId state to show a loading indicator on the specific command card being updated.
+   * Calls the updateCommand mutation with the command ID and the new user/truck assignments.
+   * After the mutation completes, it resets the savingCommandId state to null.
+   * @param commandId The ID of the command to update
+   * @param data An object containing the new userId and/or truckId to assign to the command
+   */
   const handleUpdateAssignments = async (
     commandId: number,
     data: { userId?: number; truckId?: number | null },
