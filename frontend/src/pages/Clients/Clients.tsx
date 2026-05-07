@@ -2,12 +2,19 @@ import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { useClients } from '../../hooks/clients.hooks';
+import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '../../hooks/clients.hooks';
+import ClientModal from './components/ClientModal';
+import DeleteConfirmModal from './components/DeleteConfirmModal';
+import type { Client } from '@type/client.type';
 import './Clients.css';
 
 export default function Clients() {
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Client | null>(null);
+
   const {
     data: clients = [],
     isLoading,
@@ -15,6 +22,10 @@ export default function Clients() {
     error,
     refetch,
   } = useClients();
+
+  const createMutation = useCreateClient();
+  const updateMutation = useUpdateClient();
+  const deleteMutation = useDeleteClient();
 
   const filteredClients = useMemo(() => {
     const normalized = search.trim().toLowerCase();
@@ -61,6 +72,43 @@ export default function Clients() {
     };
   }, [filteredClients]);
 
+  const handleOpenModal = (client?: Client) => {
+    setEditingClient(client || null);
+    setShowClientModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowClientModal(false);
+    setEditingClient(null);
+  };
+
+  const handleClientSubmit = async (data: {
+    name: string;
+    address: string;
+    email: string;
+    phone: string;
+  }) => {
+    if (editingClient) {
+      await updateMutation.mutateAsync({
+        id: editingClient.id,
+        data,
+      });
+    } else {
+      await createMutation.mutateAsync(data);
+    }
+  };
+
+  const handleDeleteClick = (client: Client) => {
+    setDeleteTarget(client);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteTarget) {
+      await deleteMutation.mutateAsync(deleteTarget.id);
+      setDeleteTarget(null);
+    }
+  };
+
   if (isLoading) return <Loading />;
 
   if (isError) {
@@ -83,6 +131,12 @@ export default function Clients() {
             <h1>Clients</h1>
             <p>Suivi des clients et de leurs commandes</p>
           </div>
+          <button
+            className='clients-add-btn'
+            onClick={() => handleOpenModal()}
+          >
+            + Ajouter un client
+          </button>
         </div>
 
         <input
@@ -124,6 +178,7 @@ export default function Clients() {
                   <th>Commandes</th>
                   <th>Statuts</th>
                   <th>Dernière commande</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -201,6 +256,26 @@ export default function Clients() {
                           '—'
                         )}
                       </td>
+                      <td>
+                        <div className='clients-actions'>
+                          <button
+                            type='button'
+                            className='clients-action-btn clients-action-edit'
+                            onClick={() => handleOpenModal(client)}
+                            title='Modifier'
+                          >
+                            ✎
+                          </button>
+                          <button
+                            type='button'
+                            className='clients-action-btn clients-action-delete'
+                            onClick={() => handleDeleteClick(client)}
+                            title='Supprimer'
+                          >
+                            🗑
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   );
                 })}
@@ -209,6 +284,22 @@ export default function Clients() {
           </div>
         )}
       </div>
+
+      <ClientModal
+        isOpen={showClientModal}
+        client={editingClient}
+        onClose={handleCloseModal}
+        onSubmit={handleClientSubmit}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
+
+      <DeleteConfirmModal
+        isOpen={!!deleteTarget}
+        clientName={deleteTarget?.name || ''}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+        isLoading={deleteMutation.isPending}
+      />
     </DefaultLayout>
   );
 }
