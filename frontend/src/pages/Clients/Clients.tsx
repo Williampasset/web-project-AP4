@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '../../hooks/clients.hooks';
 import ClientModal from '@component/ClientModal/ClientModal';
-import DeleteConfirmModal from '@component/DeleteConfirmModal/DeleteConfirmModal';
+import ClientDeleteConfirmModal from '@component/ClientDeleteConfirmModal/ClientDeleteConfirmModal';
 import type { Client } from '@type/client.type';
 import './Clients.css';
 
@@ -293,7 +293,7 @@ export default function Clients() {
         isLoading={createMutation.isPending || updateMutation.isPending}
       />
 
-      <DeleteConfirmModal
+      <ClientDeleteConfirmModal
         isOpen={!!deleteTarget}
         clientName={deleteTarget?.name || ''}
         onConfirm={handleConfirmDelete}

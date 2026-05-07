@@ -3,9 +3,9 @@ import Loading from '@component/Loading/Loading';
 import {
   useStockJobsForAssignment,
   useUpdateStockJobAssignment,
-} from '../../../hooks/assignments.hooks';
-import { useUsers } from '../../../hooks/users.hooks';
-import type { StockJobAssignmentData } from '../../../service/api/assignments.service';
+} from '../../hooks/assignments.hooks';
+import { useUsers } from '../../hooks/users.hooks';
+import type { StockJobAssignmentData } from '../../service/api/assignments.service';
 
 export default function StockJobAssignments() {
   const { data: jobs = [], isLoading, isError, error } = useStockJobsForAssignment();

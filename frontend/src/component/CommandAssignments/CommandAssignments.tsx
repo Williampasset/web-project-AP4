@@ -3,9 +3,9 @@ import Loading from '@component/Loading/Loading';
 import {
   useCommandsForAssignment,
   useUpdateCommandAssignment,
-} from '../../../hooks/assignments.hooks';
-import { useUsers } from '../../../hooks/users.hooks';
-import type { CommandAssignmentData } from '../../../service/api/assignments.service';
+} from '../../hooks/assignments.hooks';
+import { useUsers } from '../../hooks/users.hooks';
+import type { CommandAssignmentData } from '../../service/api/assignments.service';
 
 export default function CommandAssignments() {
   const { data: commands = [], isLoading, isError, error } = useCommandsForAssignment();

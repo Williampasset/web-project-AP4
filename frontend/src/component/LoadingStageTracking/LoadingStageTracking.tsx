@@ -3,8 +3,8 @@ import Loading from '@component/Loading/Loading';
 import {
   useLoadingStages,
   useUpdateLoadingStage,
-} from '../../../hooks/assignments.hooks';
-import type { LoadingStageData } from '../../../service/api/assignments.service';
+} from '../../hooks/assignments.hooks';
+import type { LoadingStageData } from '../../service/api/assignments.service';
 
 export default function LoadingStageTracking() {
   const { data: stages = [], isLoading, isError, error } = useLoadingStages();
