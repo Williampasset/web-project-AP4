@@ -1,7 +1,7 @@
 import { getHeaders } from './api.helper';
 import type { User } from '@type/user.type';
 
-const BASE_URL = 'http://localhost:3000/users';
+const BASE_URL = '/api/users';
 
 export const fetchUsers = async (): Promise<User[]> => {
   const res = await fetch(BASE_URL, {

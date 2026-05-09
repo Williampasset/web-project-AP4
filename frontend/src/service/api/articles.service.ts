@@ -1,7 +1,7 @@
 import { getHeaders } from './api.helper';
 import type { Article } from '@type/article.type';
 
-const BASE_URL = 'http://localhost:3000/articles';
+const BASE_URL = '/api/articles';
 
 export const fetchArticles = async (): Promise<Article[]> => {
   const res = await fetch(BASE_URL, {

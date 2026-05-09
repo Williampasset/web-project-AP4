@@ -1,7 +1,7 @@
 import { getHeaders } from './api.helper';
 import type { WarehouseLocation } from '@type/warehouse-location.type';
 
-const BASE_URL = 'http://localhost:3000/locations';
+const BASE_URL = '/api/locations';
 
 const parseErrorMessage = async (res: Response, fallback: string) => {
   try {

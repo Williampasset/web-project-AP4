@@ -1,6 +1,6 @@
 // api/commands.api.ts
 import { getHeaders } from './api.helper';
-const BASE_URL = 'http://localhost:3000/commands';
+const BASE_URL = '/api/commands';
 
 /**
  * Fetch commands with optional filters for status and userId.

@@ -1,6 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ArrowLeft, MapPin, Package, Check, AlertCircle } from 'lucide-react';
+import {
+  ArrowLeft,
+  MapPin,
+  Package,
+  Check,
+  AlertCircle,
+  QrCode,
+} from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Loading from '../../component/Loading/Loading';
 import { getStatusLabel, getStatusClass } from '@service/mapper.service';
@@ -11,6 +18,7 @@ import {
   useMarkItemPicked,
   usePreparationStatus,
 } from '../../hooks/command-preparation.hooks';
+import QrPickingScanner from '../../component/QrPickingScanner/QrPickingScanner';
 
 export default function CommandDetail() {
   const navigate = useNavigate();
@@ -21,41 +29,51 @@ export default function CommandDetail() {
 
   const { data: preparation } = usePreparationStatus(commandId!);
 
-  const totalItems = preparation?.stats.total ?? 0;
-  const preparedCount = preparation?.stats.picked ?? 0;
+  const totalItems = command?.items.length ?? 0;
+  const preparedCount =
+    preparation?.stats.picked ??
+    command?.items.filter((item) => item.commandItemPreparation?.isPicked)
+      .length ??
+    0;
 
   const progress = totalItems > 0 ? (preparedCount / totalItems) * 100 : 0;
 
   const currentItem = useMemo(() => {
-    if (!command || !preparation) return null;
+    if (!command) return null;
 
-    return command.items.find(
-      (item) =>
-        !preparation.command.items.find((i: any) => i.id === item.id)
-          ?.commandItemPreparation?.isPicked,
+    const pickedItemIds = new Set(
+      preparation?.command.items
+        ?.filter((item: any) => item.commandItemPreparation?.isPicked)
+        .map((item: any) => item.id) ?? [],
     );
+
+    return command.items.find((item) => !pickedItemIds.has(item.id)) ?? null;
   }, [command, preparation]);
 
   const { mutate: markPicked } = useMarkItemPicked();
+  const [showScanner, setShowScanner] = useState(false);
 
   /**
    * Handles marking the current item as prepared.
    */
   const handleItemPrepared = () => {
-    if (!currentItem) return;
-
-    if (!command) return;
+    if (!currentItem || !command) return;
 
     markPicked(
       {
         commandItemId: currentItem.id,
-        commandId: command?.id!,
+        commandId: command.id,
       },
       {
         onSuccess: () => toast.success('Article préparé ✓'),
         onError: () => toast.error('Erreur'),
       },
     );
+  };
+
+  const handleQrSuccess = () => {
+    setShowScanner(false);
+    handleItemPrepared();
   };
 
   /**
@@ -200,7 +218,7 @@ export default function CommandDetail() {
         </div>
       </section>
 
-      {currentItem && !currentItem.commandItemPreparation?.isPicked && (
+      {currentItem && (
         <section className='command-detail__current-item'>
           <div className='command-detail__current-header'>
             <span className='command-detail__current-badge'>
@@ -310,25 +328,45 @@ export default function CommandDetail() {
 
           <div className='command-detail__actions'>
             <button
-              onClick={handleItemPrepared}
+              onClick={() => setShowScanner(true)}
               disabled={
-                currentItem.commandItemPreparation?.isPicked ||
+                !currentItem ||
                 command.status === 'DELIVERED' ||
                 command.status === 'CANCELLED'
               }
               className='command-detail__button command-detail__button--success'
             >
+              <QrCode size={18} />
+              Scanner QR code
+            </button>
+            <button
+              onClick={handleItemPrepared}
+              disabled={
+                !currentItem ||
+                command.status === 'DELIVERED' ||
+                command.status === 'CANCELLED'
+              }
+              className='command-detail__button command-detail__button--manual'
+            >
               <Check size={18} />
-              Marquer comme préparé
+              Valider manuellement
             </button>
           </div>
         </section>
       )}
 
+      {showScanner && currentItem?.article?.reference && (
+        <QrPickingScanner
+          expectedArticleRef={currentItem.article.reference}
+          onSuccess={handleQrSuccess}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
+
       <section id='command-summary' className='command-detail__section'>
         <h2 className='command-detail__section-title'>Articles</h2>
         <div className='command-detail__items-list'>
-          {command.items.map((item, index) => {
+          {command.items.map((item) => {
             const isPrepared = item?.commandItemPreparation?.isPicked;
 
             return (

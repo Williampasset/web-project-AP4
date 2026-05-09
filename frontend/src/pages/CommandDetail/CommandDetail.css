@@ -452,6 +452,18 @@
   box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
 }
 
+.command-detail__button--manual {
+  background: white;
+  color: #6b7280;
+  border: 2px solid #e5e7eb;
+}
+
+.command-detail__button--manual:hover:not(:disabled) {
+  background: #f9fafb;
+  color: #374151;
+  border-color: #d1d5db;
+}
+
 .command-detail__button--secondary {
   background: white;
   color: #6b7280;
