@@ -325,6 +325,7 @@ enum CommandStatus {
   WAITING
   PENDING
   READY
+  IN_DELIVERY
   DELIVERED
   CANCELLED
 }

@@ -1,12 +1,17 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
-import { useTrucks } from '../../hooks/trucks.hooks';
+import { useDepartTruck, useTrucks } from '../../hooks/trucks.hooks';
 import { useCommands } from '../../hooks/commands.hooks';
 import type { CommandStatus } from '@type/command.type';
 import { formatDate } from '@service/date.service';
 import './Truck.css';
 
-const ACTIVE_STATUSES: CommandStatus[] = ['WAITING', 'PENDING', 'READY'];
+const ACTIVE_STATUSES: CommandStatus[] = [
+  'WAITING',
+  'PENDING',
+  'READY',
+  'IN_DELIVERY',
+];
 
 type FleetStatus =
   | 'MAINTENANCE'
@@ -15,6 +20,7 @@ type FleetStatus =
   | 'AVAILABLE';
 
 export default function Truck() {
+  const { mutate: departTruck, isPending: isDepartingTruck } = useDepartTruck();
   const {
     data: trucks = [],
     isLoading: isLoadingTrucks,
@@ -182,20 +188,23 @@ export default function Truck() {
                 return aDate - bDate;
               });
 
-              const hasPending = usage.truckCommands.some(
-                (command) => command.status === 'PENDING',
-              );
               const hasReady = usage.truckCommands.some(
                 (command) => command.status === 'READY',
+              );
+              const hasInDelivery = usage.truckCommands.some(
+                (command) => command.status === 'IN_DELIVERY',
               );
               const hasWaiting = usage.truckCommands.some(
                 (command) => command.status === 'WAITING',
               );
               const fleetStatus = getFleetStatus(
                 truck.maintenanceEndAt,
-                hasPending,
+                hasInDelivery,
                 hasWaiting || hasReady,
               );
+              const canDepart =
+                usage.truckCommands.length > 0 &&
+                usage.truckCommands.every((command) => command.status === 'READY');
 
               const nearestDelivery = sortedRoute[0]?.deliveryDate ?? null;
               const estimatedReturn = getEstimatedReturn(
@@ -275,6 +284,15 @@ export default function Truck() {
                           ? formatDate(nearestDelivery)
                           : formatDate(usage.truckCommands[0].commandDate)}
                       </p>
+
+                      <button
+                        type='button'
+                        className='truck-page__depart-button'
+                        disabled={!canDepart || isDepartingTruck}
+                        onClick={() => departTruck(truck.id)}
+                      >
+                        Faire partir le camion
+                      </button>
                     </section>
                   )}
 

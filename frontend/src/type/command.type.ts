@@ -7,6 +7,7 @@ export type CommandStatus =
   | 'WAITING'
   | 'PENDING'
   | 'READY'
+  | 'IN_DELIVERY'
   | 'DELIVERED'
   | 'CANCELLED';
 
@@ -95,6 +96,7 @@ export const COMMAND_STATUSES: CommandStatus[] = [
   'WAITING',
   'PENDING',
   'READY',
+  'IN_DELIVERY',
   'DELIVERED',
   'CANCELLED',
 ];
@@ -102,7 +104,8 @@ export const COMMAND_STATUSES: CommandStatus[] = [
 export const STATUS_TRANSITIONS: Record<CommandStatus, CommandStatus[]> = {
   WAITING: ['PENDING', 'CANCELLED'],
   PENDING: ['READY', 'CANCELLED'],
-  READY: ['DELIVERED', 'CANCELLED'],
+  READY: ['IN_DELIVERY', 'CANCELLED'],
+  IN_DELIVERY: ['DELIVERED'],
   DELIVERED: [],
   CANCELLED: [],
 };

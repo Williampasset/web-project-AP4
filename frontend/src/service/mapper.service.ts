@@ -11,6 +11,8 @@ export function getStatusClass(status: string) {
       return 'pending';
     case 'READY':
       return 'ready';
+    case 'IN_DELIVERY':
+      return 'in_delivery';
     case 'DELIVERED':
       return 'delivered';
     case 'CANCELLED':
@@ -33,6 +35,8 @@ export function getStatusLabel(status: string) {
       return 'En cours';
     case 'READY':
       return 'Prête';
+    case 'IN_DELIVERY':
+      return 'En cours de livraison';
     case 'DELIVERED':
       return 'Terminée';
     case 'CANCELLED':
