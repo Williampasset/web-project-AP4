@@ -139,7 +139,7 @@ export default function CommandCard({
    * Check if stock is insufficient for any item
    */
   const hasInsufficientStock = (): boolean => {
-    if (command.status !== 'WAITING' && command.status !== 'PENDING') {
+    if (command.status === 'DELIVERED' || command.status === 'CANCELLED') {
       return false;
     }
 

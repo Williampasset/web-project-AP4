@@ -210,6 +210,9 @@ export default function Truck() {
               const estimatedReturn = getEstimatedReturn(
                 sortedRoute.map((command) => command.deliveryDate),
               );
+              const upcomingLoadingCommands = sortedRoute.filter(
+                (command) => command.status === 'WAITING',
+              );
 
               return (
                 <article
@@ -252,37 +255,27 @@ export default function Truck() {
                     </div>
                   )}
 
-                  {usage.truckCommands.some(
-                    (command) =>
-                      command.status === 'WAITING' ||
-                      command.status === 'READY',
-                  ) && (
+                  {upcomingLoadingCommands.length > 0 && (
                     <section className='truck-page__section'>
                       <h4>Chargements à venir</h4>
                       <ul className='truck-page__upcoming-list'>
-                        {[...usage.truckCommands]
-                          .filter(
-                            (command) =>
-                              command.status === 'WAITING' ||
-                              command.status === 'READY',
-                          )
-                          .map((command) => (
-                            <li key={command.id}>
-                              <strong>{command.reference}</strong>
-                              <span>
-                                Date:{' '}
-                                {formatDate(
-                                  command.deliveryDate ?? command.commandDate,
-                                )}
-                              </span>
-                            </li>
-                          ))}
+                        {upcomingLoadingCommands.map((command) => (
+                          <li key={command.id}>
+                            <strong>{command.reference}</strong>
+                            <span>
+                              Date:{' '}
+                              {formatDate(
+                                command.deliveryDate ?? command.commandDate,
+                              )}
+                            </span>
+                          </li>
+                        ))}
                       </ul>
                       <p className='truck-page__upcoming-next-date'>
                         Prochaine date:{' '}
                         {nearestDelivery
                           ? formatDate(nearestDelivery)
-                          : formatDate(usage.truckCommands[0].commandDate)}
+                          : formatDate(upcomingLoadingCommands[0].commandDate)}
                       </p>
 
                       <button
