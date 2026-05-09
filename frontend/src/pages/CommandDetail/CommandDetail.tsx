@@ -328,7 +328,7 @@ export default function CommandDetail() {
       <section id='command-summary' className='command-detail__section'>
         <h2 className='command-detail__section-title'>Articles</h2>
         <div className='command-detail__items-list'>
-          {command.items.map((item, index) => {
+          {command.items.map((item) => {
             const isPrepared = item?.commandItemPreparation?.isPicked;
 
             return (
