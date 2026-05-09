@@ -1,2 +1,14 @@
 backend/package-lock.json
 frontend/package-lock.json
+
+# Environment files
+.env
+.env.*
+!.env.vps.example
+backend/.env
+frontend/.env
+
+# Common build outputs
+**/node_modules/
+**/dist/
+coverage/
