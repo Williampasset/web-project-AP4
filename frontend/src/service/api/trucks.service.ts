@@ -2,7 +2,7 @@ import { getHeaders } from './api.helper';
 import type { Truck } from '@type/truck.type';
 import type { Trip } from '@type/trip.type';
 
-const BASE_URL = 'http://localhost:3000/trucks';
+const BASE_URL = '/api/trucks';
 
 export const fetchTrucks = async (): Promise<Truck[]> => {
   const res = await fetch(BASE_URL, {

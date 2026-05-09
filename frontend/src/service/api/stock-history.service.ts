@@ -1,7 +1,7 @@
 import { getHeaders } from './api.helper';
 import type { StockHistoryEntry } from '@type/stock-history.type';
 
-const BASE_URL = 'http://localhost:3000/stock-history';
+const BASE_URL = '/api/stock-history';
 
 export const fetchStockHistory = async (): Promise<StockHistoryEntry[]> => {
   const res = await fetch(BASE_URL, {
