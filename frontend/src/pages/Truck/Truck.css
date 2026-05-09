@@ -173,6 +173,43 @@
   line-height: 1.5;
 }
 
+.truck-page__upcoming-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.truck-page__upcoming-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.truck-page__upcoming-list strong {
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.truck-page__upcoming-list span {
+  color: #6b7280;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.truck-page__upcoming-next-date {
+  margin-top: 10px !important;
+  font-weight: 700;
+  color: #111827;
+}
+
 /* Route list */
 .truck-page__route-list {
   margin: 8px 0 0;
