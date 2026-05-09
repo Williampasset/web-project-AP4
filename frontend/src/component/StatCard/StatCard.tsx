@@ -4,13 +4,14 @@ import './StatCard.css';
 interface StatCardProps {
   label: string;
   value: number;
-  variant: 'default' | 'waiting' | 'pending' | 'delivered' | 'cancelled';
+  variant: 'default' | 'waiting' | 'pending' | 'ready' | 'delivered' | 'cancelled';
 }
 
 const iconMap = {
   default: BarChart3,
   waiting: Clock,
   pending: Truck,
+  ready: Truck,
   delivered: CheckCircle,
   cancelled: XCircle,
 };

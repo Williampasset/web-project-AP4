@@ -186,7 +186,7 @@ export class TrucksService {
     const commands = await this.prisma.command.findMany({
       where: {
         truckId: id,
-        status: { in: ['WAITING', 'PENDING'] },
+        status: { in: ['WAITING', 'PENDING', 'READY'] },
       },
       include: {
         items: {
@@ -257,6 +257,7 @@ export class TrucksService {
     const statusCount = {
       WAITING: 0,
       PENDING: 0,
+      READY: 0,
       DELIVERED: 0,
       CANCELLED: 0,
     };
@@ -299,7 +300,7 @@ export class TrucksService {
       where: {
         commands: {
           none: {
-            status: { in: ['WAITING', 'PENDING'] },
+            status: { in: ['WAITING', 'PENDING', 'READY'] },
           },
         },
       },
@@ -317,7 +318,7 @@ export class TrucksService {
     const trucks = await this.prisma.truck.findMany({
       include: {
         commands: {
-          where: { status: { in: ['WAITING', 'PENDING'] } },
+          where: { status: { in: ['WAITING', 'PENDING', 'READY'] } },
           include: {
             items: {
               include: {

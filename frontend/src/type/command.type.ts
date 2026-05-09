@@ -3,7 +3,12 @@ import type { Truck } from './truck.type';
 import type { User } from './user.type';
 import type { Location } from './location.type';
 
-export type CommandStatus = 'WAITING' | 'PENDING' | 'DELIVERED' | 'CANCELLED';
+export type CommandStatus =
+  | 'WAITING'
+  | 'PENDING'
+  | 'READY'
+  | 'DELIVERED'
+  | 'CANCELLED';
 
 export interface CommandItemPreparation {
   id: number;
@@ -89,13 +94,15 @@ export interface Command {
 export const COMMAND_STATUSES: CommandStatus[] = [
   'WAITING',
   'PENDING',
+  'READY',
   'DELIVERED',
   'CANCELLED',
 ];
 
 export const STATUS_TRANSITIONS: Record<CommandStatus, CommandStatus[]> = {
   WAITING: ['PENDING', 'CANCELLED'],
-  PENDING: ['DELIVERED', 'CANCELLED'],
+  PENDING: ['READY', 'CANCELLED'],
+  READY: ['DELIVERED', 'CANCELLED'],
   DELIVERED: [],
   CANCELLED: [],
 };

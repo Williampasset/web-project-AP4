@@ -11,7 +11,7 @@ export interface Client {
 export interface ClientCommandSummary {
   id: number;
   reference: string;
-  status: 'WAITING' | 'PENDING' | 'DELIVERED' | 'CANCELLED';
+  status: 'WAITING' | 'PENDING' | 'READY' | 'DELIVERED' | 'CANCELLED';
   commandDate: string;
 }
 

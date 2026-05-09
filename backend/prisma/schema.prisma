@@ -324,6 +324,7 @@ enum UserRole {
 enum CommandStatus {
   WAITING
   PENDING
+  READY
   DELIVERED
   CANCELLED
 }

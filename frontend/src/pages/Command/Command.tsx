@@ -13,6 +13,7 @@ const STATUS_FILTERS: Array<{ value: 'ALL' | CommandStatus; label: string }> = [
   { value: 'ALL', label: 'Toutes' },
   { value: 'WAITING', label: 'En attente' },
   { value: 'PENDING', label: 'En cours' },
+  { value: 'READY', label: 'Prêtes' },
   { value: 'DELIVERED', label: 'Livrées' },
   { value: 'CANCELLED', label: 'Annulées' },
 ];
@@ -23,7 +24,7 @@ export default function Command() {
 
   const getInitialStatusFilter = (): 'ALL' | CommandStatus => {
     const status = searchParams.get('status');
-    if (status === 'WAITING' || status === 'PENDING' || status === 'DELIVERED' || status === 'CANCELLED') {
+    if (status === 'WAITING' || status === 'PENDING' || status === 'READY' || status === 'DELIVERED' || status === 'CANCELLED') {
       return status;
     }
     return 'ALL';
@@ -53,7 +54,7 @@ export default function Command() {
     const status = searchParams.get('status');
     const searchFromParams = searchParams.get('search') ?? '';
 
-    if (status === 'WAITING' || status === 'PENDING' || status === 'DELIVERED' || status === 'CANCELLED') {
+    if (status === 'WAITING' || status === 'PENDING' || status === 'READY' || status === 'DELIVERED' || status === 'CANCELLED') {
       setStatusFilter(status);
     } else {
       setStatusFilter('ALL');

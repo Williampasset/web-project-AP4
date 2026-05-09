@@ -1,6 +1,7 @@
 export enum CommandStatus {
   WAITING = 'WAITING',
   PENDING = 'PENDING',
+  READY = 'READY',
   DELIVERED = 'DELIVERED',
   CANCELLED = 'CANCELLED',
 }

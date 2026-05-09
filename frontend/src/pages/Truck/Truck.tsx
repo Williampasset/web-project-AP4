@@ -6,7 +6,7 @@ import type { CommandStatus } from '@type/command.type';
 import { formatDate } from '@service/date.service';
 import './Truck.css';
 
-const ACTIVE_STATUSES: CommandStatus[] = ['WAITING', 'PENDING'];
+const ACTIVE_STATUSES: CommandStatus[] = ['WAITING', 'PENDING', 'READY'];
 
 type FleetStatus =
   | 'MAINTENANCE'
@@ -81,19 +81,19 @@ export default function Truck() {
 
   const getFleetStatus = (
     maintenanceEndAt: string | null | undefined,
-    hasPending: boolean,
-    hasWaiting: boolean,
+    hasInDelivery: boolean,
+    hasLoadingPending: boolean,
   ): FleetStatus => {
     if (maintenanceEndAt && new Date(maintenanceEndAt) > new Date()) {
       return 'MAINTENANCE';
     }
 
-    if (hasPending) {
-      return 'IN_DELIVERY';
+    if (hasLoadingPending) {
+      return 'LOADING_PENDING';
     }
 
-    if (hasWaiting) {
-      return 'LOADING_PENDING';
+    if (hasInDelivery) {
+      return 'IN_DELIVERY';
     }
 
     return 'AVAILABLE';
@@ -185,13 +185,16 @@ export default function Truck() {
               const hasPending = usage.truckCommands.some(
                 (command) => command.status === 'PENDING',
               );
+              const hasReady = usage.truckCommands.some(
+                (command) => command.status === 'READY',
+              );
               const hasWaiting = usage.truckCommands.some(
                 (command) => command.status === 'WAITING',
               );
               const fleetStatus = getFleetStatus(
                 truck.maintenanceEndAt,
                 hasPending,
-                hasWaiting,
+                hasWaiting || hasReady,
               );
 
               const nearestDelivery = sortedRoute[0]?.deliveryDate ?? null;
@@ -240,14 +243,37 @@ export default function Truck() {
                     </div>
                   )}
 
-                  {fleetStatus === 'LOADING_PENDING' && (
+                  {usage.truckCommands.some(
+                    (command) =>
+                      command.status === 'WAITING' ||
+                      command.status === 'READY',
+                  ) && (
                     <section className='truck-page__section'>
-                      <h4>Chargement à venir</h4>
-                      <p>
-                        Date de livraison la plus proche:{' '}
+                      <h4>Chargements à venir</h4>
+                      <ul className='truck-page__upcoming-list'>
+                        {[...usage.truckCommands]
+                          .filter(
+                            (command) =>
+                              command.status === 'WAITING' ||
+                              command.status === 'READY',
+                          )
+                          .map((command) => (
+                            <li key={command.id}>
+                              <strong>{command.reference}</strong>
+                              <span>
+                                Date:{' '}
+                                {formatDate(
+                                  command.deliveryDate ?? command.commandDate,
+                                )}
+                              </span>
+                            </li>
+                          ))}
+                      </ul>
+                      <p className='truck-page__upcoming-next-date'>
+                        Prochaine date:{' '}
                         {nearestDelivery
                           ? formatDate(nearestDelivery)
-                          : 'Non définie'}
+                          : formatDate(usage.truckCommands[0].commandDate)}
                       </p>
                     </section>
                   )}
