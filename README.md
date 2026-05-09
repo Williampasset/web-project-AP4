@@ -2,7 +2,7 @@
 
 Monorepo application logistique:
 
-- Backend: NestJS + Prisma + MySQL
+- Backend: NestJS + Prisma (base distante via DATABASE_URL en déploiement VPS)
 - Frontend: React + Vite
 
 ## Déploiement VPS

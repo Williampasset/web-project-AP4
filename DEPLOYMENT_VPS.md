@@ -1,6 +1,6 @@
 # Déploiement VPS (Docker)
 
-Ce guide prépare l’application (frontend React/Vite + backend NestJS + MySQL) sur un VPS Ubuntu.
+Ce guide prépare l’application (frontend React/Vite + backend NestJS) sur un VPS Ubuntu, avec une base distante existante via `DATABASE_URL`.
 
 ## 1) Pré-requis
 
@@ -25,11 +25,8 @@ nano .env.vps
 
 Renseigner au minimum:
 
-- `MYSQL_ROOT_PASSWORD`
-- `MYSQL_DATABASE`
-- `MYSQL_USER`
-- `MYSQL_PASSWORD`
 - `JWT_SECRET`
+- `DATABASE_URL`
 
 ## 4) Déployer
 
@@ -67,10 +64,11 @@ docker compose --env-file .env.vps -f docker-compose.vps.yml down
 - Le backend exécute automatiquement `prisma db push` au démarrage du conteneur.
 - Le frontend est servi par Nginx avec fallback SPA.
 - Le chemin `/api/*` est reverse-proxy vers le backend.
+- La base n'est pas déployée par Docker Compose : elle doit déjà exister et être accessible depuis le VPS via `DATABASE_URL`.
 
 ## 7) Recommandations production
 
 - Mettre un reverse proxy TLS devant le service (Nginx/Caddy/Traefik).
-- Ajouter des sauvegardes MySQL (cron + dump externe).
+- Ajouter une stratégie de sauvegarde sur la base distante.
 - Ajouter monitoring et alerting (logs, uptime, CPU/RAM).
 - Remplacer `db push` par des migrations versionnées Prisma (`prisma migrate`).
