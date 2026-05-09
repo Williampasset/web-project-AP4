@@ -7,7 +7,7 @@ import {
   type CreateClientInput,
   type UpdateClientInput,
 } from '../service/api/clients.service';
-import type { Client, ClientWithCommands } from '@type/client.type';
+import type { ClientWithCommands } from '@type/client.type';
 
 export const useClients = () => {
   return useQuery<ClientWithCommands[]>({

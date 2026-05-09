@@ -102,7 +102,7 @@ export default function TruckHistory() {
 				commandsText.includes(normalizedSearch)
 			);
 		});
-	}, [trucks, commands, search]);
+	}, [trips, search]);
 
 	return (
 		<DefaultLayout>
