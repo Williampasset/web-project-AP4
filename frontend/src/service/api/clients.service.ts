@@ -1,7 +1,7 @@
 import { getHeaders } from './api.helper';
 import type { Client, ClientWithCommands } from '@type/client.type';
 
-const BASE_URL = 'http://localhost:3000/clients';
+const BASE_URL = '/api/clients';
 
 export const fetchClients = async (): Promise<ClientWithCommands[]> => {
   const res = await fetch(BASE_URL, {

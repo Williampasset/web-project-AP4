@@ -1,7 +1,7 @@
 import { getHeaders } from './api.helper';
 import type { FreeTransitLocation, Supplier } from '@type/supplier.type';
 
-const BASE_URL = 'http://localhost:3000/suppliers';
+const BASE_URL = '/api/suppliers';
 
 export const fetchSuppliers = async (): Promise<Supplier[]> => {
   const res = await fetch(BASE_URL, {

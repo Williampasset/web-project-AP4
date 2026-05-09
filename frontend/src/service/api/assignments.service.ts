@@ -1,6 +1,6 @@
 import { getHeaders } from './api.helper';
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = '/api';
 
 // Types for assignments
 export interface CommandAssignmentData {

@@ -1,7 +1,7 @@
 import { getHeaders } from './api.helper';
 
 // frontend/src/service/api/command-preparation.service.ts
-const API_URL = 'http://localhost:3000';
+const API_URL = '/api';
 
 export enum ValidationMethod {
   MANUAL = 'MANUAL',
