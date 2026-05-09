@@ -40,6 +40,12 @@ describe('TrucksService', () => {
         count: jest.fn(),
         findMany: jest.fn(),
       },
+      trip: {
+        findMany: jest.fn().mockResolvedValue([]),
+        findFirst: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
