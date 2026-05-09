@@ -198,6 +198,9 @@ export default function Truck() {
               const estimatedReturn = getEstimatedReturn(
                 sortedRoute.map((command) => command.deliveryDate),
               );
+              const upcomingLoadingCommands = sortedRoute.filter(
+                (command) => command.status === 'WAITING',
+              );
 
               return (
                 <article
@@ -240,14 +243,27 @@ export default function Truck() {
                     </div>
                   )}
 
-                  {fleetStatus === 'LOADING_PENDING' && (
+                  {upcomingLoadingCommands.length > 0 && (
                     <section className='truck-page__section'>
-                      <h4>Chargement à venir</h4>
-                      <p>
-                        Date de livraison la plus proche:{' '}
+                      <h4>Chargements à venir</h4>
+                      <ul className='truck-page__upcoming-list'>
+                        {upcomingLoadingCommands.map((command) => (
+                          <li key={command.id}>
+                            <strong>{command.reference}</strong>
+                            <span>
+                              Date:{' '}
+                              {formatDate(
+                                command.deliveryDate ?? command.commandDate,
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      <p className='truck-page__upcoming-next-date'>
+                        Prochaine date:{' '}
                         {nearestDelivery
                           ? formatDate(nearestDelivery)
-                          : 'Non définie'}
+                          : formatDate(upcomingLoadingCommands[0].commandDate)}
                       </p>
                     </section>
                   )}
