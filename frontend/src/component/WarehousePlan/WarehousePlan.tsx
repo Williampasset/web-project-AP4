@@ -109,13 +109,9 @@ export default function WarehousePlan({
               </button>
             ))
           ) : (
-            <span className='muted'>Aucune zone de préparation</span>
+            <span className='muted'>Aucune zone</span>
           )}
         </div>
-      </section>
-
-      <section className='zone zone-office'>
-        <strong>OFFICE</strong>
       </section>
 
       <section className='zone zone-inbound'>
@@ -143,13 +139,9 @@ export default function WarehousePlan({
               </button>
             ))
           ) : (
-            <span className='muted'>Aucune zone de transit</span>
+            <span className='muted'>Aucune zone</span>
           )}
         </div>
-      </section>
-
-      <section className='zone zone-docks'>
-        <strong>DOCK DOORS</strong>
       </section>
     </div>
   );

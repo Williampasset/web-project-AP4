@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { User } from '@type/user.type';
+import { XIcon } from 'lucide-react';
 
 interface UserModalProps {
   isOpen: boolean;
@@ -98,7 +99,7 @@ export default function UserModal({
             onClick={onClose}
             disabled={isLoading}
           >
-            ✕
+            <XIcon />
           </button>
         </div>
 
@@ -111,7 +112,10 @@ export default function UserModal({
                 type='text'
                 value={formData.matricule}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, matricule: e.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    matricule: e.target.value,
+                  }))
                 }
                 placeholder='MAT-001'
                 disabled={isLoading}
@@ -148,7 +152,10 @@ export default function UserModal({
                 type='text'
                 value={formData.firstName}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, firstName: e.target.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    firstName: e.target.value,
+                  }))
                 }
                 placeholder='John'
                 disabled={isLoading}
@@ -202,7 +209,9 @@ export default function UserModal({
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    managerId: e.target.value ? parseInt(e.target.value) : undefined,
+                    managerId: e.target.value
+                      ? parseInt(e.target.value)
+                      : undefined,
                   }))
                 }
                 disabled={isLoading}

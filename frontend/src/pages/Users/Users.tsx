@@ -1,26 +1,25 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
 import { useMemo, useState } from 'react';
-import { useUsers, useCreateUser, useDeleteUser } from '../../hooks/users.hooks';
+import {
+  useUsers,
+  useCreateUser,
+  useDeleteUser,
+} from '../../hooks/users.hooks';
 import { useCommands } from '../../hooks/commands.hooks';
 import { useStockJobsForAssignment } from '../../hooks/assignments.hooks';
 import UserModal from '@component/UserModal/UserModal';
 import DeleteConfirmModal from '@component/DeleteConfirmModal/DeleteConfirmModal';
 import type { User } from '@type/user.type';
 import './Users.css';
+import { TrashIcon } from 'lucide-react';
 
 export default function Users() {
   const [search, setSearch] = useState('');
   const [showUserModal, setShowUserModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
 
-  const {
-    data: users = [],
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useUsers();
+  const { data: users = [], isLoading, isError, error, refetch } = useUsers();
 
   const createMutation = useCreateUser();
   const deleteMutation = useDeleteUser();
@@ -58,7 +57,11 @@ export default function Users() {
   const commandCountByUser = useMemo(() => {
     const map: Record<number, number> = {};
     for (const cmd of commands) {
-      if (cmd.userId != null && cmd.status !== 'DELIVERED' && cmd.status !== 'CANCELLED') {
+      if (
+        cmd.userId != null &&
+        cmd.status !== 'DELIVERED' &&
+        cmd.status !== 'CANCELLED'
+      ) {
         map[cmd.userId] = (map[cmd.userId] ?? 0) + 1;
       }
     }
@@ -112,7 +115,10 @@ export default function Users() {
       <DefaultLayout>
         <div className='users-error'>
           <h2>Erreur de chargement</h2>
-          <p>{(error as Error)?.message ?? 'Impossible de charger les utilisateurs.'}</p>
+          <p>
+            {(error as Error)?.message ??
+              'Impossible de charger les utilisateurs.'}
+          </p>
           <button onClick={() => refetch()}>Réessayer</button>
         </div>
       </DefaultLayout>
@@ -125,7 +131,7 @@ export default function Users() {
         <div className='users-header'>
           <div>
             <h1>Utilisateurs</h1>
-            <p>Gestion du personnel et des accès</p>
+            <p>Gestion du personnel</p>
           </div>
           <button
             className='users-add-btn'
@@ -236,7 +242,7 @@ export default function Users() {
                             onClick={() => handleDeleteClick(user)}
                             title='Supprimer'
                           >
-                            🗑
+                            <TrashIcon size={16} />
                           </button>
                         </div>
                       </td>

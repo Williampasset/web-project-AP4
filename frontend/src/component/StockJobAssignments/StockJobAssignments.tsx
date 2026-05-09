@@ -9,7 +9,12 @@ import type { StockJobAssignmentData } from '../../service/api/assignments.servi
 import { AlertCircle, Inbox } from 'lucide-react';
 
 export default function StockJobAssignments() {
-  const { data: jobs = [], isLoading, isError, error } = useStockJobsForAssignment();
+  const {
+    data: jobs = [],
+    isLoading,
+    isError,
+    error,
+  } = useStockJobsForAssignment();
   const { data: users = [] } = useUsers();
   const updateMutation = useUpdateStockJobAssignment();
   const [updatingId, setUpdatingId] = useState<number | null>(null);
@@ -69,7 +74,7 @@ export default function StockJobAssignments() {
     <div className='assignments-tab'>
       <div className='assignments-header'>
         <h3>Affectation des Travaux de Stock</h3>
-        <span className='assignments-count'>{jobs.length} travail(x)</span>
+        <span className='assignments-count'>{jobs.length} travaux</span>
       </div>
 
       {jobs.length === 0 ? (
@@ -81,7 +86,8 @@ export default function StockJobAssignments() {
                 <span>Erreur de chargement</span>
               </p>
               <p style={{ fontSize: '0.85rem', marginTop: '8px' }}>
-                {(error as Error)?.message || 'Les données ne sont pas disponibles'}
+                {(error as Error)?.message ||
+                  'Les données ne sont pas disponibles'}
               </p>
             </>
           ) : (
@@ -133,8 +139,7 @@ export default function StockJobAssignments() {
                   <td>
                     {job.assignedUser ? (
                       <div className='assignments-user'>
-                        {job.assignedUser.firstName}{' '}
-                        {job.assignedUser.lastName}
+                        {job.assignedUser.firstName} {job.assignedUser.lastName}
                         <br />
                         <span className='assignments-muted'>
                           {job.assignedUser.matricule}

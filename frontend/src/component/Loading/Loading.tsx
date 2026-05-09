@@ -1,3 +1,4 @@
+import { SettingsIcon } from 'lucide-react';
 import './Loading.css';
 
 interface LoadingProps {
@@ -23,7 +24,7 @@ export default function Loading({
   return (
     <div className={containerClass}>
       <div className={`loading-spinner ${size}`}>
-        <div className='spinner'></div>
+        <SettingsIcon size={24} className='spinner' />
       </div>
       {message && <p className='loading-message'>{message}</p>}
     </div>

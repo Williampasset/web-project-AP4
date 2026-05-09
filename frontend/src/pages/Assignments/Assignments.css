@@ -50,8 +50,9 @@
 }
 
 .assignments-tab-btn.active {
-  color: #667eea;
-  border-bottom-color: #667eea;
+  color: white;
+  background-color: #00bcd4;
+  border-bottom-color: white;
 }
 
 .assignments-content {
