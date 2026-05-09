@@ -85,7 +85,7 @@ export default function WarehousePlan({
       </section>
 
       <section className='zone zone-prep'>
-        <h3>ZONES DE PRÉPARATION — Bâtiment {activeBuilding}</h3>
+        <h3>ZONES DE PRÉPARATION</h3>
         <div className='zone-grid zone-grid--prep'>
           {prepLocations.length > 0 ? (
             prepLocations.map((cell, i) => (
@@ -119,7 +119,7 @@ export default function WarehousePlan({
       </section>
 
       <section className='zone zone-inbound'>
-        <h3>INBOUND — TRANSIT (Bâtiment {activeBuilding})</h3>
+        <h3>INBOUND — TRANSIT</h3>
         <div className='zone-grid zone-grid--inbound'>
           {transitLocations.length > 0 ? (
             transitLocations.map((cell, i) => (

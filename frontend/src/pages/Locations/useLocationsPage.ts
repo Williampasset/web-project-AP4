@@ -78,17 +78,17 @@ export function useLocationsPage() {
 
   const prepLocations = useMemo(() => {
     return locations
-      .filter((l) => l.zone === 'PREP' && l.building === activeBuilding)
+      .filter((l) => l.zone === 'PREP')
       .sort(sortByCoordinate)
       .map(toDisplayLocation);
-  }, [locations, activeBuilding]);
+  }, [locations]);
 
   const transitLocations = useMemo(() => {
     return locations
-      .filter((l) => l.zone === 'TRANSIT' && l.building === activeBuilding)
+      .filter((l) => l.zone === 'TRANSIT')
       .sort(sortByCoordinate)
       .map(toDisplayLocation);
-  }, [locations, activeBuilding]);
+  }, [locations]);
 
   const focusedLocation =
     mappedLocations.find((cell) => cell.id === focusedLocationId) ??
