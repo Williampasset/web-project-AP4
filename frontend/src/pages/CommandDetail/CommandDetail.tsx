@@ -5,13 +5,12 @@ import { toast } from 'react-hot-toast';
 import Loading from '../../component/Loading/Loading';
 import { getStatusLabel, getStatusClass } from '@service/mapper.service';
 import { formatDate } from '@service/date.service';
-import { useCommand, useUpdateCommand } from '../../hooks/commands.hooks';
+import { useCommand } from '../../hooks/commands.hooks';
 import './CommandDetail.css';
 import {
   useMarkItemPicked,
   usePreparationStatus,
 } from '../../hooks/command-preparation.hooks';
-import type { CommandStatus } from '@type/command.type';
 
 export default function CommandDetail() {
   const navigate = useNavigate();
@@ -19,7 +18,6 @@ export default function CommandDetail() {
   const commandId = id ? parseInt(id) : null;
 
   const { data: command, isLoading, error } = useCommand(commandId || 0);
-  const { mutate: commandUpdate } = useUpdateCommand();
 
   const { data: preparation } = usePreparationStatus(commandId!);
 
@@ -41,38 +39,12 @@ export default function CommandDetail() {
   const { mutate: markPicked } = useMarkItemPicked();
 
   /**
-   * Handles updating the status of the command.
-   * This function is called when the user marks an item as prepared
-   * or when the command status needs to be updated based on preparation progress.
-   * @param newStatus The new status to set for the command (e.g., 'PENDING', 'DELIVERED')
-   */
-  const handleCommandStatusUpdate = (newStatus: CommandStatus) => {
-    if (!command) return;
-
-    commandUpdate(
-      { id: command.id, data: { status: newStatus } },
-      {
-        onSuccess: () => toast.success('Statut de la commande mis à jour ✓'),
-        onError: () => toast.error('Erreur lors de la mise à jour'),
-      },
-    );
-  };
-
-  /**
    * Handles marking the current item as prepared.
    */
   const handleItemPrepared = () => {
     if (!currentItem) return;
 
     if (!command) return;
-
-    if (command.status === 'WAITING') {
-      handleCommandStatusUpdate('PENDING');
-    }
-
-    if (preparedCount + 1 >= totalItems) {
-      handleCommandStatusUpdate('DELIVERED');
-    }
 
     markPicked(
       {

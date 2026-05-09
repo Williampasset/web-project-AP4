@@ -1,9 +1,9 @@
 import DefaultLayout from '@component/default/DefaultLayout';
 import Loading from '@component/Loading/Loading';
-import { useTrucks } from '../../hooks/trucks.hooks';
-import { useCommands } from '../../hooks/commands.hooks';
+import { useTruckHistory } from '../../hooks/trucks.hooks';
 import { formatDate } from '@service/date.service';
 import { useMemo, useState } from 'react';
+import type { Trip } from '@type/trip.type';
 import './TruckHistory.css';
 
 interface VoyageCommandSummary {
@@ -30,91 +30,61 @@ interface VoyageCard {
 export default function TruckHistory() {
 	const [search, setSearch] = useState('');
 
-	const { data: trucks = [], isLoading: isLoadingTrucks } = useTrucks();
-	const { data: commands = [], isLoading: isLoadingCommands } = useCommands({
-		status: 'DELIVERED',
-	});
-
-	const isLoading = isLoadingTrucks || isLoadingCommands;
+	const { data: trips = [], isLoading } = useTruckHistory();
 
 	const history = useMemo<VoyageCard[]>(() => {
 		const normalizedSearch = search.trim().toLowerCase();
-
-		const truckById = new Map(trucks.map((truck) => [truck.id, truck.imat]));
 		const voyagesMap = new Map<string, VoyageCard>();
 
-		commands.forEach((command) => {
-			if (!command.truckId) return;
+		trips.forEach((trip: Trip) => {
+			const truckImat = trip.truck?.imat ?? `Camion #${trip.truckId}`;
+			const departureAt = trip.plannedDepartureAt ?? trip.createdAt;
+			const returnAt = trip.actualArrivalAt ?? trip.plannedArrivalAt ?? departureAt;
+			const voyageKey = trip.reference;
 
-			const truckImat = truckById.get(command.truckId) ?? `Camion #${command.truckId}`;
-			const returnAt = command.deliveryDate ?? command.commandDate;
-			const returnDay = new Date(returnAt).toISOString().slice(0, 10);
-			const voyageKey = `${command.truckId}-${returnDay}`;
+			const commands = trip.deliveryStops
+				.filter((stop) => stop.command)
+				.map((stop) => {
+					const command = stop.command!;
+					const itemsCount = command.items.reduce(
+						(sum, item) => sum + item.quantity,
+						0,
+					);
+					const totalWeight = command.items.reduce(
+						(sum, item) => sum + (item.article?.weight ?? 0) * item.quantity,
+						0,
+					);
+					const totalVolume = command.items.reduce(
+						(sum, item) => sum + (item.article?.volume ?? 0) * item.quantity,
+						0,
+					);
 
-			const commandWeight = command.items.reduce(
-				(sum, item) => sum + (item.article?.weight ?? 0) * item.quantity,
-				0,
-			);
-			const commandVolume = command.items.reduce(
-				(sum, item) => sum + (item.article?.volume ?? 0) * item.quantity,
-				0,
-			);
-			const itemsCount = command.items.reduce((sum, item) => sum + item.quantity, 0);
-
-			const existing = voyagesMap.get(voyageKey);
-
-			if (!existing) {
-				voyagesMap.set(voyageKey, {
-					id: voyageKey,
-					truckImat,
-					departureAt: command.commandDate,
-					returnAt,
-					commands: [
-						{
-							id: command.id,
-							reference: command.reference,
-							clientName: command.client.name,
-							deliveryAt: returnAt,
-							itemsCount,
-							totalWeight: commandWeight,
-							totalVolume: commandVolume,
-						},
-					],
-					clients: [command.client.name],
-					totalWeight: commandWeight,
-					totalVolume: commandVolume,
+					return {
+						id: command.id,
+						reference: command.reference,
+						clientName: command.client.name,
+						deliveryAt: stop.deliveredAt ?? stop.plannedArrivalAt ?? returnAt,
+						itemsCount,
+						totalWeight,
+						totalVolume,
+					};
 				});
-				return;
-			}
 
-			existing.commands.push({
-				id: command.id,
-				reference: command.reference,
-				clientName: command.client.name,
-				deliveryAt: returnAt,
-				itemsCount,
-				totalWeight: commandWeight,
-				totalVolume: commandVolume,
+			voyagesMap.set(voyageKey, {
+				id: voyageKey,
+				truckImat,
+				departureAt,
+				returnAt,
+				commands: commands.sort(
+					(a, b) => new Date(a.deliveryAt).getTime() - new Date(b.deliveryAt).getTime(),
+				),
+				clients: Array.from(new Set(commands.map((command) => command.clientName))),
+				totalWeight: commands.reduce((sum, command) => sum + command.totalWeight, 0),
+				totalVolume: commands.reduce((sum, command) => sum + command.totalVolume, 0),
 			});
-			existing.clients = Array.from(new Set([...existing.clients, command.client.name]));
-			existing.totalWeight += commandWeight;
-			existing.totalVolume += commandVolume;
-
-			if (new Date(command.commandDate) < new Date(existing.departureAt)) {
-				existing.departureAt = command.commandDate;
-			}
-			if (new Date(returnAt) > new Date(existing.returnAt)) {
-				existing.returnAt = returnAt;
-			}
 		});
 
 		const voyages = Array.from(voyagesMap.values())
-			.map((voyage) => ({
-				...voyage,
-				commands: [...voyage.commands].sort(
-					(a, b) => new Date(a.deliveryAt).getTime() - new Date(b.deliveryAt).getTime(),
-				),
-			}))
 			.sort((a, b) => new Date(b.returnAt).getTime() - new Date(a.returnAt).getTime());
 
 		if (!normalizedSearch) return voyages;

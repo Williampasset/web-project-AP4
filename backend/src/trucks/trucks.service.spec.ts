@@ -14,6 +14,8 @@ describe('TrucksService', () => {
     id: 1,
     imat: 'AA-123-BB',
     maxLoad: 1500,
+    maxVolume: 50,
+    maintenanceEndAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -39,6 +41,12 @@ describe('TrucksService', () => {
       command: {
         count: jest.fn(),
         findMany: jest.fn(),
+      },
+      trip: {
+        findMany: jest.fn().mockResolvedValue([]),
+        findFirst: jest.fn(),
+        create: jest.fn(),
+        update: jest.fn(),
       },
     };
 
@@ -209,7 +217,9 @@ describe('TrucksService', () => {
       const updatedTruck = { ...mockTruck, ...updateTruckDto };
 
       jest.spyOn(prisma.truck, 'findUnique').mockResolvedValue(mockTruck);
-      jest.spyOn(prisma.truck, 'update').mockResolvedValue(updatedTruck);
+      jest
+        .spyOn(prisma.truck, 'update')
+        .mockResolvedValue(updatedTruck as typeof mockTruck);
 
       const result = await service.update(1, updateTruckDto);
 
@@ -507,6 +517,7 @@ describe('TrucksService', () => {
         statusCount: {
           WAITING: 0,
           PENDING: 0,
+          READY: 0,
           DELIVERED: 2,
           CANCELLED: 0,
         },

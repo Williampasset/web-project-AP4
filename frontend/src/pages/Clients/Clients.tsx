@@ -62,6 +62,10 @@ export default function Clients() {
         sum + c.commands.filter((cmd) => cmd.status === 'PENDING').length,
       0,
     );
+    const ready = filteredClients.reduce(
+      (sum, c) => sum + c.commands.filter((cmd) => cmd.status === 'READY').length,
+      0,
+    );
 
     return {
       totalClients: filteredClients.length,
@@ -69,6 +73,7 @@ export default function Clients() {
       delivered,
       waiting,
       pending,
+      ready,
     };
   }, [filteredClients]);
 
@@ -162,7 +167,7 @@ export default function Clients() {
           </div>
           <div className='clients-kpi'>
             <span>En cours</span>
-            <strong>{globalStats.waiting + globalStats.pending}</strong>
+            <strong>{globalStats.waiting + globalStats.pending + globalStats.ready}</strong>
           </div>
         </div>
 
@@ -188,6 +193,9 @@ export default function Clients() {
                   ).length;
                   const pending = client.commands.filter(
                     (cmd) => cmd.status === 'PENDING',
+                  ).length;
+                  const ready = client.commands.filter(
+                    (cmd) => cmd.status === 'READY',
                   ).length;
                   const delivered = client.commands.filter(
                     (cmd) => cmd.status === 'DELIVERED',
@@ -231,6 +239,17 @@ export default function Clients() {
                           }
                         >
                           PENDING: {pending}
+                        </button>
+                        <button
+                          type='button'
+                          className='clients-badge clients-badge--pending'
+                          onClick={() =>
+                            navigate(
+                              `/commands?status=READY&search=${encodeURIComponent(client.name)}`,
+                            )
+                          }
+                        >
+                          READY: {ready}
                         </button>
                         <button
                           type='button'

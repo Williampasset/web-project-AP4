@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { CommandStatus } from '../commands/enums/command-status.enum';
 import {
   MarkItemPickedDto,
   ValidateItemDto,
@@ -34,7 +35,7 @@ export class CommandPreparationService {
       );
     }
 
-    return this.prisma.commandItemPreparation.update({
+    const updatedPreparation = await this.prisma.commandItemPreparation.update({
       where: { id: preparation.id },
       data: {
         isPicked: true,
@@ -42,6 +43,30 @@ export class CommandPreparationService {
       },
       include: { commandItem: true },
     });
+
+    const command = preparation.commandItem.command;
+    const commandItems = await this.prisma.commandItem.findMany({
+      where: { commandId: command.id },
+      include: { commandItemPreparation: true },
+    });
+
+    const allPicked = commandItems.every(
+      (item) => item.commandItemPreparation?.isPicked,
+    );
+
+    if (allPicked) {
+      await this.prisma.command.update({
+        where: { id: command.id },
+        data: { status: 'READY' as any },
+      });
+    } else if (command.status === CommandStatus.WAITING) {
+      await this.prisma.command.update({
+        where: { id: command.id },
+        data: { status: CommandStatus.PENDING },
+      });
+    }
+
+    return updatedPreparation;
   }
 
   /**

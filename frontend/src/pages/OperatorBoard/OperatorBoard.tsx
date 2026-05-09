@@ -87,6 +87,7 @@ export default function OperatorBoard() {
       total: commands.length,
       waiting: commands.filter((c) => c.status === 'WAITING').length,
       pending: commands.filter((c) => c.status === 'PENDING').length,
+      ready: commands.filter((c) => c.status === 'READY').length,
       delivered: commands.filter((c) => c.status === 'DELIVERED').length,
       cancelled: commands.filter((c) => c.status === 'CANCELLED').length,
     };
@@ -158,6 +159,7 @@ export default function OperatorBoard() {
           value={statistics.pending}
           variant='pending'
         />
+        <StatCard label='Prêtes' value={statistics.ready} variant='ready' />
         <StatCard
           label='Terminées'
           value={statistics.delivered}

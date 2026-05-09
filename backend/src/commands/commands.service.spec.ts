@@ -130,6 +130,11 @@ describe('CommandsService', () => {
       stockHistory: {
         create: jest.fn(),
       },
+      trip: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        findMany: jest.fn(),
+        create: jest.fn(),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({

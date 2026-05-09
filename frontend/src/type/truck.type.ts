@@ -7,7 +7,13 @@ export interface Truck {
   commands?: Array<{
     id: number;
     reference: string;
-    status: 'WAITING' | 'PENDING' | 'DELIVERED' | 'CANCELLED';
+    status:
+      | 'WAITING'
+      | 'PENDING'
+      | 'READY'
+      | 'IN_DELIVERY'
+      | 'DELIVERED'
+      | 'CANCELLED';
     commandDate: string;
   }>;
   createdAt: string;

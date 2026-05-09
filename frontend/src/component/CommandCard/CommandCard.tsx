@@ -186,7 +186,7 @@ export default function CommandCard({
    * @return True if there is a volume overflow, false otherwise
    */
   const hasTruckVolumeOverflow = (): boolean => {
-    if (command.status === 'DELIVERED' || command.status === 'CANCELLED') {
+    if (command.status !== 'WAITING' && command.status !== 'PENDING') {
       return false;
     }
 

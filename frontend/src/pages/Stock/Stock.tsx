@@ -11,7 +11,7 @@ import type { Command } from '@type/command.type';
 import type { Supplier } from '@type/supplier.type';
 import './Stock.css';
 
-const PENDING_LOADING_STATUSES: Command['status'][] = ['WAITING', 'PENDING'];
+const PENDING_LOADING_STATUSES: Command['status'][] = ['WAITING', 'PENDING', 'READY'];
 
 type AggregatedStockRow = {
   articleCode: string;
@@ -98,7 +98,7 @@ export default function Stock() {
 
   /**
    * Calculates the total pending quantity for each article based on
-   * the commands that are in a waiting or pending status.
+  * the commands that are waiting, in progress, or ready for loading.
    */
   const pendingDemandByArticle = useMemo(() => {
     const map = new Map<number, number>();

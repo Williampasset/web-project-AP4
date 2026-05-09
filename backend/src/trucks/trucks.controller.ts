@@ -109,6 +109,27 @@ export class TrucksController {
   }
 
   /**
+   * Get all truck trips history
+   * GET /trucks/history
+   */
+  @Get('history')
+  @ApiOperation({
+    summary: 'Get truck trips history',
+    description: 'Returns all completed and in-progress truck trips',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Truck history retrieved',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async findHistory() {
+    return this.trucksService.findHistory();
+  }
+
+  /**
    * Retrieve a truck by id
    * GET /trucks/:id
    */
@@ -196,6 +217,36 @@ export class TrucksController {
   })
   async findByImat(@Param('imat') imat: string) {
     return this.trucksService.findByImat(imat);
+  }
+
+  /**
+   * Depart with all ready commands assigned to a truck
+   * POST /trucks/:id/depart
+   */
+  @Post(':id/depart')
+  @ApiOperation({
+    summary: 'Depart truck',
+    description: 'Starts a truck trip with all ready commands already assigned',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Truck ID',
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Truck departed',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Truck cannot depart',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized',
+  })
+  async departTruck(@Param('id', ParseIntPipe) id: number) {
+    return this.trucksService.departTruck(id);
   }
 
   /**
