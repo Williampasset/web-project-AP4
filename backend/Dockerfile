@@ -11,4 +11,4 @@ RUN npm run build
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma generate && npx prisma db push && node dist/main"]
+CMD ["sh", "-c", "npx prisma generate && node dist/main"]

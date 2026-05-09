@@ -10,6 +10,10 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
 
+  // Health check endpoint for Docker
+  const httpAdapter = app.getHttpAdapter();
+  httpAdapter.get('/health', (_req: any, res: any) => res.send({ status: 'ok' }));
+
   const config = new DocumentBuilder()
     .setTitle('Warehouse API')
     .setVersion('1.0')
