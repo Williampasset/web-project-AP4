@@ -241,7 +241,6 @@ export class LocationsService {
     return this.preparationService.deleteZeroStockArticle(articleId);
   }
 
-
   private async ensureUserExists(userId: number) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
@@ -250,4 +249,3 @@ export class LocationsService {
     return user;
   }
 }
-
