@@ -1,6 +1,24 @@
 import { getHeaders } from './api.helper';
+import type { WarehouseLocation } from '@type/warehouse-location.type';
 
 const BASE_URL = '/api';
+
+const parseErrorMessage = async (res: Response, fallback: string) => {
+  try {
+    const body = await res.json();
+    if (typeof body?.message === 'string') return body.message;
+    if (Array.isArray(body?.message)) return body.message.join(', ');
+    if (body?.error) return String(body.error);
+  } catch {
+    try {
+      const text = await res.text();
+      if (text) return text;
+    } catch {
+      // ignore
+    }
+  }
+  return fallback;
+};
 
 // Types for assignments
 export interface CommandAssignmentData {
@@ -98,23 +116,63 @@ export const fetchStockJobsForAssignment = async (): Promise<
   StockJobAssignmentData[]
 > => {
   try {
-    // Try to fetch from an endpoint that lists all pending jobs
-    // For now, return empty array if endpoint doesn't exist
-    const res = await fetch(`${BASE_URL}/stock-jobs?status=PENDING`, {
+    const res = await fetch(`${BASE_URL}/locations`, {
       headers: getHeaders(),
       cache: 'no-store',
     });
 
     if (!res.ok) {
-      // Endpoint doesn't exist yet, return empty array
-      return [];
+      throw new Error('Failed to fetch locations');
     }
 
-    const data = await res.json();
-    return data.filter((job: any) => job.status === 'PENDING');
+    const locations: WarehouseLocation[] = await res.json();
+    const locationsById = new Map(locations.map((location) => [location.id, location]));
+
+    const jobs = locations.flatMap((sourceLocation) => {
+      return (sourceLocation.pendingJobs ?? []).map((job) => {
+        const sourceArticle = sourceLocation.articles.find(
+          (article) => article.id === job.sourceArticleId,
+        );
+        const targetLocation =
+          job.targetLocationId != null
+            ? locationsById.get(job.targetLocationId)
+            : undefined;
+
+        return {
+          id: job.id,
+          type: job.type,
+          status: job.status,
+          quantity: job.quantity,
+          sourceArticle: {
+            id: job.sourceArticleId,
+            reference:
+              sourceArticle?.reference ?? `ARTICLE-${job.sourceArticleId}`,
+            label: sourceArticle?.label ?? 'Article',
+          },
+          targetLocation: targetLocation
+            ? {
+                id: targetLocation.id,
+                building: targetLocation.building,
+                aisle: targetLocation.aisle,
+                shelf: targetLocation.shelf,
+                cell: targetLocation.cell,
+              }
+            : undefined,
+          assignedUserId: job.assignedUser.id,
+          assignedUser: job.assignedUser,
+          requestedAt: job.requestedAt,
+        } satisfies StockJobAssignmentData;
+      });
+    });
+
+    return jobs
+      .filter((job) => job.status === 'PENDING')
+      .sort(
+        (a, b) =>
+          new Date(a.requestedAt).getTime() - new Date(b.requestedAt).getTime(),
+      );
   } catch (error) {
-    // Endpoint not available yet
-    return [];
+    throw new Error('Failed to fetch stock jobs');
   }
 };
 
@@ -173,7 +231,11 @@ export const updateStockJobAssignment = async (
     body: JSON.stringify({ assignedUserId: data.assignedUserId }),
   });
 
-  if (!res.ok) throw new Error('Failed to update stock job assignment');
+  if (!res.ok) {
+    throw new Error(
+      await parseErrorMessage(res, 'Failed to update stock job assignment'),
+    );
+  }
 
   return res.json();
 };

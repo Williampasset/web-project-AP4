@@ -512,6 +512,93 @@ export class LocationsService {
     throw new BadRequestException(`Unsupported stock job type: ${job.type}`);
   }
 
+  async updateStockJobAssignment(jobId: number, assignedUserId: number) {
+    await this.ensureUserExists(assignedUserId);
+
+    const job = await this.prisma.stockJob.findUnique({
+      where: { id: jobId },
+      include: {
+        sourceArticle: {
+          select: {
+            id: true,
+            reference: true,
+            label: true,
+          },
+        },
+        assignedUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            matricule: true,
+          },
+        },
+        targetLocation: {
+          select: {
+            id: true,
+            building: true,
+            aisle: true,
+            shelf: true,
+            cell: true,
+          },
+        },
+      },
+    });
+
+    if (!job) {
+      throw new NotFoundException(`Stock job #${jobId} not found`);
+    }
+
+    if (job.status !== 'PENDING') {
+      throw new ConflictException(
+        `Stock job #${jobId} is not pending and cannot be reassigned`,
+      );
+    }
+
+    const updated = await this.prisma.stockJob.update({
+      where: { id: jobId },
+      data: { assignedUserId },
+      include: {
+        sourceArticle: {
+          select: {
+            id: true,
+            reference: true,
+            label: true,
+          },
+        },
+        assignedUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            matricule: true,
+          },
+        },
+        targetLocation: {
+          select: {
+            id: true,
+            building: true,
+            aisle: true,
+            shelf: true,
+            cell: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: updated.id,
+      type: updated.type,
+      status: updated.status,
+      quantity: updated.quantity,
+      sourceArticle: updated.sourceArticle,
+      targetLocation: updated.targetLocation,
+      assignedUserId: updated.assignedUserId,
+      assignedUser: updated.assignedUser,
+      requestedAt: updated.requestedAt,
+    };
+  }
+
   async deleteZeroStockArticle(articleId: number) {
     const article = await this.prisma.article.findUnique({
       where: { id: articleId },
