@@ -1,0 +1,84 @@
+.qr-location-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 16px;
+}
+
+.qr-location-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.qr-location-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qr-location-title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.qr-location-close {
+  border: none;
+  background: #f3f4f6;
+  border-radius: 999px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+}
+
+.qr-location-hint {
+  margin: 0;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.qr-location-reader {
+  width: 100%;
+  min-height: 320px;
+  background: #0f172a;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.qr-location-video {
+  width: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  display: block;
+}
+
+.qr-location-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.qr-location-error {
+  margin: 0;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.875rem;
+}

@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   ParseIntPipe,
   Post,
   UseGuards,
@@ -13,6 +14,7 @@ import { LocationsService } from './locations.service';
 import { MoveArticleDto } from './dto/move-article.dto';
 import { MergeArticleDto } from './dto/merge-article.dto';
 import { ValidateStockJobDto } from './dto/validate-stock-job.dto';
+import { UpdateStockJobAssignmentDto } from './dto/update-stock-job-assignment.dto';
 
 @Controller('locations')
 @UseGuards(JwtAuthGuard)
@@ -57,6 +59,17 @@ export class LocationsController {
     return this.locationsService.validateStockJob(
       jobId,
       validateStockJobDto.validatedByUserId,
+    );
+  }
+
+  @Patch('jobs/:jobId')
+  async updateJobAssignment(
+    @Param('jobId', ParseIntPipe) jobId: number,
+    @Body() updateStockJobAssignmentDto: UpdateStockJobAssignmentDto,
+  ) {
+    return this.locationsService.updateStockJobAssignment(
+      jobId,
+      updateStockJobAssignmentDto.assignedUserId,
     );
   }
 

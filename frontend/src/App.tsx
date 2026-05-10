@@ -16,6 +16,7 @@ import StockHistory from './pages/StockHistory/StockHistory';
 import Clients from './pages/Clients/Clients';
 import Users from './pages/Users/Users';
 import Assignments from './pages/Assignments/Assignments';
+import StockJobDetail from './pages/StockJobDetail/StockJobDetail';
 
 function App() {
   return (
@@ -132,6 +133,14 @@ function App() {
         element={
           <ProtectedRoute>
             <CommandDetail />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/stock-jobs/:id'
+        element={
+          <ProtectedRoute>
+            <StockJobDetail />
           </ProtectedRoute>
         }
       ></Route>

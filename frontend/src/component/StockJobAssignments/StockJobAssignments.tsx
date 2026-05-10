@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'react-hot-toast';
 import Loading from '@component/Loading/Loading';
 import {
   useStockJobsForAssignment,
@@ -22,12 +23,20 @@ export default function StockJobAssignments() {
   const magasiniers = users.filter((u) => u.role === 'MAGASINIER');
 
   const handleAssign = async (jobId: number, newUserId: number) => {
+    if (!Number.isFinite(newUserId) || newUserId < 1) {
+      toast.error('Sélectionnez un utilisateur valide');
+      return;
+    }
+
     setUpdatingId(jobId);
     try {
       await updateMutation.mutateAsync({
         jobId,
         data: { assignedUserId: newUserId },
       });
+      toast.success('Travail de stock réassigné');
+    } catch (e) {
+      toast.error((e as Error)?.message ?? 'Échec de la réaffectation');
     } finally {
       setUpdatingId(null);
     }
@@ -154,7 +163,7 @@ export default function StockJobAssignments() {
                       className='assignments-select'
                       value={job.assignedUserId || ''}
                       onChange={(e) =>
-                        handleAssign(job.id, parseInt(e.target.value))
+                        handleAssign(job.id, Number(e.target.value))
                       }
                       disabled={updatingId === job.id}
                     >
