@@ -33,6 +33,15 @@ export const useMarkItemPicked = () => {
       queryClient.invalidateQueries({
         queryKey: ['preparation-status', variables.commandId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ['locations', 'warehouse-view'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['articles'],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['articles', 'live-stock'],
+      });
     },
   });
 };
