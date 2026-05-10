@@ -173,7 +173,9 @@ export class LocationsService {
     }
 
     if (article.locationId === targetLocationId) {
-      throw new BadRequestException('Source and target locations must be different');
+      throw new BadRequestException(
+        'Source and target locations must be different',
+      );
     }
 
     if (quantity > article.stock) {
@@ -191,7 +193,9 @@ export class LocationsService {
     });
 
     if (!targetLocation) {
-      throw new NotFoundException(`Target location #${targetLocationId} not found`);
+      throw new NotFoundException(
+        `Target location #${targetLocationId} not found`,
+      );
     }
 
     if (targetLocation.articles.length > 0) {
@@ -232,7 +236,9 @@ export class LocationsService {
     assignedUserId: number,
   ) {
     if (sourceArticleId === targetArticleId) {
-      throw new BadRequestException('Source and target articles must be different');
+      throw new BadRequestException(
+        'Source and target articles must be different',
+      );
     }
 
     await this.ensureUserExists(assignedUserId);
@@ -250,11 +256,15 @@ export class LocationsService {
     ]);
 
     if (!source) {
-      throw new NotFoundException(`Source article #${sourceArticleId} not found`);
+      throw new NotFoundException(
+        `Source article #${sourceArticleId} not found`,
+      );
     }
 
     if (!target) {
-      throw new NotFoundException(`Target article #${targetArticleId} not found`);
+      throw new NotFoundException(
+        `Target article #${targetArticleId} not found`,
+      );
     }
 
     const sourceLabel = source.label.trim().toLowerCase();
@@ -424,11 +434,15 @@ export class LocationsService {
       ]);
 
       if (!source) {
-        throw new NotFoundException(`Source article #${job.sourceArticleId} not found`);
+        throw new NotFoundException(
+          `Source article #${job.sourceArticleId} not found`,
+        );
       }
 
       if (!target) {
-        throw new NotFoundException(`Target article #${job.targetArticleId} not found`);
+        throw new NotFoundException(
+          `Target article #${job.targetArticleId} not found`,
+        );
       }
 
       const sourceLabel = source.label.trim().toLowerCase();
@@ -618,7 +632,7 @@ export class LocationsService {
     try {
       await this.prisma.article.delete({ where: { id: articleId } });
     } catch (error) {
-      if ((error as any)?.code === 'P2003') {
+      if (error?.code === 'P2003') {
         throw new ConflictException(
           `Article #${articleId} is referenced by existing records and cannot be deleted`,
         );
