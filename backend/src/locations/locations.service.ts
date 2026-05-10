@@ -449,7 +449,7 @@ export class LocationsService {
     try {
       await this.prisma.article.delete({ where: { id: articleId } });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      if ((error as any)?.code === 'P2003') {
         throw new ConflictException(
           `Article #${articleId} is referenced by existing records and cannot be deleted`,
         );
