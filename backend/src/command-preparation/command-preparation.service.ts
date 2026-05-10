@@ -9,7 +9,6 @@ import { CommandStatus } from '../commands/enums/command-status.enum';
 import {
   MarkItemPickedDto,
   ValidateItemDto,
-  ItemValidationMethod,
   MoveToLoadingZoneDto,
   SimulateRfidCheckDto,
   LoadItemToTruckDto,
