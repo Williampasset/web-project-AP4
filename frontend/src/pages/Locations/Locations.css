@@ -301,6 +301,18 @@
   line-height: 1.2;
 }
 
+.prep-slot__assignee {
+  font-size: 0.62rem;
+  color: #7c2d12;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Zone markers */
 .zone-office {
   grid-area: office;
@@ -539,6 +551,11 @@
   background: #f3f4f6;
   color: #9ca3af;
   cursor: not-allowed;
+}
+
+.inspector-assignee {
+  font-size: 0.75rem;
+  color: #6b7280;
 }
 
 .inspector-btn {

@@ -20,6 +20,8 @@ export default function Locations() {
     prepLocations,
     transitLocations,
     focusedLocation,
+    prepAssigneeNamesByLocationId,
+    focusedPrepAssigneeName,
     qrModalLocation,
     assignedUserId,
     isActing,
@@ -40,6 +42,7 @@ export default function Locations() {
     handleMerge,
     handleValidateJob,
     handleDeleteZeroStock,
+    handleAssignPrepZoneWorker,
   } = useLocationsPage();
 
   if (isLoading) return <Loading />;
@@ -103,6 +106,7 @@ export default function Locations() {
           pickLocations={pickLocations}
           prepLocations={prepLocations}
           transitLocations={transitLocations}
+          prepAssigneesByLocationId={prepAssigneeNamesByLocationId}
           activeBuilding={activeBuilding}
           focusedLocationId={focusedLocation?.id ?? null}
           onFocusLocation={setFocusedLocationId}
@@ -114,6 +118,7 @@ export default function Locations() {
           assignedUserId={assignedUserId}
           isActing={isActing}
           actionError={actionError}
+          focusedPrepAssigneeName={focusedPrepAssigneeName}
           moveQuantity={moveQuantity}
           moveTargetLocationId={moveTargetLocationId}
           mergeTargetArticleId={mergeTargetArticleId}
@@ -128,6 +133,7 @@ export default function Locations() {
           onMerge={handleMerge}
           onValidateJob={handleValidateJob}
           onDeleteZeroStock={handleDeleteZeroStock}
+          onAssignPrepWorker={handleAssignPrepZoneWorker}
         />
       </div>
 

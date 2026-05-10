@@ -9,6 +9,7 @@ interface WarehouseInspectorProps {
   assignedUserId: number | null;
   isActing: boolean;
   actionError: string | null;
+  focusedPrepAssigneeName: string | null;
   moveQuantity: number;
   moveTargetLocationId: number | null;
   mergeTargetArticleId: number | null;
@@ -23,6 +24,7 @@ interface WarehouseInspectorProps {
   onMerge: () => void;
   onValidateJob: (jobId: number, userId: number) => void;
   onDeleteZeroStock: () => void;
+  onAssignPrepWorker: () => void;
 }
 
 export default function WarehouseInspector({
@@ -31,6 +33,7 @@ export default function WarehouseInspector({
   assignedUserId,
   isActing,
   actionError,
+  focusedPrepAssigneeName,
   moveQuantity,
   moveTargetLocationId,
   mergeTargetArticleId,
@@ -45,6 +48,7 @@ export default function WarehouseInspector({
   onMerge,
   onValidateJob,
   onDeleteZeroStock,
+  onAssignPrepWorker,
 }: WarehouseInspectorProps) {
   if (!focusedLocation) {
     return (
@@ -97,6 +101,24 @@ export default function WarehouseInspector({
             ))}
           </select>
         </div>
+        {focusedLocation.zone === 'PREP' && (
+          <div className='inspector-actions__row'>
+            <label>Affecter à cette zone de préparation</label>
+            <button
+              type='button'
+              className='inspector-btn inspector-btn--prep'
+              disabled={isActing || !assignedUserId}
+              onClick={onAssignPrepWorker}
+            >
+              Affecter le magasinier
+            </button>
+            <small className='inspector-assignee'>
+              {focusedPrepAssigneeName
+                ? `Actuellement: ${focusedPrepAssigneeName}`
+                : 'Aucun magasinier affecté'}
+            </small>
+          </div>
+        )}
       </div>
 
       {hasPendingJobs && (
