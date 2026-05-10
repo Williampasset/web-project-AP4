@@ -211,7 +211,10 @@ export default function Truck() {
                 sortedRoute.map((command) => command.deliveryDate),
               );
               const upcomingLoadingCommands = sortedRoute.filter(
-                (command) => command.status === 'WAITING',
+                (command) =>
+                  command.status === 'WAITING' ||
+                  command.status === 'PENDING' ||
+                  command.status === 'READY',
               );
 
               return (
@@ -263,7 +266,7 @@ export default function Truck() {
                           <li key={command.id}>
                             <strong>{command.reference}</strong>
                             <span>
-                              Date:{' '}
+                              {command.status} · Date:{' '}
                               {formatDate(
                                 command.deliveryDate ?? command.commandDate,
                               )}
