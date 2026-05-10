@@ -12,7 +12,9 @@ async function bootstrap() {
 
   // Health check endpoint for Docker
   const httpAdapter = app.getHttpAdapter();
-  httpAdapter.get('/health', (_req: any, res: any) => res.send({ status: 'ok' }));
+  httpAdapter.get('/health', (_req: any, res: any) =>
+    res.send({ status: 'ok' }),
+  );
 
   const config = new DocumentBuilder()
     .setTitle('Warehouse API')

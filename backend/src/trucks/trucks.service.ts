@@ -61,7 +61,7 @@ export class TrucksService {
   async findOne(id: number) {
     await this.syncExpiredTrips();
 
-    const truck = await this.findTruckOrThrow(id);
+    await this.findTruckOrThrow(id);
 
     const result = await this.prisma.truck.findUnique({
       where: { id },
@@ -428,15 +428,24 @@ export class TrucksService {
     }
 
     const orderedCommands = [...readyCommands].sort((a, b) => {
-      const aDate = a.deliveryDate ? new Date(a.deliveryDate).getTime() : new Date(a.commandDate).getTime();
-      const bDate = b.deliveryDate ? new Date(b.deliveryDate).getTime() : new Date(b.commandDate).getTime();
+      const aDate = a.deliveryDate
+        ? new Date(a.deliveryDate).getTime()
+        : new Date(a.commandDate).getTime();
+      const bDate = b.deliveryDate
+        ? new Date(b.deliveryDate).getTime()
+        : new Date(b.commandDate).getTime();
       return aDate - bDate;
     });
 
-    const plannedArrivalAt = orderedCommands.reduce((latest, command) => {
-      const candidate = command.deliveryDate ?? command.commandDate;
-      return !latest || new Date(candidate) > new Date(latest) ? candidate : latest;
-    }, null as string | null);
+    const plannedArrivalAt = orderedCommands.reduce(
+      (latest, command) => {
+        const candidate = command.deliveryDate ?? command.commandDate;
+        return !latest || new Date(candidate) > new Date(latest)
+          ? candidate
+          : latest;
+      },
+      null as string | null,
+    );
 
     const plannedWeight = orderedCommands.reduce((sum, command) => {
       const commandWeight = command.items.reduce(
@@ -463,7 +472,9 @@ export class TrucksService {
           truckId: id,
           status: 'IN_PROGRESS',
           plannedDepartureAt: now,
-          plannedArrivalAt: plannedArrivalAt ? new Date(plannedArrivalAt) : null,
+          plannedArrivalAt: plannedArrivalAt
+            ? new Date(plannedArrivalAt)
+            : null,
           plannedWeight,
           plannedVolume,
           actualWeight: plannedWeight,
@@ -481,7 +492,8 @@ export class TrucksService {
           0,
         );
         const commandVolume = command.items.reduce(
-          (itemSum, item) => itemSum + item.quantity * (item.article.volume ?? 0),
+          (itemSum, item) =>
+            itemSum + item.quantity * (item.article.volume ?? 0),
           0,
         );
 

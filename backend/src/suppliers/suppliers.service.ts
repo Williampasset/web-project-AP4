@@ -6,7 +6,6 @@ import {
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { PrismaService } from '../prisma.service';
-import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class SuppliersService {

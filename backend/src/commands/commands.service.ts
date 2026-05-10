@@ -454,24 +454,23 @@ export class CommandsService {
     }
   }
 
+  /**
+   * Ensure a truck has no active trip before assigning commands to it
+   */
+  private async ensureTruckIsAssignable(truckId: number) {
+    const activeTrip = await this.prisma.trip.findFirst({
+      where: {
+        truckId,
+        status: 'IN_PROGRESS',
+      },
+    });
 
-      /**
-       * Ensure a truck has no active trip before assigning commands to it
-       */
-      private async ensureTruckIsAssignable(truckId: number) {
-        const activeTrip = await this.prisma.trip.findFirst({
-          where: {
-            truckId,
-            status: 'IN_PROGRESS',
-          },
-        });
-
-        if (activeTrip) {
-          throw new BadRequestException(
-            `Truck #${truckId} is already on a trip and cannot receive new commands`,
-          );
-        }
-      }
+    if (activeTrip) {
+      throw new BadRequestException(
+        `Truck #${truckId} is already on a trip and cannot receive new commands`,
+      );
+    }
+  }
   /**
    * Ensure that an article exists
    * @param articleId The ID of the article to verify

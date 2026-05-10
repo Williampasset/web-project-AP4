@@ -74,7 +74,9 @@ export class LocationsController {
   }
 
   @Delete('articles/:articleId/zero-stock')
-  async deleteZeroStockArticle(@Param('articleId', ParseIntPipe) articleId: number) {
+  async deleteZeroStockArticle(
+    @Param('articleId', ParseIntPipe) articleId: number,
+  ) {
     return this.locationsService.deleteZeroStockArticle(articleId);
   }
 }
