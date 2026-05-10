@@ -106,7 +106,7 @@ export const fetchCommandsForAssignment = async (): Promise<
     return allCommands.filter(
       (cmd: any) => cmd.status === 'WAITING' || cmd.status === 'PENDING',
     );
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Failed to fetch commands');
   }
 };
@@ -171,7 +171,7 @@ export const fetchStockJobsForAssignment = async (): Promise<
         (a, b) =>
           new Date(a.requestedAt).getTime() - new Date(b.requestedAt).getTime(),
       );
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Failed to fetch stock jobs');
   }
 };

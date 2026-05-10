@@ -52,13 +52,13 @@ export default function Login() {
             localStorage.setItem('user', JSON.stringify(userData));
 
             navigateByRole(userData.role);
-          } catch (err) {
+          } catch (_err) {
             setError('Erreur lors du traitement du login');
           }
         },
 
-        onError: (err: any) => {
-          setError(err.message || 'Identifiants invalides');
+        onError: (_err: any) => {
+          setError('Erreur lors du traitement du login');
         },
       },
     );
