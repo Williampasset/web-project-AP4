@@ -24,49 +24,103 @@ export class CommandPreparationService {
    * Mark a command item as picked from its location
    */
   async markItemPicked(dto: MarkItemPickedDto) {
-    const preparation = await this.prisma.commandItemPreparation.findUnique({
-      where: { commandItemId: dto.commandItemId },
-      include: { commandItem: { include: { command: true } } },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const preparation = await tx.commandItemPreparation.findUnique({
+        where: { commandItemId: dto.commandItemId },
+        include: {
+          commandItem: {
+            include: {
+              command: true,
+              article: {
+                select: {
+                  id: true,
+                  stock: true,
+                  locationId: true,
+                  reference: true,
+                  label: true,
+                },
+              },
+            },
+          },
+        },
+      });
 
-    if (!preparation) {
-      throw new NotFoundException(
-        `Préparation non trouvée pour l'article ${dto.commandItemId}`,
+      if (!preparation) {
+        throw new NotFoundException(
+          `Préparation non trouvée pour l'article ${dto.commandItemId}`,
+        );
+      }
+
+      // Idempotent: if already picked, do not decrement stock again
+      if (preparation.isPicked) {
+        return tx.commandItemPreparation.findUnique({
+          where: { commandItemId: dto.commandItemId },
+          include: { commandItem: true },
+        });
+      }
+
+      const item = preparation.commandItem;
+      const quantityToPick = item.quantity;
+      const article = item.article;
+
+      if (quantityToPick > article.stock) {
+        throw new BadRequestException(
+          `Stock insuffisant pour l'article ${article.reference ?? article.id}: demandé ${quantityToPick}, disponible ${article.stock}`,
+        );
+      }
+
+      await tx.article.update({
+        where: { id: item.articleId },
+        data: { stock: { decrement: quantityToPick } },
+      });
+
+      const updatedPreparation = await tx.commandItemPreparation.update({
+        where: { id: preparation.id },
+        data: {
+          isPicked: true,
+          pickedAt: new Date(),
+        },
+        include: { commandItem: true },
+      });
+
+      await tx.stockHistory.create({
+        data: {
+          eventType: 'COMMAND_SHIPMENT',
+          quantity: quantityToPick,
+          articleId: item.articleId,
+          articleReference: article.reference,
+          articleLabel: article.label,
+          fromLocationId: article.locationId,
+          commandId: item.commandId,
+          createdByUserId: item.command.userId ?? undefined,
+          note: `Prélèvement opérateur sur commande ${item.command.reference}`,
+        },
+      });
+
+      const command = item.command;
+      const commandItems = await tx.commandItem.findMany({
+        where: { commandId: command.id },
+        include: { commandItemPreparation: true },
+      });
+
+      const allPicked = commandItems.every(
+        (commandItem) => commandItem.commandItemPreparation?.isPicked,
       );
-    }
 
-    const updatedPreparation = await this.prisma.commandItemPreparation.update({
-      where: { id: preparation.id },
-      data: {
-        isPicked: true,
-        pickedAt: new Date(),
-      },
-      include: { commandItem: true },
+      if (allPicked) {
+        await tx.command.update({
+          where: { id: command.id },
+          data: { status: 'READY' as any },
+        });
+      } else if (command.status === CommandStatus.WAITING) {
+        await tx.command.update({
+          where: { id: command.id },
+          data: { status: CommandStatus.PENDING },
+        });
+      }
+
+      return updatedPreparation;
     });
-
-    const command = preparation.commandItem.command;
-    const commandItems = await this.prisma.commandItem.findMany({
-      where: { commandId: command.id },
-      include: { commandItemPreparation: true },
-    });
-
-    const allPicked = commandItems.every(
-      (item) => item.commandItemPreparation?.isPicked,
-    );
-
-    if (allPicked) {
-      await this.prisma.command.update({
-        where: { id: command.id },
-        data: { status: 'READY' as any },
-      });
-    } else if (command.status === CommandStatus.WAITING) {
-      await this.prisma.command.update({
-        where: { id: command.id },
-        data: { status: CommandStatus.PENDING },
-      });
-    }
-
-    return updatedPreparation;
   }
 
   /**
