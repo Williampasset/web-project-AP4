@@ -9,6 +9,14 @@ import {
 } from 'lucide-react';
 import { formatDate } from '@service/date.service';
 import { getStatusClass, getStatusLabel } from '@service/mapper.service';
+import {
+  isCommandLate,
+  getCommandTotalValue,
+  getCommandTotalWeight,
+  getCommandTotalVolume,
+  hasCommandInsufficientStock,
+  hasCommandVolumeOverflow,
+} from '@service/command.service';
 import type { Command } from '@type/command.type';
 import type { User as AppUser } from '@type/user.type';
 import type { Truck as AppTruck } from '@type/truck.type';
@@ -108,18 +116,10 @@ export default function CommandCard({
   };
 
   /**
-   * Check if command is late
-   */
-  const isLate = (): boolean => {
-    if (!command.deliveryDate || command.status === 'DELIVERED') return false;
-    return new Date(command.deliveryDate) < new Date();
-  };
-
-  /**
    * Get status to display (with late indicator)
    */
   const getDisplayStatus = (): string => {
-    if (isLate()) {
+    if (isCommandLate(command)) {
       return 'En retard';
     }
     return getStatusLabel(command.status);
@@ -129,69 +129,10 @@ export default function CommandCard({
    * Get status class (with late indicator)
    */
   const getDisplayStatusClass = (): string => {
-    if (isLate()) {
+    if (isCommandLate(command)) {
       return 'late';
     }
     return getStatusClass(command.status);
-  };
-
-  /**
-   * Check if stock is insufficient for any item
-   */
-  const hasInsufficientStock = (): boolean => {
-    if (command.status === 'DELIVERED' || command.status === 'CANCELLED') {
-      return false;
-    }
-
-    return command.items.some((item) => {
-      const availableStock = item.article?.stock ?? 0;
-      return availableStock < item.quantity;
-    });
-  };
-
-  /**
-   * Get total command value
-   */
-  const getTotalValue = (): number => {
-    return command.items.reduce(
-      (total, item) => total + item.quantity * item.unitPrice,
-      0,
-    );
-  };
-
-  /**
-   * Get total command weight
-   * @returns The total weight of the command
-   */
-  const getTotalWeight = (): number => {
-    return command.items.reduce(
-      (total, item) => total + (item.article?.weight ?? 0) * item.quantity,
-      0,
-    );
-  };
-
-  /**
-   * Get total command volume
-   * @returns The total volume of the command
-   */
-  const getTotalVolume = (): number => {
-    return command.items.reduce(
-      (total, item) => total + (item.article?.volume ?? 0) * item.quantity,
-      0,
-    );
-  };
-
-  /**
-   * Check if total volume exceeds truck's max volume
-   * @return True if there is a volume overflow, false otherwise
-   */
-  const hasTruckVolumeOverflow = (): boolean => {
-    if (command.status !== 'WAITING' && command.status !== 'PENDING') {
-      return false;
-    }
-
-    if (!command.truck || command.truck.maxVolume == null) return false;
-    return getTotalVolume() > command.truck.maxVolume;
   };
 
   return (
@@ -215,22 +156,23 @@ export default function CommandCard({
           <div className='command-card__value-section'>
             <p className='command-card__value-label'>Montant</p>
             <p className='command-card__value-amount'>
-              {getTotalValue().toFixed(2)} €
+              {getCommandTotalValue(command).toFixed(2)} €
             </p>
           </div>
         </div>
 
-        {(hasInsufficientStock() || hasTruckVolumeOverflow()) && (
+        {(hasCommandInsufficientStock(command) ||
+          hasCommandVolumeOverflow(command)) && (
           <div className='command-card__alert'>
-            {hasInsufficientStock() && (
+            {hasCommandInsufficientStock(command) && (
               <p className='command-card__alert-text'>
                 <TriangleAlertIcon /> Stock insuffisant
               </p>
             )}
-            {hasTruckVolumeOverflow() && (
+            {hasCommandVolumeOverflow(command) && (
               <p className='command-card__alert-text'>
                 <TriangleAlertIcon /> Dépassement du volume max camion (
-                {getTotalVolume().toFixed(2)} m³ /{' '}
+                {getCommandTotalVolume(command).toFixed(2)} m³ /{' '}
                 {command.truck?.maxVolume.toFixed(2)} m³)
               </p>
             )}
@@ -312,7 +254,7 @@ export default function CommandCard({
             <div className='command-card__info-content'>
               <span className='command-card__info-label'>Poids total</span>
               <span className='command-card__info-value'>
-                {getTotalWeight().toFixed(2)} kg
+                {getCommandTotalWeight(command).toFixed(2)} kg
               </span>
             </div>
           </div>
@@ -322,7 +264,7 @@ export default function CommandCard({
             <div className='command-card__info-content'>
               <span className='command-card__info-label'>Volume total</span>
               <span className='command-card__info-value'>
-                {getTotalVolume().toFixed(2)} m³
+                {getCommandTotalVolume(command).toFixed(2)} m³
               </span>
             </div>
           </div>
