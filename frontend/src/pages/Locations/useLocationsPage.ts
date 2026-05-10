@@ -13,6 +13,22 @@ import type { WarehouseLocation } from '@type/warehouse-location.type';
 import { sortByCoordinate, sortByFullCoordinate, toDisplayLocation } from '@utils/location.utils';
 import type { Building, DisplayLocation } from '@type/location-view.type';
 
+const normalizeZone = (zone: string) => zone.trim().toUpperCase();
+
+const isPrepZone = (zone: string) => {
+  const normalized = normalizeZone(zone);
+  return normalized === 'PREP' || normalized === 'PREPARATION';
+};
+
+const isTransitZone = (zone: string) => {
+  const normalized = normalizeZone(zone);
+  return (
+    normalized === 'TRANSIT' ||
+    normalized === 'INBOUND' ||
+    normalized === 'IN'
+  );
+};
+
 export function useLocationsPage() {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [focusedLocationId, setFocusedLocationId] = useState<number | null>(null);
@@ -57,8 +73,8 @@ export function useLocationsPage() {
     return locations.filter(
       (l) =>
         l.building === activeBuilding &&
-        l.zone !== 'PREP' &&
-        l.zone !== 'TRANSIT',
+        !isPrepZone(l.zone) &&
+        !isTransitZone(l.zone),
     );
   }, [locations, activeBuilding]);
 
@@ -78,14 +94,22 @@ export function useLocationsPage() {
 
   const prepLocations = useMemo(() => {
     return locations
-      .filter((l) => l.zone === 'PREP' && l.building === activeBuilding)
+      .filter(
+        (l) =>
+          isPrepZone(l.zone) &&
+          l.building === activeBuilding,
+      )
       .sort(sortByCoordinate)
       .map(toDisplayLocation);
   }, [locations, activeBuilding]);
 
   const transitLocations = useMemo(() => {
     return locations
-      .filter((l) => l.zone === 'TRANSIT' && l.building === activeBuilding)
+      .filter(
+        (l) =>
+          isTransitZone(l.zone) &&
+          l.building === activeBuilding,
+      )
       .sort(sortByCoordinate)
       .map(toDisplayLocation);
   }, [locations, activeBuilding]);

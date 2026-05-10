@@ -5,13 +5,95 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { Prisma } from '@prisma/client';
+import { BuildingName, Prisma } from '@prisma/client';
 
 @Injectable()
 export class LocationsService {
   constructor(private prisma: PrismaService) {}
 
+  private static readonly OPERATIONAL_BUILDINGS: BuildingName[] = [
+    BuildingName.A,
+    BuildingName.B,
+    BuildingName.C,
+  ];
+
+  private static readonly PREP_MIN_SLOTS_PER_BUILDING = 4;
+
+  private static readonly PREP_DEFAULT_AISLE = 99;
+
+  private static readonly PREP_DEFAULT_SHELF = 1;
+
+  private async ensurePreparationZonesPerBuilding() {
+    await this.prisma.location.deleteMany({
+      where: {
+        building: BuildingName.P,
+        zone: 'PREP',
+        articles: { none: {} },
+        targetStockJobs: { none: {} },
+      },
+    });
+
+    const existingPrepLocations = await this.prisma.location.findMany({
+      where: {
+        zone: 'PREP',
+        building: {
+          in: [...LocationsService.OPERATIONAL_BUILDINGS],
+        },
+      },
+      select: {
+        building: true,
+        aisle: true,
+        shelf: true,
+        cell: true,
+      },
+    });
+
+    const byBuilding = new Map<BuildingName, Set<string>>();
+
+    for (const building of LocationsService.OPERATIONAL_BUILDINGS) {
+      byBuilding.set(building, new Set());
+    }
+
+    for (const location of existingPrepLocations) {
+      const key = `${location.aisle}-${location.shelf}-${location.cell}`;
+      byBuilding.get(location.building)?.add(key);
+    }
+
+    const toCreate: Prisma.LocationCreateManyInput[] = [];
+
+    for (const building of LocationsService.OPERATIONAL_BUILDINGS) {
+      const usedSlots = byBuilding.get(building) ?? new Set<string>();
+      let nextCell = 1;
+
+      while (usedSlots.size < LocationsService.PREP_MIN_SLOTS_PER_BUILDING) {
+        const key = `${LocationsService.PREP_DEFAULT_AISLE}-${LocationsService.PREP_DEFAULT_SHELF}-${nextCell}`;
+
+        if (!usedSlots.has(key)) {
+          usedSlots.add(key);
+          toCreate.push({
+            building,
+            aisle: LocationsService.PREP_DEFAULT_AISLE,
+            shelf: LocationsService.PREP_DEFAULT_SHELF,
+            cell: nextCell,
+            zone: 'PREP',
+          });
+        }
+
+        nextCell += 1;
+      }
+    }
+
+    if (toCreate.length > 0) {
+      await this.prisma.location.createMany({
+        data: toCreate,
+        skipDuplicates: true,
+      });
+    }
+  }
+
   async findAll() {
+    await this.ensurePreparationZonesPerBuilding();
+
     const locations = await this.prisma.location.findMany({
       include: {
         articles: {
