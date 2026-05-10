@@ -6,6 +6,7 @@ interface WarehousePlanProps {
   pickLocations: DisplayLocation[];
   prepLocations: DisplayLocation[];
   transitLocations: DisplayLocation[];
+  prepAssigneesByLocationId: Record<number, string>;
   activeBuilding: string | null;
   focusedLocationId: number | null;
   onFocusLocation: (locationId: number) => void;
@@ -52,6 +53,7 @@ export default function WarehousePlan({
   pickLocations,
   prepLocations,
   transitLocations,
+  prepAssigneesByLocationId,
   activeBuilding,
   focusedLocationId,
   onFocusLocation,
@@ -88,26 +90,35 @@ export default function WarehousePlan({
         <h3>ZONES DE PRÉPARATION — Bâtiment {activeBuilding}</h3>
         <div className='zone-grid zone-grid--prep'>
           {prepLocations.length > 0 ? (
-            prepLocations.map((cell, i) => (
-              <button
-                key={cell.id}
-                type='button'
-                className={`prep-slot ${cell.articles.length > 0 ? 'prep-slot--occupied' : ''} ${(cell.pendingJobs?.length ?? 0) > 0 ? 'prep-slot--pending' : ''} ${focusedLocationId === cell.id ? 'focused' : ''}`}
-                onClick={() => onFocusLocation(cell.id)}
-                title={`Zone ${cell.building}-PZ-${String(i + 1).padStart(2, '0')} — ${cell.articles[0]?.label ?? 'Libre'}`}
-              >
-                <span className='prep-slot__code'>
-                  {cell.building}-PZ-{String(i + 1).padStart(2, '0')}
-                </span>
-                <span className='prep-slot__status'>
-                  {(cell.pendingJobs?.length ?? 0) > 0
-                    ? 'En attente'
-                    : cell.articles.length > 0
-                      ? `${cell.articles[0].label.slice(0, 12)}…`
-                      : 'Libre'}
-                </span>
-              </button>
-            ))
+            prepLocations.map((cell, i) => {
+              const assignee = prepAssigneesByLocationId[cell.id];
+
+              return (
+                <button
+                  key={cell.id}
+                  type='button'
+                  className={`prep-slot ${cell.articles.length > 0 ? 'prep-slot--occupied' : ''} ${(cell.pendingJobs?.length ?? 0) > 0 ? 'prep-slot--pending' : ''} ${focusedLocationId === cell.id ? 'focused' : ''}`}
+                  onClick={() => onFocusLocation(cell.id)}
+                  title={`Zone ${cell.building}-PZ-${String(i + 1).padStart(2, '0')} — ${cell.articles[0]?.label ?? (assignee ? `Affecté à ${assignee}` : 'Libre')}`}
+                >
+                  <span className='prep-slot__code'>
+                    {cell.building}-PZ-{String(i + 1).padStart(2, '0')}
+                  </span>
+                  <span className='prep-slot__status'>
+                    {(cell.pendingJobs?.length ?? 0) > 0
+                      ? 'En attente'
+                      : cell.articles.length > 0
+                        ? `${cell.articles[0].label.slice(0, 12)}…`
+                        : assignee
+                          ? 'Affecté'
+                          : 'Libre'}
+                  </span>
+                  {assignee && (
+                    <span className='prep-slot__assignee'>{assignee}</span>
+                  )}
+                </button>
+              );
+            })
           ) : (
             <span className='muted'>Aucune zone</span>
           )}

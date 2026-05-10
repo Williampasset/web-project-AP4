@@ -13,6 +13,22 @@ import type { WarehouseLocation } from '@type/warehouse-location.type';
 import { sortByCoordinate, sortByFullCoordinate, toDisplayLocation } from '@utils/location.utils';
 import type { Building, DisplayLocation } from '@type/location-view.type';
 
+const normalizeZone = (zone: string) => zone.trim().toUpperCase();
+
+const isPrepZone = (zone: string) => {
+  const normalized = normalizeZone(zone);
+  return normalized === 'PREP' || normalized === 'PREPARATION';
+};
+
+const isTransitZone = (zone: string) => {
+  const normalized = normalizeZone(zone);
+  return (
+    normalized === 'TRANSIT' ||
+    normalized === 'INBOUND' ||
+    normalized === 'IN'
+  );
+};
+
 export function useLocationsPage() {
   const [selectedBuilding, setSelectedBuilding] = useState<Building | null>(null);
   const [focusedLocationId, setFocusedLocationId] = useState<number | null>(null);
@@ -21,6 +37,9 @@ export function useLocationsPage() {
   const [moveQuantity, setMoveQuantity] = useState(1);
   const [mergeTargetArticleId, setMergeTargetArticleId] = useState<number | null>(null);
   const [assignedUserId, setAssignedUserId] = useState<number | null>(null);
+  const [prepAssigneeByLocationId, setPrepAssigneeByLocationId] = useState<
+    Record<number, number>
+  >({});
   const [isActing, setIsActing] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -57,8 +76,8 @@ export function useLocationsPage() {
     return locations.filter(
       (l) =>
         l.building === activeBuilding &&
-        l.zone !== 'PREP' &&
-        l.zone !== 'TRANSIT',
+        !isPrepZone(l.zone) &&
+        !isTransitZone(l.zone),
     );
   }, [locations, activeBuilding]);
 
@@ -78,14 +97,22 @@ export function useLocationsPage() {
 
   const prepLocations = useMemo(() => {
     return locations
-      .filter((l) => l.zone === 'PREP' && l.building === activeBuilding)
+      .filter(
+        (l) =>
+          isPrepZone(l.zone) &&
+          l.building === activeBuilding,
+      )
       .sort(sortByCoordinate)
       .map(toDisplayLocation);
   }, [locations, activeBuilding]);
 
   const transitLocations = useMemo(() => {
     return locations
-      .filter((l) => l.zone === 'TRANSIT' && l.building === activeBuilding)
+      .filter(
+        (l) =>
+          isTransitZone(l.zone) &&
+          l.building === activeBuilding,
+      )
       .sort(sortByCoordinate)
       .map(toDisplayLocation);
   }, [locations, activeBuilding]);
@@ -96,6 +123,27 @@ export function useLocationsPage() {
     transitLocations.find((cell) => cell.id === focusedLocationId) ??
     mappedLocations[0] ??
     null;
+
+  const prepAssigneeNamesByLocationId = useMemo(() => {
+    const usersById = new Map(
+      users.map((user) => [user.id, `${user.firstName} ${user.lastName}`]),
+    );
+
+    return Object.entries(prepAssigneeByLocationId).reduce<
+      Record<number, string>
+    >((acc, [locationId, userId]) => {
+      const name = usersById.get(userId);
+      if (name) {
+        acc[Number(locationId)] = name;
+      }
+      return acc;
+    }, {});
+  }, [prepAssigneeByLocationId, users]);
+
+  const focusedPrepAssigneeName =
+    focusedLocation && focusedLocation.zone === 'PREP'
+      ? prepAssigneeNamesByLocationId[focusedLocation.id] ?? null
+      : null;
 
   const focusedArticle = focusedLocation?.articles?.[0] ?? null;
 
@@ -209,6 +257,17 @@ export function useLocationsPage() {
     }
   };
 
+  const handleAssignPrepZoneWorker = () => {
+    if (!focusedLocation || focusedLocation.zone !== 'PREP' || !assignedUserId) {
+      return;
+    }
+
+    setPrepAssigneeByLocationId((prev) => ({
+      ...prev,
+      [focusedLocation.id]: assignedUserId,
+    }));
+  };
+
   return {
     isLoading,
     isError,
@@ -222,6 +281,8 @@ export function useLocationsPage() {
     prepLocations,
     transitLocations,
     focusedLocation,
+    prepAssigneeNamesByLocationId,
+    focusedPrepAssigneeName,
     qrModalLocation,
     assignedUserId,
     isActing,
@@ -242,5 +303,6 @@ export function useLocationsPage() {
     handleMerge,
     handleValidateJob,
     handleDeleteZeroStock,
+    handleAssignPrepZoneWorker,
   };
 }

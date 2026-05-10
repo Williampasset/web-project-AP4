@@ -113,7 +113,7 @@ export default function TruckHistory() {
         commandsText.includes(normalizedSearch)
       );
     });
-  }, [search]);
+  }, [trips, search]);
 
   return (
     <DefaultLayout>
