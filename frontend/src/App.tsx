@@ -1,14 +1,151 @@
-import './App.css'
-import { Route, Routes } from 'react-router'
-import Login from './login/Login'
+import './App.css';
+import { Navigate, Route, Routes } from 'react-router';
+import Login from './pages/Login/Login';
+import Stock from './pages/Stock/Stock';
+import Command from './pages/Command/Command';
+import { ProtectedRoute } from './guards/ProtectedRoute';
+import OperateurBoard from './pages/OperatorBoard/OperatorBoard';
+import { PublicRoute } from './guards/PublicRoute';
+import DashboardRedirect from './pages/DashboardRedirect/DashboardRedirect';
+import CommandDetail from './pages/CommandDetail/CommandDetail';
+import Truck from './pages/Truck/Truck';
+import TruckHistory from './pages/TruckHistory/TruckHistory';
+import Suppliers from './pages/Suppliers/Suppliers';
+import Locations from './pages/Locations/Locations';
+import StockHistory from './pages/StockHistory/StockHistory';
+import Clients from './pages/Clients/Clients';
+import Users from './pages/Users/Users';
+import Assignments from './pages/Assignments/Assignments';
+import StockJobDetail from './pages/StockJobDetail/StockJobDetail';
 
 function App() {
-
   return (
     <Routes>
-      <Route path="/" element={<Login/>}></Route>
+      <Route path='/' element={<DashboardRedirect />}></Route>
+
+      <Route
+        path='/login'
+        element={
+          <PublicRoute>
+            <div className='login-page'>
+              <Login />
+            </div>
+          </PublicRoute>
+        }
+      ></Route>
+      <Route
+        path='/articles'
+        element={
+          <ProtectedRoute>
+            <Stock />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route path='/stock' element={<Navigate to='/articles' replace />} />
+      <Route
+        path='/commands'
+        element={
+          <ProtectedRoute>
+            <Command />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route path='/commande' element={<Navigate to='/commands' replace />} />
+      <Route
+        path='/truck'
+        element={
+          <ProtectedRoute>
+            <Truck />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/truck/history'
+        element={
+          <ProtectedRoute>
+            <TruckHistory />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route path='/trucks' element={<Navigate to='/truck' replace />} />
+      <Route
+        path='/suppliers'
+        element={
+          <ProtectedRoute>
+            <Suppliers />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/clients'
+        element={
+          <ProtectedRoute>
+            <Clients />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/users'
+        element={
+          <ProtectedRoute>
+            <Users />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/assignments'
+        element={
+          <ProtectedRoute>
+            <Assignments />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/locations'
+        element={
+          <ProtectedRoute>
+            <Locations />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/stock-history'
+        element={
+          <ProtectedRoute>
+            <StockHistory />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/stock-history'
+        element={<Navigate to='/stock-history' replace />}
+      />
+      <Route
+        path='/operateur'
+        element={
+          <ProtectedRoute>
+            <OperateurBoard />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/commands/:id'
+        element={
+          <ProtectedRoute>
+            <CommandDetail />
+          </ProtectedRoute>
+        }
+      ></Route>
+      <Route
+        path='/stock-jobs/:id'
+        element={
+          <ProtectedRoute>
+            <StockJobDetail />
+          </ProtectedRoute>
+        }
+      ></Route>
     </Routes>
-  )
+  );
 }
 
-export default App
+export default App;

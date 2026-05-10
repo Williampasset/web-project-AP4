@@ -1,0 +1,183 @@
+{
+  "commands": [
+    {
+      "id": 101,
+      "reference": "CMD-101",
+      "status": "WAITING",
+      "commandDate": "2026-04-10T09:30:00.000Z",
+      "deliveryDate": null,
+      "clientId": 1,
+      "truckId": 1,
+      "userId": 2,
+      "client": {
+        "id": 1,
+        "name": "Acme Corp"
+      },
+      "user": {
+        "id": 2,
+        "firstName": "Jean",
+        "lastName": "Dupont"
+      },
+      "items": [
+        {
+          "id": 1,
+          "commandId": 101,
+          "articleId": 1,
+          "quantity": 2,
+          "unitPrice": 10.5,
+          "article": {
+            "id": 1,
+            "reference": "ART-001",
+            "label": "Produit A",
+            "weight": 1.2
+          }
+        },
+        {
+          "id": 2,
+          "commandId": 101,
+          "articleId": 3,
+          "quantity": 1,
+          "unitPrice": 20,
+          "article": {
+            "id": 3,
+            "reference": "ART-003",
+            "label": "Produit C",
+            "weight": 2.5
+          }
+        }
+      ],
+      "createdAt": "2026-04-10T09:30:00.000Z",
+      "updatedAt": "2026-04-10T09:30:00.000Z"
+    },
+    {
+      "id": 102,
+      "reference": "CMD-102",
+      "status": "PENDING",
+      "commandDate": "2026-04-08T14:45:00.000Z",
+      "deliveryDate": "2026-04-12T10:00:00.000Z",
+      "clientId": 2,
+      "truckId": 2,
+      "userId": 3,
+      "client": {
+        "id": 2,
+        "name": "Globex"
+      },
+      "user": {
+        "id": 3,
+        "firstName": "Alice",
+        "lastName": "Martin"
+      },
+      "items": [
+        {
+          "id": 3,
+          "commandId": 102,
+          "articleId": 2,
+          "quantity": 3,
+          "unitPrice": 15,
+          "article": {
+            "id": 2,
+            "reference": "ART-002",
+            "label": "Produit B",
+            "weight": 2
+          }
+        }
+      ],
+      "createdAt": "2026-04-08T14:45:00.000Z",
+      "updatedAt": "2026-04-08T14:45:00.000Z"
+    },
+    {
+      "id": 103,
+      "reference": "CMD-103",
+      "status": "DELIVERED",
+      "commandDate": "2026-03-30T11:20:00.000Z",
+      "deliveryDate": "2026-04-02T16:00:00.000Z",
+      "clientId": 3,
+      "truckId": 3,
+      "userId": 2,
+      "client": {
+        "id": 3,
+        "name": "Initech"
+      },
+      "user": {
+        "id": 2,
+        "firstName": "Jean",
+        "lastName": "Dupont"
+      },
+      "items": [
+        {
+          "id": 4,
+          "commandId": 103,
+          "articleId": 4,
+          "quantity": 2,
+          "unitPrice": 18,
+          "article": {
+            "id": 4,
+            "reference": "ART-004",
+            "label": "Produit D",
+            "weight": 3
+          }
+        }
+      ],
+      "createdAt": "2026-03-30T11:20:00.000Z",
+      "updatedAt": "2026-03-30T11:20:00.000Z"
+    },
+    {
+      "id": 104,
+      "reference": "CMD-104",
+      "status": "WAITING",
+      "commandDate": "2026-04-18T08:15:00.000Z",
+      "deliveryDate": null,
+      "clientId": 4,
+      "truckId": null,
+      "userId": 4,
+      "client": {
+        "id": 4,
+        "name": "Umbrella Corp"
+      },
+      "user": {
+        "id": 4,
+        "firstName": "Paul",
+        "lastName": "Durand"
+      },
+      "items": [
+        {
+          "id": 5,
+          "commandId": 104,
+          "articleId": 10,
+          "quantity": 1,
+          "unitPrice": 25,
+          "article": {
+            "id": 10,
+            "reference": "ART-010",
+            "label": "Produit X",
+            "weight": 1.8
+          }
+        }
+      ],
+      "createdAt": "2026-04-18T08:15:00.000Z",
+      "updatedAt": "2026-04-18T08:15:00.000Z"
+    },
+    {
+      "id": 105,
+      "reference": "CMD-105",
+      "status": "CANCELLED",
+      "commandDate": "2026-04-15T13:00:00.000Z",
+      "deliveryDate": null,
+      "clientId": 5,
+      "truckId": null,
+      "userId": 3,
+      "client": {
+        "id": 5,
+        "name": "Soylent"
+      },
+      "user": {
+        "id": 3,
+        "firstName": "Alice",
+        "lastName": "Martin"
+      },
+      "items": [],
+      "createdAt": "2026-04-15T13:00:00.000Z",
+      "updatedAt": "2026-04-15T13:00:00.000Z"
+    }
+  ]
+}

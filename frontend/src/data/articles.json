@@ -1,0 +1,94 @@
+{
+  "articles": [
+    {
+      "id": 1,
+      "weight": 2.5,
+      "label": "Laptop Dell XPS 13",
+      "description": "Ultra-portable laptop with 13-inch display",
+      "stock": 0,
+      "locationId": 1,
+      "supplierIds": [1]
+    },
+    {
+      "id": 2,
+      "weight": 0.5,
+      "label": "USB-C Cable",
+      "description": "High-speed USB-C charging cable 2m",
+      "stock": 0,
+      "locationId": 2,
+      "supplierIds": [2]
+    },
+    {
+      "id": 3,
+      "weight": 1.2,
+      "label": "Wireless Mouse",
+      "description": "Ergonomic mouse with silent clicks",
+      "stock": 0,
+      "locationId": 1,
+      "supplierIds": [3]
+    },
+    {
+      "id": 4,
+      "weight": 3.8,
+      "label": "Mechanical Keyboard RGB",
+      "description": "Gaming keyboard with mechanical switches",
+      "stock": 0,
+      "locationId": 3,
+      "supplierIds": [3]
+    },
+    {
+      "id": 5,
+      "weight": 0.3,
+      "label": "HDMI 2.1 Cable",
+      "description": "4K 60Hz HDMI cable 3m",
+      "stock": 200,
+      "locationId": 2,
+      "supplierIds": [2]
+    },
+    {
+      "id": 6,
+      "weight": 4.0,
+      "label": "Écran 24\" Full HD",
+      "description": "Moniteur 24 pouces anti-reflet",
+      "stock": 27,
+      "locationId": 4,
+      "supplierIds": [1, 4]
+    },
+    {
+      "id": 7,
+      "weight": 0.25,
+      "label": "Disque SSD 1 To",
+      "description": "SSD externe USB 3.2",
+      "stock": 60,
+      "locationId": 5,
+      "supplierIds": [1, 4]
+    },
+    {
+      "id": 8,
+      "weight": 14.0,
+      "label": "Chaise ergonomique",
+      "description": "Chaise de bureau réglable et confortable",
+      "stock": 12,
+      "locationId": 6,
+      "supplierIds": [3]
+    },
+    {
+      "id": 9,
+      "weight": 0.6,
+      "label": "Pack d'encre pour imprimante",
+      "description": "4 cartouches noir et couleur",
+      "stock": 85,
+      "locationId": 3,
+      "supplierIds": [3]
+    },
+    {
+      "id": 10,
+      "weight": 1.8,
+      "label": "Switch réseau 8 ports",
+      "description": "Switch Ethernet Gigabit 8 ports",
+      "stock": 23,
+      "locationId": 4,
+      "supplierIds": [2]
+    }
+  ]
+}

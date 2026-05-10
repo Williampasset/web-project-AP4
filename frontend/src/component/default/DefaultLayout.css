@@ -1,0 +1,40 @@
+.layout-container {
+  --navbar-width: 280px;
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--bg);
+}
+
+main.main-content {
+  flex: 1;
+  margin-left: var(--navbar-width);
+  width: calc(100% - var(--navbar-width));
+  max-width: calc(100% - var(--navbar-width));
+  min-width: 0;
+  padding: 24px;
+  background: var(--bg);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .layout-container {
+    flex-direction: column;
+  }
+
+  main.main-content {
+    margin-left: 0;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0;
+    padding-top: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  main.main-content {
+    padding: 16px;
+  }
+}

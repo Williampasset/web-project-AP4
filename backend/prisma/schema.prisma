@@ -1,0 +1,399 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  matricule String    @unique
+  firstName String
+  lastName  String
+  password  String
+  role      UserRole
+  managerId Int?
+  manager   User?     @relation(name: "manager", fields: [managerId], references: [id])
+  employees User[]    @relation(name: "manager")
+  commands  Command[]
+  assignedStockJobs  StockJob[] @relation("StockJobAssignedUser")
+  validatedStockJobs StockJob[] @relation("StockJobValidatedUser")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([managerId])
+}
+
+model Command {
+  id            Int                      @id @default(autoincrement())
+  reference     String                   @unique
+  status        CommandStatus
+  commandDate   DateTime                 @default(now())
+  deliveryDate  DateTime?
+  clientId      Int
+  client        Client                   @relation(fields: [clientId], references: [id])
+  truckId       Int?
+  truck         Truck?                   @relation(fields: [truckId], references: [id])
+  userId        Int?
+  user          User?                    @relation(fields: [userId], references: [id])
+  items         CommandItem[]
+  preparedItems CommandItemPreparation[]
+  loadingStages CommandLoadingStage[]
+  tripStops     TripStop[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([clientId])
+  @@index([truckId])
+  @@index([userId])
+  @@index([status])
+}
+
+model CommandItem {
+  id                     Int                     @id @default(autoincrement())
+  commandId              Int
+  command                Command                 @relation(fields: [commandId], references: [id])
+  articleId              Int
+  article                Article                 @relation(fields: [articleId], references: [id])
+  quantity               Int
+  unitPrice              Float
+  commandItemPreparation CommandItemPreparation?
+
+  @@unique([commandId, articleId])
+  @@index([commandId])
+  @@index([articleId])
+}
+
+model CommandItemPreparation {
+  id            Int         @id @default(autoincrement())
+  commandItemId Int         @unique
+  commandItem   CommandItem @relation(fields: [commandItemId], references: [id], onDelete: Cascade)
+
+  isPicked Boolean   @default(false)
+  pickedAt DateTime?
+
+  isValidated      Boolean          @default(false)
+  validatedAt      DateTime?
+  validationMethod ValidationMethod @default(MANUAL)
+
+  isAtLoadingZone Boolean   @default(false)
+  atLoadingZoneAt DateTime?
+
+  isLoaded Boolean   @default(false)
+  loadedAt DateTime?
+
+  rfidChecksPassed Int       @default(0)
+  rfidChecksFailed Int       @default(0)
+  lastRfidCheck    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  command   Command? @relation(fields: [commandId], references: [id])
+  commandId Int?
+
+  @@index([commandItemId])
+}
+
+model CommandLoadingStage {
+  id        Int     @id @default(autoincrement())
+  commandId Int
+  command   Command @relation(fields: [commandId], references: [id], onDelete: Cascade)
+
+  stage  LoadingStage
+  status StageStatus  @default(PENDING)
+
+  rfidChecksPassed Int @default(0)
+  rfidChecksFailed Int @default(0)
+
+  startedAt   DateTime?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([commandId, stage])
+  @@index([commandId])
+}
+
+model Article {
+  id         Int      @id @default(autoincrement())
+  reference  String   @unique
+  label      String
+  weight     Float
+  volume     Float    @default(0)
+  price      Float
+  stock      Int      @default(0)
+  locationId Int
+  location   Location @relation(fields: [locationId], references: [id])
+
+  supplierId Int?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  items CommandItem[]
+  sourceStockJobs StockJob[] @relation("StockJobSourceArticle")
+  targetStockJobs StockJob[] @relation("StockJobTargetArticle")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([locationId])
+  @@index([supplierId])
+}
+
+model Location {
+  id       Int          @id @default(autoincrement())
+  building BuildingName
+  aisle    Int
+  shelf    Int
+  cell     Int
+  zone     LocationZone @default(PICK)
+  articles Article[]
+  targetStockJobs StockJob[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([building, aisle, shelf, cell])
+}
+
+model StockJob {
+  id               Int           @id @default(autoincrement())
+  type             StockJobType
+  status           StockJobStatus @default(PENDING)
+  sourceArticleId  Int
+  sourceArticle    Article       @relation("StockJobSourceArticle", fields: [sourceArticleId], references: [id])
+  targetLocationId Int?
+  targetLocation   Location?     @relation(fields: [targetLocationId], references: [id])
+  targetArticleId  Int?
+  targetArticle    Article?      @relation("StockJobTargetArticle", fields: [targetArticleId], references: [id])
+  quantity         Int           @default(1)
+  assignedUserId   Int
+  assignedUser     User          @relation("StockJobAssignedUser", fields: [assignedUserId], references: [id])
+  validatedByUserId Int?
+  validatedByUser   User?        @relation("StockJobValidatedUser", fields: [validatedByUserId], references: [id])
+  requestedAt      DateTime      @default(now())
+  validatedAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([status])
+  @@index([sourceArticleId])
+  @@index([assignedUserId])
+  @@index([targetLocationId])
+  @@index([targetArticleId])
+}
+
+model StockHistory {
+  id               Int              @id @default(autoincrement())
+  eventType        StockHistoryType
+  quantity         Int              @default(0)
+  articleId        Int?
+  articleReference String?          @db.VarChar(80)
+  articleLabel     String?          @db.VarChar(255)
+  fromLocationId   Int?
+  toLocationId     Int?
+  supplierId       Int?
+  commandId        Int?
+  stockJobId       Int?
+  note             String?          @db.VarChar(500)
+  createdByUserId  Int?
+  createdAt        DateTime         @default(now())
+
+  @@index([eventType])
+  @@index([createdAt])
+  @@index([articleId])
+  @@index([commandId])
+  @@index([supplierId])
+}
+
+model Client {
+  id       Int       @id @default(autoincrement())
+  name     String
+  address  String
+  email    String?
+  phone    String?   @db.VarChar(20)
+  commands Command[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+model Truck {
+  id       Int       @id @default(autoincrement())
+  imat     String    @unique
+  maxLoad  Float
+  maxVolume Float    @default(0)
+  maintenanceEndAt DateTime?
+  commands Command[]
+  trips    Trip[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Trip {
+  id                 Int        @id @default(autoincrement())
+  reference          String     @unique
+  truckId            Int
+  truck              Truck      @relation(fields: [truckId], references: [id])
+  status             TripStatus @default(PLANNED)
+
+  plannedDepartureAt DateTime?
+  plannedArrivalAt   DateTime?
+  actualDepartureAt  DateTime?
+  actualArrivalAt    DateTime?
+
+  plannedWeight      Float      @default(0)
+  plannedVolume      Float      @default(0)
+  actualWeight       Float?
+  actualVolume       Float?
+
+  notes              String?    @db.VarChar(500)
+  deliveryStops      TripStop[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([truckId])
+  @@index([status])
+  @@index([plannedDepartureAt])
+}
+
+model TripStop {
+  id                   Int                @id @default(autoincrement())
+  tripId               Int
+  trip                 Trip               @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  commandId            Int?
+  command              Command?           @relation(fields: [commandId], references: [id])
+
+  stopOrder            Int
+  status               DeliveryStopStatus @default(PENDING)
+
+  plannedArrivalAt     DateTime?
+  actualArrivalAt      DateTime?
+  deliveredAt          DateTime?
+
+  plannedWeight        Float              @default(0)
+  plannedVolume        Float              @default(0)
+
+  clientNameSnapshot   String             @db.VarChar(150)
+  clientAddressSnapshot String            @db.VarChar(255)
+  commandRefSnapshot   String?            @db.VarChar(50)
+  deliveryNotes        String?            @db.VarChar(500)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tripId, stopOrder])
+  @@index([tripId])
+  @@index([commandId])
+  @@index([status])
+}
+
+model Supplier {
+  id       Int       @id @default(autoincrement())
+  name     String    @db.VarChar(100)
+  email    String?   @db.VarChar(100)
+  phone    String?   @db.VarChar(20)
+  address  String    @db.VarChar(255)
+  articles Article[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+}
+
+enum UserRole {
+  MANAGER
+  MAGASINIER
+}
+
+enum CommandStatus {
+  WAITING
+  PENDING
+  READY
+  IN_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum BuildingName {
+  A
+  B
+  C
+  P
+}
+
+enum LocationZone {
+  BULK
+  PICK
+  PREP
+  TRANSIT
+}
+
+enum StockJobType {
+  MOVE
+  MERGE
+}
+
+enum StockJobStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum StockHistoryType {
+  SUPPLIER_INBOUND
+  COMMAND_SHIPMENT
+  COMMAND_REVERT
+  MOVE_VALIDATED
+  MERGE_VALIDATED
+  CELL_CLEARED
+}
+
+enum ValidationMethod {
+  MANUAL
+  QR_CODE
+}
+
+enum LoadingStage {
+  PREPARATION
+  LOADING_ZONE
+  LOADING_TRUCK
+  LOADED
+}
+
+enum StageStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum TripStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum DeliveryStopStatus {
+  PENDING
+  ARRIVED
+  DELIVERED
+  FAILED
+  SKIPPED
+}

@@ -1,0 +1,290 @@
+/* ── Page layout ── */
+.stock-history-page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stock-history-header {
+  margin-bottom: 8px;
+}
+
+.stock-history-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #111827;
+}
+
+.stock-history-header p {
+  margin: 8px 0 0;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* ── KPIs ── */
+.stock-history-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.kpi {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.kpi:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.kpi span {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.kpi strong {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.kpi--in {
+  border-color: #34d399;
+  background: #ecfdf5;
+}
+
+.kpi--in strong {
+  color: #059669;
+}
+
+.kpi--out {
+  border-color: #f87171;
+  background: #fef2f2;
+}
+
+.kpi--out strong {
+  color: #991b1b;
+}
+
+/* ── Table wrapper ── */
+.stock-history-table-wrap {
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.stock-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1000px;
+  font-size: 0.875rem;
+}
+
+.stock-history-table th {
+  background: #00bcd4;
+  color: #ffffff;
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  border-bottom: 2px solid #0097a7;
+}
+
+.stock-history-table td {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 14px;
+  color: #374151;
+}
+
+.stock-history-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.stock-history-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.stock-history-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.article-ref {
+  display: block;
+  font-weight: 600;
+  color: #111827;
+  font-size: 0.875rem;
+}
+
+.article-label {
+  display: block;
+  color: #6b7280;
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+
+.empty-state {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  padding: 32px 14px !important;
+}
+
+/* ── Badges ── */
+.history-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+
+.history-badge--in {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.history-badge--out {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.history-badge--revert {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.history-badge--move {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.history-badge--merge {
+  background: #e9d5ff;
+  color: #6d28d9;
+}
+
+.history-badge--clear {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* ── Error state ── */
+.stock-history-error {
+  background: #ffffff;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 36px;
+  text-align: center;
+}
+
+.stock-history-error h2 {
+  color: #991b1b;
+  font-size: 1.25rem;
+  margin: 0 0 10px;
+}
+
+.stock-history-error p {
+  color: #6b7280;
+  font-size: 0.9375rem;
+  margin: 0 0 20px;
+}
+
+.stock-history-error button {
+  border: none;
+  background: #00bcd4;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.stock-history-error button:hover {
+  background: #00acc1;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.15);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .stock-history-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .stock-history-page {
+    gap: 16px;
+  }
+
+  .stock-history-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .stock-history-table {
+    min-width: 800px;
+    font-size: 0.8125rem;
+  }
+
+  .stock-history-table th,
+  .stock-history-table td {
+    padding: 10px 11px;
+  }
+
+  .article-ref {
+    font-size: 0.8125rem;
+  }
+
+  .article-label {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .stock-history-table {
+    min-width: 700px;
+    font-size: 0.75rem;
+  }
+
+  .stock-history-table th,
+  .stock-history-table td {
+    padding: 8px 10px;
+  }
+
+  .kpi {
+    padding: 12px;
+  }
+
+  .kpi span {
+    font-size: 0.75rem;
+  }
+
+  .kpi strong {
+    font-size: 1.5rem;
+  }
+
+  .history-badge {
+    font-size: 0.7rem;
+    padding: 3px 8px;
+  }
+}
