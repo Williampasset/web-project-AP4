@@ -16,6 +16,11 @@ de base de données.
 - **Historique des stocks** : Traçabilité des mouvements
 - **Préparation de commandes** : Workflow de préparation
 
+## Déploiement
+
+L'application est déployé et disponible sur cette URL:
+https://warehouse.clementflament.fr/
+
 ## 🛠️ Technologies Utilisées
 
 ### Backend
